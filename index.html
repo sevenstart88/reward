@@ -120,9 +120,9 @@ textarea{resize:none;min-height:100px;line-height:1.6}
 </style>
 
 <!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script>
+<script defer src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script defer>
   const firebaseConfig = {
     apiKey: "AIzaSyD10MfkNyfWvSRVDIX-CruZF6QCpqKG9mE",
     authDomain: "reward-alba.firebaseapp.com",
@@ -520,6 +520,7 @@ function selAg(n,v) {
   });
 }
 function anext(step) {
+  try {
   const e=document.getElementById('e'+step);e.textContent='';e.classList.remove('v');
   if(step===1){
     const n=document.getElementById('a-name').value.trim();
@@ -536,6 +537,7 @@ function anext(step) {
   if(step===5){if(!agV[1]){e.textContent='동의 여부를 선택해 주세요.';e.classList.add('v');return}if(agV[1]==='n'){showSl('sl-del');return}}
   aCur=step+1;updPg(aCur);showSl('sl'+aCur);
   if(aCur===4)document.getElementById('hh').textContent=document.getElementById('a-name').value.trim()||'-';
+  } catch(err) { alert('오류: '+err.message); }
 }
 function aback(step){aCur=step-1;updPg(aCur);showSl('sl'+aCur)}
 
