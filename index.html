@@ -120,10 +120,9 @@ textarea{resize:none;min-height:100px;line-height:1.6}
 </style>
 
 <!-- Firebase SDK -->
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
-
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script>
   const firebaseConfig = {
     apiKey: "AIzaSyD10MfkNyfWvSRVDIX-CruZF6QCpqKG9mE",
     authDomain: "reward-alba.firebaseapp.com",
@@ -132,138 +131,67 @@ textarea{resize:none;min-height:100px;line-height:1.6}
     messagingSenderId: "168342460091",
     appId: "1:168342460091:web:e288fb4fdab92a1af7bb9e"
   };
+  firebase.initializeApp(firebaseConfig);
+  var db = firebase.firestore();
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-
-  // 전역으로 Firebase 함수 노출
-  window._db = db;
-  window._col = collection;
-  window._addDoc = addDoc;
-  window._getDocs = getDocs;
-  window._doc = doc;
-  window._updateDoc = updateDoc;
-  window._onSnapshot = onSnapshot;
-  window._query = query;
-  window._orderBy = orderBy;
-  window._firebaseReady = true;
-
-  // Firebase에서 데이터 로드
-  window.loadFromFirebase = async function() {
-    try {
-      // 회원 목록 실시간 감지
-      const membersRef = collection(db, 'members');
-      onSnapshot(membersRef, (snapshot) => {
-        window._MB = snapshot.docs.map(d => ({id: d.id, ...d.data()}));
-        // 화면 업데이트
-        if(window._currentScreen === 'user') window.refreshUserDash();
-        if(window._currentScreen === 'adm') window.refreshAdmDash();
-      });
-
-      // 미션 실시간 감지
-      const missionsRef = collection(db, 'missions');
-      onSnapshot(missionsRef, (snapshot) => {
-        window._MS = snapshot.docs.map(d => ({id: d.id, ...d.data()}));
-        if(window._currentScreen === 'user') window.renderMis && window.renderMis();
-        if(window._currentScreen === 'adm') window.renderSentMis && window.renderSentMis();
-      });
-
-      // 제출 실시간 감지
-      const subsRef = collection(db, 'submissions');
-      onSnapshot(subsRef, (snapshot) => {
-        window._SB = snapshot.docs.map(d => ({id: d.id, ...d.data()}));
-        if(window._currentScreen === 'user') window.renderMis && window.renderMis();
-        if(window._currentScreen === 'adm') window.renderSub && window.renderSub();
-      });
-
-      // 설정 로드
-      const settingsRef = collection(db, 'settings');
-      const settingsSnap = await getDocs(settingsRef);
-      settingsSnap.forEach(d => {
-        const data = d.data();
-        if(data.dispCnt !== undefined) window._DISP_CNT = data.dispCnt;
-      });
-
-    } catch(e) {
-      console.error('Firebase 로드 오류:', e);
-    }
-  };
-
-  // Firebase에 회원 저장
+  // 회원 저장
   window.saveMemberToFirebase = async function(member) {
     try {
-      const ref = collection(db, 'members');
-      const docRef = await addDoc(ref, member);
-      return docRef.id;
-    } catch(e) {
-      console.error('회원 저장 오류:', e);
-      return null;
-    }
+      var ref = await db.collection('members').add(member);
+      return ref.id;
+    } catch(e) { console.error('회원저장오류',e); return null; }
   };
 
-  // Firebase에 미션 저장
+  // 미션 저장
   window.saveMissionToFirebase = async function(mission) {
-    try {
-      const ref = collection(db, 'missions');
-      await addDoc(ref, mission);
-    } catch(e) { console.error('미션 저장 오류:', e); }
+    try { await db.collection('missions').add(mission); } catch(e) { console.error(e); }
   };
 
-  // Firebase에 제출 저장
+  // 제출 저장
   window.saveSubToFirebase = async function(sub) {
-    try {
-      const ref = collection(db, 'submissions');
-      await addDoc(ref, sub);
-    } catch(e) { console.error('제출 저장 오류:', e); }
+    try { await db.collection('submissions').add(sub); } catch(e) { console.error(e); }
   };
 
-  // Firebase에서 승인/반려 업데이트
+  // 승인/반려 업데이트
   window.updateSubStatus = async function(id, status) {
-    try {
-      const ref = doc(db, 'submissions', id);
-      await updateDoc(ref, {status: status});
-    } catch(e) { console.error('상태 업데이트 오류:', e); }
+    try { await db.collection('submissions').doc(id).update({status: status}); } catch(e) { console.error(e); }
   };
 
-  // Firebase에서 회원 포인트 업데이트
+  // 포인트 업데이트
   window.updateMemberPoints = async function(id, points, weekPts, monthPts) {
-    try {
-      const ref = doc(db, 'members', id);
-      await updateDoc(ref, {points, weekPts, monthPts});
-    } catch(e) { console.error('포인트 업데이트 오류:', e); }
+    try { await db.collection('members').doc(id).update({points, weekPts, monthPts}); } catch(e) { console.error(e); }
   };
 
-  // Firebase에서 회원 삭제
+  // 회원 삭제
   window.deleteMemberFromFirebase = async function(id) {
-    try {
-      const { deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-      const ref = doc(db, 'members', id);
-      await deleteDoc(ref);
-    } catch(e) { console.error('삭제 오류:', e); }
+    try { await db.collection('members').doc(id).delete(); } catch(e) { console.error(e); }
   };
 
-  // Firebase에서 미션 삭제
+  // 미션 삭제
   window.deleteMissionFromFirebase = async function(id) {
-    try {
-      const { deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-      const ref = doc(db, 'missions', id);
-      await deleteDoc(ref);
-    } catch(e) { console.error('미션 삭제 오류:', e); }
+    try { await db.collection('missions').doc(id).delete(); } catch(e) { console.error(e); }
   };
 
-  // 설정 저장
-  window.saveSettingToFirebase = async function(key, value) {
-    try {
-      const { setDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
-      const ref = doc(db, 'settings', key);
-      await setDoc(ref, {[key]: value});
-    } catch(e) { console.error('설정 저장 오류:', e); }
+  // 실시간 데이터 로드
+  window.loadFromFirebase = function() {
+    // 회원 실시간 감지
+    db.collection('members').onSnapshot(function(snapshot) {
+      window._MB = snapshot.docs.map(function(d) { return Object.assign({id: d.id}, d.data()); });
+      if(window._currentScreen === 'adm') { window.refreshAdmDash && window.refreshAdmDash(); }
+    });
+    // 미션 실시간 감지
+    db.collection('missions').onSnapshot(function(snapshot) {
+      window._MS = snapshot.docs.map(function(d) { return Object.assign({id: d.id}, d.data()); });
+      if(window._currentScreen === 'user') { window.renderMis && window.renderMis(); }
+      if(window._currentScreen === 'adm') { window.renderSentMis && window.renderSentMis(); }
+    });
+    // 제출 실시간 감지
+    db.collection('submissions').onSnapshot(function(snapshot) {
+      window._SB = snapshot.docs.map(function(d) { return Object.assign({id: d.id}, d.data()); });
+      if(window._currentScreen === 'user') { window.renderMis && window.renderMis(); }
+      if(window._currentScreen === 'adm') { window.renderSub && window.renderSub(); }
+    });
   };
-
-  // 페이지 로드 시 Firebase 연결
-  window.addEventListener('load', () => {
-    window.loadFromFirebase();
-  });
 </script>
 </head>
 <body>
