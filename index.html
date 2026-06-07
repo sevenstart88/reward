@@ -118,6 +118,153 @@ textarea{resize:none;min-height:100px;line-height:1.6}
 #mi{max-width:95vw;max-height:87vh;border-radius:12px}
 .close-modal{position:absolute;top:16px;right:16px;width:36px;height:36px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;font-weight:800;color:#333}
 </style>
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyD10MfkNyfWvSRVDIX-CruZF6QCpqKG9mE",
+    authDomain: "reward-alba.firebaseapp.com",
+    projectId: "reward-alba",
+    storageBucket: "reward-alba.firebasestorage.app",
+    messagingSenderId: "168342460091",
+    appId: "1:168342460091:web:e288fb4fdab92a1af7bb9e"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // 전역으로 Firebase 함수 노출
+  window._db = db;
+  window._col = collection;
+  window._addDoc = addDoc;
+  window._getDocs = getDocs;
+  window._doc = doc;
+  window._updateDoc = updateDoc;
+  window._onSnapshot = onSnapshot;
+  window._query = query;
+  window._orderBy = orderBy;
+  window._firebaseReady = true;
+
+  // Firebase에서 데이터 로드
+  window.loadFromFirebase = async function() {
+    try {
+      // 회원 목록 실시간 감지
+      const membersRef = collection(db, 'members');
+      onSnapshot(membersRef, (snapshot) => {
+        window._MB = snapshot.docs.map(d => ({id: d.id, ...d.data()}));
+        // 화면 업데이트
+        if(window._currentScreen === 'user') window.refreshUserDash();
+        if(window._currentScreen === 'adm') window.refreshAdmDash();
+      });
+
+      // 미션 실시간 감지
+      const missionsRef = collection(db, 'missions');
+      onSnapshot(missionsRef, (snapshot) => {
+        window._MS = snapshot.docs.map(d => ({id: d.id, ...d.data()}));
+        if(window._currentScreen === 'user') window.renderMis && window.renderMis();
+        if(window._currentScreen === 'adm') window.renderSentMis && window.renderSentMis();
+      });
+
+      // 제출 실시간 감지
+      const subsRef = collection(db, 'submissions');
+      onSnapshot(subsRef, (snapshot) => {
+        window._SB = snapshot.docs.map(d => ({id: d.id, ...d.data()}));
+        if(window._currentScreen === 'user') window.renderMis && window.renderMis();
+        if(window._currentScreen === 'adm') window.renderSub && window.renderSub();
+      });
+
+      // 설정 로드
+      const settingsRef = collection(db, 'settings');
+      const settingsSnap = await getDocs(settingsRef);
+      settingsSnap.forEach(d => {
+        const data = d.data();
+        if(data.dispCnt !== undefined) window._DISP_CNT = data.dispCnt;
+      });
+
+    } catch(e) {
+      console.error('Firebase 로드 오류:', e);
+    }
+  };
+
+  // Firebase에 회원 저장
+  window.saveMemberToFirebase = async function(member) {
+    try {
+      const ref = collection(db, 'members');
+      const docRef = await addDoc(ref, member);
+      return docRef.id;
+    } catch(e) {
+      console.error('회원 저장 오류:', e);
+      return null;
+    }
+  };
+
+  // Firebase에 미션 저장
+  window.saveMissionToFirebase = async function(mission) {
+    try {
+      const ref = collection(db, 'missions');
+      await addDoc(ref, mission);
+    } catch(e) { console.error('미션 저장 오류:', e); }
+  };
+
+  // Firebase에 제출 저장
+  window.saveSubToFirebase = async function(sub) {
+    try {
+      const ref = collection(db, 'submissions');
+      await addDoc(ref, sub);
+    } catch(e) { console.error('제출 저장 오류:', e); }
+  };
+
+  // Firebase에서 승인/반려 업데이트
+  window.updateSubStatus = async function(id, status) {
+    try {
+      const ref = doc(db, 'submissions', id);
+      await updateDoc(ref, {status: status});
+    } catch(e) { console.error('상태 업데이트 오류:', e); }
+  };
+
+  // Firebase에서 회원 포인트 업데이트
+  window.updateMemberPoints = async function(id, points, weekPts, monthPts) {
+    try {
+      const ref = doc(db, 'members', id);
+      await updateDoc(ref, {points, weekPts, monthPts});
+    } catch(e) { console.error('포인트 업데이트 오류:', e); }
+  };
+
+  // Firebase에서 회원 삭제
+  window.deleteMemberFromFirebase = async function(id) {
+    try {
+      const { deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+      const ref = doc(db, 'members', id);
+      await deleteDoc(ref);
+    } catch(e) { console.error('삭제 오류:', e); }
+  };
+
+  // Firebase에서 미션 삭제
+  window.deleteMissionFromFirebase = async function(id) {
+    try {
+      const { deleteDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+      const ref = doc(db, 'missions', id);
+      await deleteDoc(ref);
+    } catch(e) { console.error('미션 삭제 오류:', e); }
+  };
+
+  // 설정 저장
+  window.saveSettingToFirebase = async function(key, value) {
+    try {
+      const { setDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+      const ref = doc(db, 'settings', key);
+      await setDoc(ref, {[key]: value});
+    } catch(e) { console.error('설정 저장 오류:', e); }
+  };
+
+  // 페이지 로드 시 Firebase 연결
+  window.addEventListener('load', () => {
+    window.loadFromFirebase();
+  });
+</script>
 </head>
 <body>
 
@@ -477,6 +624,15 @@ async function doSubmit() {
   const osL=pickV.os==='android'?'안드로이드':'애플 (iOS)';
   // 중복 체크 제거 — 다른 기기에서 오면 중복이 아님
   const newM={id:'u'+Date.now(),name,phone,age:ageL,os:osL,bank,account:acct,holder,points:0,weekPts:0,monthPts:0,joinDate:new Date().toISOString().split('T')[0]};
+  // Firebase에 저장
+  if(window.saveMemberToFirebase) {
+    const fbId = await window.saveMemberToFirebase({
+      name, phone, age:ageL, os:osL, bank, account:acct, holder,
+      points:0, weekPts:0, monthPts:0,
+      joinDate: new Date().toISOString().split('T')[0]
+    });
+    if(fbId) newM.id = fbId;
+  }
   window._MB.push(newM);
   saveData();
   await sendToSheet({type:'member',date:newM.joinDate,name,phone,age:ageL,os:osL,bank,account:acct,holder});
@@ -500,6 +656,7 @@ function doLogin() {
   const phoneIn=np(document.getElementById('l-phone').value);
   const er=document.getElementById('l-er');er.classList.remove('v');
   if(!nameIn||!phoneIn){er.textContent='성함과 연락처를 모두 입력하세요.';er.classList.add('v');return}
+  // localStorage + Firebase 둘 다 검색
   const found=window._MB.find(m=>m.name===nameIn&&np(m.phone)===phoneIn);
   if(!found){er.textContent=window._MB.length===0?'신청서를 먼저 작성해 주세요.':'성함 또는 연락처가 일치하지 않습니다.';er.classList.add('v');return}
   me=found;showUserDash();
@@ -519,12 +676,21 @@ function doLogout() {
 }
 
 /* 알바 대시보드 */
+window.refreshUserDash = function() {
+  if(!me) return;
+  const fresh=window._MB.find(x=>x.id===me.id);if(fresh)me=fresh;
+  const dc=window._DISP_CNT!==null?window._DISP_CNT:window._MB.length;
+  document.getElementById('u-cnt').textContent=dc;
+  renderRk();renderMis();
+};
+window._currentScreen = '';
 function showUserDash() {
   const fresh=window._MB.find(x=>x.id===me.id);if(fresh)me=fresh;
   const dc=window._DISP_CNT!==null?window._DISP_CNT:window._MB.length;
   document.getElementById('u-cnt').textContent=dc;
   document.getElementById('u-nm').textContent=me.name+'님';
   renderRk();renderMis();go('sc-user');
+  window._currentScreen='user';
 }
 function setRk(mode,el) {
   rkMode=mode;
@@ -607,8 +773,13 @@ async function doUp(mid) {
   reader.onload=async function(e){
     const b64=e.target.result;
     const mis=window._MS.find(m=>m.id===mid);
-    const sub={id:'s'+Date.now(),missionId:mid,userId:me.id,userName:me.name,image:b64,status:'pending',at:new Date().toISOString()};
-    window._SB.push(sub);
+    const sub={missionId:mid,userId:me.id,userName:me.name,image:b64,status:'pending',at:new Date().toISOString()};
+    if(window.saveSubToFirebase) {
+      await window.saveSubToFirebase(sub);
+    } else {
+      sub.id = 's'+Date.now();
+      window._SB.push(sub);
+    }
     saveData();
     await sendToSheet({type:'capture',at:sub.at,userName:me.name,missionDesc:mis?mis.desc:'',status:'검토중'});
     delete pendingFiles[mid];
@@ -618,6 +789,13 @@ async function doUp(mid) {
 }
 
 /* 관리자 */
+window.refreshAdmDash = function() {
+  document.getElementById('a-tot').textContent=window._MB.length;
+  document.getElementById('a-pnd').textContent=window._SB.filter(s=>s.status==='pending').length;
+  document.getElementById('a-apr').textContent=window._SB.filter(s=>s.status==='approved').length;
+  document.getElementById('a-pts').textContent=window._MB.reduce((a,m)=>a+(m.points||0),0).toLocaleString()+'원';
+  renderMem();
+};
 function showAdmDash() {
   document.getElementById('a-tot').textContent=window._MB.length;
   document.getElementById('a-pnd').textContent=window._SB.filter(s=>s.status==='pending').length;
@@ -628,6 +806,7 @@ function showAdmDash() {
   const ci=document.getElementById('set-cnt');if(ci)ci.value=window._DISP_CNT!==null?window._DISP_CNT:'';
   const gu=document.getElementById('gs-url');if(gu)gu.value=window._GS_URL||'';
   go('sc-adm');
+  window._currentScreen='adm';
 }
 function atab(id,el) {
   el.closest('.tabs').querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));el.classList.add('on');
@@ -666,7 +845,11 @@ function renderMem() {
     <div class="ap">누적: ${(m.points||0).toLocaleString()}원 · 주간: ${(m.weekPts||0).toLocaleString()}원 · 월간: ${(m.monthPts||0).toLocaleString()}원</div>
     </div><button class="bsm bng" onclick="delMem('${m.id}')">삭제</button></div>`).join('');
 }
-function delMem(id){if(!confirm('삭제하시겠습니까?'))return;window._MB=window._MB.filter(m=>m.id!==id);saveData();showAdmDash()}
+function delMem(id){
+  if(!confirm('삭제하시겠습니까?'))return;
+  if(window.deleteMemberFromFirebase) window.deleteMemberFromFirebase(id);
+  window._MB=window._MB.filter(m=>m.id!==id);saveData();showAdmDash()
+}
 function renderSub() {
   const el=document.getElementById('sub-list');if(!el)return;
   const all=[...window._SB.filter(s=>s.status==='pending'),...window._SB.filter(s=>s.status==='approved'),...window._SB.filter(s=>s.status==='rejected')];
@@ -692,7 +875,11 @@ function approve(sid) {
   const s=window._SB.find(x=>x.id===sid);if(!s)return;
   s.status='approved';
   const m=window._MB.find(x=>x.id===s.userId);
-  if(m){m.points=(m.points||0)+1000;m.weekPts=(m.weekPts||0)+1000;m.monthPts=(m.monthPts||0)+1000;}
+  if(m){m.points=(m.points||0)+1000;m.weekPts=(m.weekPts||0)+1000;m.monthPts=(m.monthPts||0)+1000;
+    // Firebase 업데이트
+    if(window.updateMemberPoints) window.updateMemberPoints(m.id, m.points, m.weekPts, m.monthPts);
+    if(window.updateSubStatus) window.updateSubStatus(sid, 'approved');
+  }
   saveData();
   document.getElementById('a-pnd').textContent=window._SB.filter(s=>s.status==='pending').length;
   document.getElementById('a-apr').textContent=window._SB.filter(s=>s.status==='approved').length;
@@ -701,7 +888,9 @@ function approve(sid) {
 }
 function reject(sid) {
   const s=window._SB.find(x=>x.id===sid);if(!s)return;
-  s.status='rejected';saveData();
+  s.status='rejected';
+  if(window.updateSubStatus) window.updateSubStatus(sid, 'rejected');
+  saveData();
   document.getElementById('a-pnd').textContent=window._SB.filter(x=>x.status==='pending').length;
   renderSub();
 }
@@ -713,7 +902,13 @@ function sendMis() {
   const msg=document.getElementById('m-msg');
   if(!tid||!lnk||!dsc.trim()){msg.innerHTML='<div class="er v">모든 항목을 입력해 주세요.</div>';return}
   const tgt=window._MB.find(m=>m.id===tid);
-  window._MS.push({id:'m'+Date.now(),targetId:tid,targetName:tgt?.name||'',title:'광고 미션',link:lnk,desc:dsc,points:pts,at:new Date().toISOString()});
+  const newMis = {targetId:tid,targetName:tgt?.name||'',title:'광고 미션',link:lnk,desc:dsc,points:pts,at:new Date().toISOString()};
+  if(window.saveMissionToFirebase) {
+    await window.saveMissionToFirebase(newMis);
+  } else {
+    newMis.id = 'm'+Date.now();
+    window._MS.push(newMis);
+  }
   saveData();
   msg.innerHTML=`<div class="ok-msg">✓ ${ex(tgt?.name||'')}님께 미션이 전달되었습니다.</div>`;
   document.getElementById('m-lnk').value='';document.getElementById('m-dsc').value='';
