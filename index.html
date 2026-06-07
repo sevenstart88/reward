@@ -239,7 +239,7 @@ textarea{resize:none;min-height:100px;line-height:1.6}
       <button class="btn btnP" onclick="doLogin()">로그인</button>
     </div>
     <div style="text-align:center;margin-top:20px;font-size:15px;color:#64748b">처음이신가요? <span style="color:#3b82f6;font-weight:700;cursor:pointer" onclick="go('sc-apply')">신청서 작성 →</span></div>
-    <div style="text-align:center;margin-top:12px;font-size:15px;color:#64748b">관리자이신가요? <span style="color:#3b82f6;font-weight:700;cursor:pointer" onclick="go('sc-adm-login')">관리자 로그인 →</span></div>
+
   </div>
 </div>
 
@@ -381,17 +381,18 @@ const ADM_PW = 'admin1234';
 const np = v => String(v||'').replace(/\D/g,'');
 const ex = s => s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):'';
 
-// ★ localStorage 사용 — 브라우저가 동일하면 새로고침 후에도 유지
+// ★ 구글시트 URL 고정 세팅
+var FIXED_GS_URL = "https://script.google.com/macros/s/AKfycbzHLXFTw6CMQDrA8bkPHUqfgx9b-gMoy3GmP1daZ9oSWuf4c0hTzLGp4D4rAZqryG0tbw/exec";
 function loadData() {
   try {
     window._MB = JSON.parse(localStorage.getItem('_MB') || '[]');
     window._MS = JSON.parse(localStorage.getItem('_MS') || '[]');
     window._SB = JSON.parse(localStorage.getItem('_SB') || '[]');
     window._DISP_CNT = localStorage.getItem('_DISP_CNT') === null ? null : parseInt(localStorage.getItem('_DISP_CNT'));
-    window._GS_URL = localStorage.getItem('_GS_URL') || '';
+    window._GS_URL = localStorage.getItem('_GS_URL') || FIXED_GS_URL;
   } catch(e) {
     window._MB=[]; window._MS=[]; window._SB=[];
-    window._DISP_CNT=null; window._GS_URL='';
+    window._DISP_CNT=null; window._GS_URL=FIXED_GS_URL;
   }
 }
 function saveData() {
@@ -410,7 +411,7 @@ let me=null, rkMode='week', agV={}, pickV={}, aCur=1;
 
 async function sendToSheet(data) {
   if(!window._GS_URL) return;
-  try { await fetch(window._GS_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(data)}); } catch(e) {}
+  try { await fetch(window._GS_URL,{method:'POST',body:JSON.stringify(data),headers:{'Content-Type':'application/json'}}); } catch(e) {}
 }
 
 function go(id) {
@@ -736,7 +737,12 @@ function delMis(mid){if(!confirm('삭제하시겠습니까?'))return;window._MS=
 function openModal(sid){const s=window._SB.find(x=>x.id===sid);if(!s)return;document.getElementById('mi').src=s.image;document.getElementById('im').classList.add('on')}
 function closeModal(){document.getElementById('im').classList.remove('on')}
 
-go('sc-login');
+// ?admin URL이면 관리자 로그인 화면으로
+if(location.search.includes('admin')){
+  go('sc-adm-login');
+} else {
+  go('sc-login');
+}
 </script>
 </body>
 </html>
