@@ -59,35 +59,46 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 .scard{background:#f8fafc;border-radius:14px;padding:14px;text-align:left;margin-bottom:16px}
 .srow{display:flex;gap:8px;margin-bottom:7px;font-size:13px}.srow:last-child{margin-bottom:0}
 .sk{color:#64748b;width:68px;flex-shrink:0;font-weight:500}.sv{color:#1a1a2e;font-weight:700}
-/* 알바 대시보드 */
-.uh{background:linear-gradient(135deg,#3b82f6,#6366f1);padding:16px;display:flex;align-items:center;justify-content:space-between}
-.uh-name{font-size:16px;font-weight:700;color:#fff}
-.uh-sub{font-size:12px;color:rgba(255,255,255,.8);margin-top:2px}
-.uh-r{display:flex;align-items:center;gap:10px}
-.uc{background:rgba(255,255,255,.2);border-radius:12px;padding:8px 14px;text-align:center}
-.un{font-size:24px;font-weight:800;color:#fff;line-height:1.1}
-.ul2{font-size:10px;color:rgba(255,255,255,.85);margin-top:2px;font-weight:600}
-.lo{font-size:12px;color:rgba(255,255,255,.9);cursor:pointer;font-weight:700;padding:7px 11px;background:rgba(255,255,255,.2);border-radius:10px}
-.rk{background:#fff;border-bottom:1px solid #f1f5f9;padding:14px 16px}
-.rk-t{font-size:14px;font-weight:800;color:#374151;margin-bottom:10px}
-.rtabs{display:flex;gap:8px;margin-bottom:10px}
-.rt{padding:5px 15px;font-size:13px;font-weight:700;cursor:pointer;border-radius:20px;border:1.5px solid #e2e8f0;background:#fff;color:#64748b}
-.rt.on{background:#3b82f6;color:#fff;border-color:#3b82f6}
+/* ── 알바 대시보드 헤더 ── */
+.uh{background:linear-gradient(135deg,#1e40af,#4f46e5);padding:18px 16px;display:flex;align-items:flex-start;justify-content:space-between}
+.uh-left{display:flex;flex-direction:column;gap:6px}
+.uh-name{font-size:17px;font-weight:800;color:#fff}
+.uh-reward{display:inline-flex;align-items:center;gap:5px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:5px 12px}
+.uh-reward-amt{font-size:15px;font-weight:800;color:#fde68a}
+.uh-reward-lbl{font-size:10px;color:rgba(255,255,255,.8);font-weight:600}
+.uh-r{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.uc{background:rgba(255,255,255,.15);border-radius:12px;padding:7px 12px;text-align:center}
+.un{font-size:20px;font-weight:800;color:#fff;line-height:1.1}
+.ul2{font-size:9px;color:rgba(255,255,255,.8);margin-top:2px;font-weight:600}
+.lo{font-size:11px;color:rgba(255,255,255,.9);cursor:pointer;font-weight:700;padding:7px 10px;background:rgba(255,255,255,.2);border-radius:10px;white-space:nowrap}
+/* ── 랭킹 섹션 ── */
+.rk{background:linear-gradient(180deg,#eff6ff 0%,#fff 100%);border-bottom:3px solid #dbeafe;padding:16px 16px 14px}
+.rk-t{font-size:15px;font-weight:800;color:#1e40af;margin-bottom:10px}
+.rtabs{display:flex;gap:8px;margin-bottom:12px}
+.rt{padding:6px 16px;font-size:13px;font-weight:700;cursor:pointer;border-radius:20px;border:2px solid #dbeafe;background:#fff;color:#3b82f6}
+.rt.on{background:#3b82f6;color:#fff;border-color:#3b82f6;box-shadow:0 2px 8px rgba(59,130,246,.3)}
 .rtb{width:100%;border-collapse:collapse;font-size:13px}
-.rtb th{padding:6px 8px;text-align:left;color:#94a3b8;border-bottom:1px solid #f1f5f9;font-weight:600;font-size:12px}
-.rtb td{padding:7px 8px;border-bottom:1px solid #f1f5f9;color:#1a1a2e}
+.rtb th{padding:7px 8px;text-align:left;color:#64748b;border-bottom:2px solid #dbeafe;font-weight:700;font-size:11px}
+.rtb td{padding:8px 8px;border-bottom:1px solid #f1f5f9;color:#1a1a2e}
 .rtb tr:last-child td{border-bottom:none}
-.rb{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;font-size:10px;font-weight:800}
-.r1{background:#fbbf24;color:#78350f}.r2{background:#94a3b8;color:#1e293b}.r3{background:#f97316;color:#fff}.rn{background:#f1f5f9;color:#94a3b8}
-.ma{padding:14px 14px 40px}
-.mh{font-size:15px;font-weight:800;color:#1a1a2e;margin-bottom:12px}
-.mc{background:#fff;border:1px solid #e2e8f0;border-radius:16px;margin-bottom:14px;overflow:hidden}
-.mc-h{padding:13px 15px;border-bottom:1px solid #f1f5f9;display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.rb{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;font-size:11px;font-weight:800}
+.r1{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#78350f}.r2{background:linear-gradient(135deg,#94a3b8,#64748b);color:#fff}.r3{background:linear-gradient(135deg,#f97316,#ea580c);color:#fff}.rn{background:#f1f5f9;color:#94a3b8}
+/* ── 내 광고 미션 섹션 ── */
+.ma{padding:0 0 40px}
+.ma-header{background:linear-gradient(135deg,#0f172a,#1e293b);padding:14px 16px;display:flex;align-items:center;gap:8px}
+.mh{font-size:15px;font-weight:800;color:#fff;margin:0}
+.mh-badge{background:#3b82f6;color:#fff;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px}
+.ma-body{padding:14px 14px 0}
+.mc{background:#fff;border:1px solid #e2e8f0;border-radius:16px;margin-bottom:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.mc-h{padding:13px 15px;border-bottom:2px solid #f1f5f9;display:flex;align-items:flex-start;justify-content:space-between;gap:8px;background:#fafafa}
 .mc-ht{font-size:14px;font-weight:800;color:#1a1a2e}
 .mc-b{padding:13px 15px}
 .mc-d{font-size:13px;color:#475569;line-height:1.7;margin-bottom:10px;white-space:pre-wrap;word-break:break-word}
-.mc-a{display:flex;align-items:center;justify-content:center;gap:6px;font-size:14px;color:#fff;background:#3b82f6;padding:12px;border-radius:12px;text-decoration:none;margin-bottom:10px;font-weight:700}
+.mc-a{display:flex;align-items:center;justify-content:center;gap:6px;font-size:14px;color:#fff;background:linear-gradient(135deg,#3b82f6,#6366f1);padding:12px;border-radius:12px;text-decoration:none;margin-bottom:10px;font-weight:700;box-shadow:0 2px 8px rgba(59,130,246,.3)}
 .mc-r{font-size:13px;color:#64748b;margin-bottom:10px}.mc-r b{color:#3b82f6;font-size:15px;font-weight:800}
+/* 토스트 알림 */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e293b;color:#fff;font-size:13px;font-weight:600;padding:10px 20px;border-radius:20px;z-index:9998;opacity:0;transition:all .4s;white-space:nowrap}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
 .bdg{display:inline-block;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700;flex-shrink:0}
 .bn{background:#eff6ff;color:#1d4ed8}.bp{background:#fffbeb;color:#92400e}.bo{background:#f0fdf4;color:#15803d}.br3{background:#fef2f2;color:#b91c1c}
 .ub{border:2px dashed #cbd5e1;border-radius:14px;padding:20px;text-align:center;cursor:pointer;background:#f8fafc}
@@ -138,6 +149,9 @@ textarea{resize:none;min-height:80px;line-height:1.6}
   <div class="loading-spinner"></div>
   <div class="loading-txt">Firebase 연결 중...</div>
 </div>
+
+<!-- 토스트 알림 -->
+<div class="toast" id="toast"></div>
 
 <!-- 신청서 -->
 <div id="sc-apply" class="screen">
@@ -263,21 +277,35 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 <!-- 알바 대시보드 -->
 <div id="sc-user" class="screen">
   <div class="uh">
-    <div><div class="uh-name" id="u-nm">이름님</div><div class="uh-sub">리워드 체험단</div></div>
+    <div class="uh-left">
+      <div class="uh-name" id="u-nm">이름님</div>
+      <div class="uh-reward">
+        <span style="font-size:13px">💰</span>
+        <span class="uh-reward-amt" id="u-pts">0원</span>
+        <span class="uh-reward-lbl">누적 리워드</span>
+      </div>
+    </div>
     <div class="uh-r">
       <div class="uc"><div class="un" id="u-cnt">0</div><div class="ul2">총 회원수</div></div>
       <div class="lo" onclick="doLogout()">로그아웃</div>
     </div>
   </div>
+  <!-- 랭킹 섹션 -->
   <div class="rk">
-    <div class="rk-t">🏆 리워드 랭킹 <span style="font-size:12px;font-weight:400;color:#94a3b8">(조회 전용)</span></div>
+    <div class="rk-t">🏆 리워드 랭킹 <span style="font-size:11px;font-weight:500;color:#64748b">(조회 전용)</span></div>
     <div class="rtabs"><div class="rt on" onclick="setRk('week',this)">주간 TOP 10</div><div class="rt" onclick="setRk('month',this)">월간 TOP 10</div></div>
     <table class="rtb"><thead><tr><th style="width:32px">순위</th><th>이름</th><th style="text-align:right">리워드</th></tr></thead><tbody id="rk-body"></tbody></table>
-    <div style="font-size:11px;color:#94a3b8;text-align:right;margin-top:5px" id="rk-note"></div>
+    <div style="font-size:11px;color:#94a3b8;text-align:right;margin-top:6px" id="rk-note"></div>
   </div>
+  <!-- 미션 섹션 (구분된 디자인) -->
   <div class="ma">
-    <div class="mh">📋 내 광고 미션</div>
-    <div id="u-mis"><div class="nm">📭 전달된 미션이 없습니다.</div></div>
+    <div class="ma-header">
+      <div class="mh">📋 내 광고 미션</div>
+      <div class="mh-badge" id="mis-cnt-badge"></div>
+    </div>
+    <div class="ma-body">
+      <div id="u-mis"><div class="nm">📭 전달된 미션이 없습니다.</div></div>
+    </div>
   </div>
 </div>
 
@@ -373,9 +401,20 @@ var me = null, rkMode = 'week';
 var ageVal = '', osVal = '', ag1 = '', ag2 = '';
 var aCur = 1;
 var pendingFiles = {};
-
-// 리스너 해제용
 var unsubMem = null, unsubMis = null, unsubSub = null;
+var userRefreshTimer = null;
+
+// ── 자동로그인 세션 ──────────────────────────────────────
+var SESSION_KEY = 'rw_session_id';
+var ADM_SESSION_KEY = 'rw_adm_session';
+function saveSession(id){ try{localStorage.setItem(SESSION_KEY,id);}catch(e){} }
+function loadSession(){ try{return localStorage.getItem(SESSION_KEY);}catch(e){return null;} }
+function saveAdmSession(){ try{localStorage.setItem(ADM_SESSION_KEY,'1');}catch(e){} }
+function loadAdmSession(){ try{return localStorage.getItem(ADM_SESSION_KEY);}catch(e){return null;} }
+function clearSession(){ try{localStorage.removeItem(SESSION_KEY);localStorage.removeItem(ADM_SESSION_KEY);}catch(e){} }
+
+// ── 토스트 알림 ──────────────────────────────────────────
+function showToast(msg){ var t=document.getElementById('toast'); if(!t) return; t.textContent=msg; t.classList.add('on'); setTimeout(function(){t.classList.remove('on');},2500); }
 
 // ── 로딩 제어 ───────────────────────────────────────────
 function showLoading(txt) {
@@ -387,46 +426,60 @@ function hideLoading() {
   document.getElementById('loading-overlay').style.display = 'none';
 }
 
-// ── 초기 데이터 로드 ─────────────────────────────────────
+// ── 알바 자동갱신 (30초마다) ────────────────────────────
+function startUserAutoRefresh() {
+  stopUserAutoRefresh();
+  userRefreshTimer = setInterval(async function(){
+    if(!me || !document.getElementById('sc-user').classList.contains('on')) return;
+    try {
+      var snap=await getDocs(collection(db,'members')); MB=[]; snap.forEach(function(d){MB.push(Object.assign({id:d.id},d.data()));});
+      var ms=await getDocs(collection(db,'missions')); MS=[]; ms.forEach(function(d){MS.push(Object.assign({id:d.id},d.data()));});
+      var sb=await getDocs(collection(db,'submissions')); SB=[]; sb.forEach(function(d){SB.push(Object.assign({id:d.id},d.data()));});
+      var fresh=MB.find(function(m){return m.id===me.id;}); if(fresh) me=fresh;
+      document.getElementById('u-pts').textContent=(me.points||0).toLocaleString()+'원';
+      document.getElementById('u-cnt').textContent=DISP_CNT!==null?DISP_CNT:MB.length;
+      renderRk(); renderMis();
+    } catch(e){}
+  }, 30000);
+}
+function stopUserAutoRefresh(){ if(userRefreshTimer){clearInterval(userRefreshTimer);userRefreshTimer=null;} }
+
+// ── 초기 데이터 로드 + 자동로그인 ────────────────────────
 async function loadAllData() {
-  showLoading('Firebase 연결 중...');
+  showLoading('연결 중...');
   try {
-    // 회원 목록
     var mbSnap = await getDocs(collection(db, 'members'));
-    MB = [];
-    mbSnap.forEach(function(d){ MB.push(Object.assign({id: d.id}, d.data())); });
-
-    // 미션 목록
+    MB = []; mbSnap.forEach(function(d){ MB.push(Object.assign({id: d.id}, d.data())); });
     var msSnap = await getDocs(collection(db, 'missions'));
-    MS = [];
-    msSnap.forEach(function(d){ MS.push(Object.assign({id: d.id}, d.data())); });
-
-    // 제출 목록
+    MS = []; msSnap.forEach(function(d){ MS.push(Object.assign({id: d.id}, d.data())); });
     var sbSnap = await getDocs(collection(db, 'submissions'));
-    SB = [];
-    sbSnap.forEach(function(d){ SB.push(Object.assign({id: d.id}, d.data())); });
-
-    // 설정 (총 회원수 표시)
+    SB = []; sbSnap.forEach(function(d){ SB.push(Object.assign({id: d.id}, d.data())); });
     var cfgDoc = await getDoc(doc(db, 'config', 'settings'));
-    if(cfgDoc.exists()) {
-      var cfg = cfgDoc.data();
-      DISP_CNT = cfg.dispCount !== undefined ? cfg.dispCount : null;
-    }
+    if(cfgDoc.exists()){ var cfg=cfgDoc.data(); DISP_CNT=cfg.dispCount!==undefined?cfg.dispCount:null; }
 
     hideLoading();
+    var isAdmin = location.search.indexOf('admin') !== -1;
 
-    // 시작 화면 결정
-    if(location.search.indexOf('admin') !== -1) {
-      goSc('sc-adm-login');
-    } else {
-      goSc('sc-login');
+    // 관리자 자동로그인
+    if(isAdmin){
+      if(loadAdmSession()){ showToast('✅ 관리자 자동로그인'); await showAdmDash(); return; }
+      goSc('sc-adm-login'); return;
     }
+
+    // 알바 자동로그인
+    var savedId = loadSession();
+    if(savedId){
+      var found = MB.find(function(m){ return m.id===savedId; });
+      if(found){ me=found; showToast('✅ '+me.name+'님 자동로그인'); await showUserDash(); return; }
+      else{ clearSession(); }
+    }
+    goSc('sc-login');
   } catch(e) {
-    console.error('Firebase 로드 오류:', e);
     hideLoading();
-    alert('Firebase 연결에 실패했습니다. 잠시 후 다시 시도해주세요.\n오류: ' + e.message);
+    alert('Firebase 연결 오류: '+e.message);
   }
 }
+
 
 // ── 실시간 리스너 시작 (관리자용) ───────────────────────
 function startRealtimeListeners() {
@@ -625,7 +678,8 @@ window.doLogin = async function() {
       return;
     }
     me = found;
-    showUserDash();
+    saveSession(me.id); // 자동로그인 저장
+    await showUserDash();
   } catch(err) {
     hideLoading();
     er.textContent='오류: '+err.message; er.classList.add('on');
@@ -636,11 +690,14 @@ window.doAdmLogin = function() {
   var pw = document.getElementById('adm-pw').value;
   var er = document.getElementById('adm-er');
   if(pw!==ADM_PW) { er.textContent='비밀번호가 틀렸습니다.'; er.classList.add('on'); return; }
+  saveAdmSession(); // 관리자 자동로그인 저장
   me=null; showAdmDash();
 };
 
 window.doLogout = function() {
+  clearSession(); // 세션 삭제
   stopRealtimeListeners();
+  stopUserAutoRefresh();
   me=null;
   document.getElementById('l-name').value='';
   document.getElementById('l-phone').value='';
@@ -652,25 +709,23 @@ window.doLogout = function() {
 async function showUserDash() {
   showLoading('데이터 불러오는 중...');
   try {
-    // 최신 데이터 갱신
     var snap = await getDocs(collection(db, 'members'));
     MB = []; snap.forEach(function(d){ MB.push(Object.assign({id: d.id}, d.data())); });
     var msSnap = await getDocs(collection(db, 'missions'));
     MS = []; msSnap.forEach(function(d){ MS.push(Object.assign({id: d.id}, d.data())); });
     var sbSnap = await getDocs(collection(db, 'submissions'));
     SB = []; sbSnap.forEach(function(d){ SB.push(Object.assign({id: d.id}, d.data())); });
-    // 설정 읽기
     var cfgDoc = await getDoc(doc(db, 'config', 'settings'));
     if(cfgDoc.exists()) { var cfg = cfgDoc.data(); DISP_CNT = cfg.dispCount !== undefined ? cfg.dispCount : null; }
-
-    // 본인 최신 데이터 갱신
     var fresh = MB.find(function(m){ return m.id===me.id; });
     if(fresh) me = fresh;
-
     hideLoading();
+    // ① 누적 리워드 표시
+    document.getElementById('u-pts').textContent = (me.points||0).toLocaleString()+'원';
     document.getElementById('u-cnt').textContent = DISP_CNT!==null ? DISP_CNT : MB.length;
     document.getElementById('u-nm').textContent = me.name+'님';
     renderRk(); renderMis(); goSc('sc-user');
+    startUserAutoRefresh(); // ② 30초 자동갱신 시작
   } catch(err) {
     hideLoading();
     alert('데이터 로드 오류: '+err.message);
@@ -705,6 +760,9 @@ function renderRk() {
 function renderMis() {
   var el=document.getElementById('u-mis'); if(!el) return;
   var my=MS.filter(function(m){ return m.targetId===me.id; });
+  // 미션 개수 배지
+  var badge=document.getElementById('mis-cnt-badge');
+  if(badge) badge.textContent=my.length?my.length+'개':'';
   if(!my.length){el.innerHTML='<div class="nm">📭 전달된 미션이 없습니다.</div>';return;}
   var html='';
   for(var i=0;i<my.length;i++){
