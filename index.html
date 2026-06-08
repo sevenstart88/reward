@@ -121,12 +121,26 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 #im{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:999;align-items:center;justify-content:center}
 #im.on{display:flex}
 #mi{max-width:95vw;max-height:85vh;border-radius:12px}
+/* 로딩 오버레이 */
+.loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,.85);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+.loading-spinner{width:42px;height:42px;border:4px solid #e2e8f0;border-top-color:#3b82f6;border-radius:50%;animation:spin .8s linear infinite}
+.loading-txt{font-size:14px;color:#64748b;font-weight:500}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* Firebase 상태 표시 */
+.fb-badge{position:fixed;bottom:16px;right:16px;background:#16a34a;color:#fff;font-size:11px;font-weight:700;padding:6px 12px;border-radius:20px;z-index:100;opacity:0;transition:opacity .3s}
+.fb-badge.on{opacity:1}
 </style>
 </head>
 <body>
 
+<!-- 로딩 오버레이 -->
+<div class="loading-overlay" id="loading-overlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-txt">Firebase 연결 중...</div>
+</div>
+
 <!-- 신청서 -->
-<div id="sc-apply" class="screen on">
+<div id="sc-apply" class="screen">
   <div class="ap-top"><div class="ap-title">🏆 리워드 체험단</div><div class="ap-sub">신청서 작성</div></div>
   <div class="pg-wrap">
     <div class="pg-lbl" id="pg-lbl">1 / 6단계</div>
@@ -327,48 +341,144 @@ textarea{resize:none;min-height:80px;line-height:1.6}
   </div>
 </div>
 
-<script>
+<!-- Firebase SDK -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import {
+  getFirestore, collection, doc, getDocs, getDoc, addDoc, setDoc, updateDoc, deleteDoc,
+  query, where, orderBy, onSnapshot, serverTimestamp
+} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+
+// ── Firebase 초기화 ──────────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyD10MfkNyfWvSRVDIX-CruZF6QCpqKG9mE",
+  authDomain: "reward-alba.firebaseapp.com",
+  projectId: "reward-alba",
+  messagingSenderId: "168342460091",
+  appId: "1:168342460091:web:e288fb4fdab92a1af7bb9e"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+
+// ── 전역 변수 ────────────────────────────────────────────
 var ADM_PW = 'admin1234';
 var np = function(v){ return String(v||'').replace(/\D/g,''); };
 var ex = function(s){ return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'):''; };
 
-// 데이터
 var MB = [], MS = [], SB = [];
 var DISP_CNT = null;
 var me = null, rkMode = 'week';
 var ageVal = '', osVal = '', ag1 = '', ag2 = '';
 var aCur = 1;
+var pendingFiles = {};
 
-// localStorage 로드
-function loadData() {
-  try {
-    MB = JSON.parse(localStorage.getItem('MB') || '[]');
-    MS = JSON.parse(localStorage.getItem('MS') || '[]');
-    SB = JSON.parse(localStorage.getItem('SB') || '[]');
-    var dc = localStorage.getItem('DC');
-    DISP_CNT = dc ? parseInt(dc) : null;
-  } catch(e) { MB=[]; MS=[]; SB=[]; }
-}
-function saveData() {
-  try {
-    localStorage.setItem('MB', JSON.stringify(MB));
-    localStorage.setItem('MS', JSON.stringify(MS));
-    localStorage.setItem('SB', JSON.stringify(SB));
-    if(DISP_CNT !== null) localStorage.setItem('DC', DISP_CNT);
-    else localStorage.removeItem('DC');
-  } catch(e) {}
-}
-loadData();
+// 리스너 해제용
+var unsubMem = null, unsubMis = null, unsubSub = null;
 
-// 화면 전환
-function goSc(id) {
+// ── 로딩 제어 ───────────────────────────────────────────
+function showLoading(txt) {
+  var ov = document.getElementById('loading-overlay');
+  ov.querySelector('.loading-txt').textContent = txt || '처리 중...';
+  ov.style.display = 'flex';
+}
+function hideLoading() {
+  document.getElementById('loading-overlay').style.display = 'none';
+}
+
+// ── 초기 데이터 로드 ─────────────────────────────────────
+async function loadAllData() {
+  showLoading('Firebase 연결 중...');
+  try {
+    // 회원 목록
+    var mbSnap = await getDocs(collection(db, 'members'));
+    MB = [];
+    mbSnap.forEach(function(d){ MB.push(Object.assign({id: d.id}, d.data())); });
+
+    // 미션 목록
+    var msSnap = await getDocs(collection(db, 'missions'));
+    MS = [];
+    msSnap.forEach(function(d){ MS.push(Object.assign({id: d.id}, d.data())); });
+
+    // 제출 목록
+    var sbSnap = await getDocs(collection(db, 'submissions'));
+    SB = [];
+    sbSnap.forEach(function(d){ SB.push(Object.assign({id: d.id}, d.data())); });
+
+    // 설정 (총 회원수 표시)
+    var cfgDoc = await getDoc(doc(db, 'config', 'settings'));
+    if(cfgDoc.exists()) {
+      var cfg = cfgDoc.data();
+      DISP_CNT = cfg.dispCount !== undefined ? cfg.dispCount : null;
+    }
+
+    hideLoading();
+
+    // 시작 화면 결정
+    if(location.search.indexOf('admin') !== -1) {
+      goSc('sc-adm-login');
+    } else {
+      goSc('sc-login');
+    }
+  } catch(e) {
+    console.error('Firebase 로드 오류:', e);
+    hideLoading();
+    alert('Firebase 연결에 실패했습니다. 잠시 후 다시 시도해주세요.\n오류: ' + e.message);
+  }
+}
+
+// ── 실시간 리스너 시작 (관리자용) ───────────────────────
+function startRealtimeListeners() {
+  // 회원 실시간
+  unsubMem = onSnapshot(collection(db, 'members'), function(snap) {
+    MB = [];
+    snap.forEach(function(d){ MB.push(Object.assign({id: d.id}, d.data())); });
+    var memListEl = document.getElementById('mem-list');
+    if(memListEl && document.getElementById('sc-adm').classList.contains('on')) {
+      updateAdmStats();
+      renderMem();
+      refreshMisTgt();
+    }
+  });
+
+  // 미션 실시간
+  unsubMis = onSnapshot(collection(db, 'missions'), function(snap) {
+    MS = [];
+    snap.forEach(function(d){ MS.push(Object.assign({id: d.id}, d.data())); });
+    var misListEl = document.getElementById('mis-list');
+    if(misListEl && document.getElementById('sc-adm').classList.contains('on')) {
+      renderSentMis();
+    }
+  });
+
+  // 제출 실시간
+  unsubSub = onSnapshot(collection(db, 'submissions'), function(snap) {
+    SB = [];
+    snap.forEach(function(d){ SB.push(Object.assign({id: d.id}, d.data())); });
+    var subListEl = document.getElementById('sub-list');
+    if(subListEl && document.getElementById('sc-adm').classList.contains('on')) {
+      updateAdmStats();
+      renderSub();
+    }
+  });
+}
+
+function stopRealtimeListeners() {
+  if(unsubMem) { unsubMem(); unsubMem = null; }
+  if(unsubMis) { unsubMis(); unsubMis = null; }
+  if(unsubSub) { unsubSub(); unsubSub = null; }
+}
+
+// ── 화면 전환 ───────────────────────────────────────────
+window.goSc = function(id) {
   var screens = document.querySelectorAll('.screen');
   for(var i=0; i<screens.length; i++) screens[i].classList.remove('on');
   document.getElementById(id).classList.add('on');
   window.scrollTo(0,0);
-}
+};
 
-// 신청서
+// ── 신청서 ──────────────────────────────────────────────
 function showSl(id) {
   var slides = document.querySelectorAll('#sc-apply .slide');
   for(var i=0; i<slides.length; i++) slides[i].classList.remove('on');
@@ -380,17 +490,17 @@ function updPg(s) {
   document.getElementById('pg-lbl').textContent = s + ' / 6단계';
   document.getElementById('pg-fill').style.width = (s/6*100) + '%';
 }
-function pickAge(v) {
+window.pickAge = function(v) {
   ageVal = v;
   document.getElementById('cb-minor').className = 'cb' + (v==='minor'?' on':'');
   document.getElementById('cb-adult').className = 'cb' + (v==='adult'?' on':'');
-}
-function pickOs(v) {
+};
+window.pickOs = function(v) {
   osVal = v;
   document.getElementById('cb-android').className = 'cb' + (v==='android'?' on':'');
   document.getElementById('cb-ios').className = 'cb' + (v==='ios'?' on':'');
-}
-function selAg(n, v) {
+};
+window.selAg = function(n, v) {
   if(n===1) ag1=v; else ag2=v;
   var ks = ['y','n'];
   for(var i=0; i<ks.length; i++) {
@@ -400,17 +510,19 @@ function selAg(n, v) {
     b.className = 'ab' + (v===k ? (k==='y'?' y':' n') : '');
     c.textContent = v===k ? '✓' : '';
   }
-}
-function anext(step) {
+};
+window.anext = function(step) {
   var e = document.getElementById('e'+step);
   e.textContent = '';
   e.classList.remove('on');
-
   if(step===1) {
     var n = document.getElementById('a-name').value.trim();
     var p = np(document.getElementById('a-phone').value);
     if(!n) { e.textContent='성함을 입력해 주세요.'; e.classList.add('on'); return; }
     if(p.length<10) { e.textContent='연락처를 정확히 입력해 주세요.'; e.classList.add('on'); return; }
+    // 중복 체크
+    var dup = MB.find(function(m){ return m.name===n && np(m.phone)===p; });
+    if(dup) { e.textContent='이미 가입된 성함/연락처입니다.'; e.classList.add('on'); return; }
   }
   if(step===2 && !ageVal) { e.textContent='항목을 선택해 주세요.'; e.classList.add('on'); return; }
   if(step===3 && !osVal) { e.textContent='휴대폰 종류를 선택해 주세요.'; e.classList.add('on'); return; }
@@ -428,14 +540,15 @@ function anext(step) {
   updPg(aCur);
   showSl('sl'+aCur);
   if(aCur===4) document.getElementById('hh').textContent = document.getElementById('a-name').value.trim()||'-';
-}
-function aback(step) { aCur=step-1; updPg(aCur); showSl('sl'+aCur); }
+};
+window.aback = function(step) { aCur=step-1; updPg(aCur); showSl('sl'+aCur); };
 
-function doSubmit() {
+window.doSubmit = async function() {
   var e = document.getElementById('e6');
   e.textContent=''; e.classList.remove('on');
   if(!ag2) { e.textContent='동의 여부를 선택해 주세요.'; e.classList.add('on'); return; }
   if(ag2==='n') { showSl('sl-del'); return; }
+
   var name = document.getElementById('a-name').value.trim();
   var phone = np(document.getElementById('a-phone').value);
   var bank = document.getElementById('a-bank').value;
@@ -443,17 +556,43 @@ function doSubmit() {
   var holder = document.getElementById('a-holder').value.trim();
   var ageL = ageVal==='minor'?'미성년자':'성인';
   var osL = osVal==='android'?'안드로이드':'애플 (iOS)';
-  MB.push({id:'u'+Date.now(), name:name, phone:phone, age:ageL, os:osL, bank:bank, account:acct, holder:holder, points:0, weekPts:0, monthPts:0, joinDate:new Date().toISOString().split('T')[0]});
-  saveData();
-  document.getElementById('lnh').textContent = name;
-  document.getElementById('lph').textContent = phone;
-  var fields = [['성함',name],['연락처',phone],['나이',ageL],['휴대폰',osL],['은행',bank],['계좌번호',acct],['예금주',holder]];
-  var html = '';
-  for(var i=0; i<fields.length; i++) html += '<div class="srow"><span class="sk">'+fields[i][0]+'</span><span class="sv">'+ex(fields[i][1])+'</span></div>';
-  document.getElementById('sum-box').innerHTML = html;
-  showSl('sl-ok');
-}
-function restart() {
+
+  showLoading('신청서 저장 중...');
+  try {
+    var newMember = {
+      name: name,
+      phone: phone,
+      age: ageL,
+      os: osL,
+      bank: bank,
+      account: acct,
+      holder: holder,
+      points: 0,
+      weekPts: 0,
+      monthPts: 0,
+      joinDate: new Date().toISOString().split('T')[0],
+      createdAt: serverTimestamp()
+    };
+    var docRef = await addDoc(collection(db, 'members'), newMember);
+    newMember.id = docRef.id;
+    MB.push(newMember);
+
+    hideLoading();
+    document.getElementById('lnh').textContent = name;
+    document.getElementById('lph').textContent = phone;
+    var fields = [['성함',name],['연락처',phone],['나이',ageL],['휴대폰',osL],['은행',bank],['계좌번호',acct],['예금주',holder]];
+    var html = '';
+    for(var i=0; i<fields.length; i++) html += '<div class="srow"><span class="sk">'+fields[i][0]+'</span><span class="sv">'+ex(fields[i][1])+'</span></div>';
+    document.getElementById('sum-box').innerHTML = html;
+    showSl('sl-ok');
+  } catch(err) {
+    hideLoading();
+    e.textContent='저장 중 오류가 발생했습니다: '+err.message;
+    e.classList.add('on');
+  }
+};
+
+window.restart = function() {
   ageVal=''; osVal=''; ag1=''; ag2=''; aCur=1;
   ['a-name','a-phone','a-acct','a-holder'].forEach(function(id){ document.getElementById(id).value=''; });
   document.getElementById('a-bank').value='';
@@ -461,47 +600,89 @@ function restart() {
   [[1,'y'],[1,'n'],[2,'y'],[2,'n']].forEach(function(x){ document.getElementById('ag'+x[0]+x[1]).className='ab'; document.getElementById('ck'+x[0]+x[1]).textContent=''; });
   updPg(1); showSl('sl1');
   document.querySelector('.pg-wrap').style.display='block';
-}
+};
 
-// 로그인
-function doLogin() {
+// ── 로그인 ───────────────────────────────────────────────
+window.doLogin = async function() {
   var nameIn = document.getElementById('l-name').value.trim();
   var phoneIn = np(document.getElementById('l-phone').value);
   var er = document.getElementById('l-er');
   er.classList.remove('on');
   if(!nameIn||!phoneIn) { er.textContent='성함과 연락처를 모두 입력하세요.'; er.classList.add('on'); return; }
-  var found = null;
-  for(var i=0; i<MB.length; i++) { if(MB[i].name===nameIn && np(MB[i].phone)===phoneIn) { found=MB[i]; break; } }
-  if(!found) { er.textContent=MB.length===0?'신청서를 먼저 작성해 주세요.':'성함 또는 연락처가 일치하지 않습니다.'; er.classList.add('on'); return; }
-  me = found; showUserDash();
-}
-function doAdmLogin() {
+
+  showLoading('로그인 중...');
+  try {
+    // 최신 회원 목록 가져오기
+    var snap = await getDocs(collection(db, 'members'));
+    MB = [];
+    snap.forEach(function(d){ MB.push(Object.assign({id: d.id}, d.data())); });
+    hideLoading();
+
+    var found = MB.find(function(m){ return m.name===nameIn && np(m.phone)===phoneIn; });
+    if(!found) {
+      er.textContent = MB.length===0 ? '신청서를 먼저 작성해 주세요.' : '성함 또는 연락처가 일치하지 않습니다.';
+      er.classList.add('on');
+      return;
+    }
+    me = found;
+    showUserDash();
+  } catch(err) {
+    hideLoading();
+    er.textContent='오류: '+err.message; er.classList.add('on');
+  }
+};
+
+window.doAdmLogin = function() {
   var pw = document.getElementById('adm-pw').value;
   var er = document.getElementById('adm-er');
   if(pw!==ADM_PW) { er.textContent='비밀번호가 틀렸습니다.'; er.classList.add('on'); return; }
   me=null; showAdmDash();
-}
-function doLogout() {
+};
+
+window.doLogout = function() {
+  stopRealtimeListeners();
   me=null;
   document.getElementById('l-name').value='';
   document.getElementById('l-phone').value='';
   document.getElementById('adm-pw').value='';
   goSc('sc-login');
+};
+
+// ── 알바 대시보드 ─────────────────────────────────────────
+async function showUserDash() {
+  showLoading('데이터 불러오는 중...');
+  try {
+    // 최신 데이터 갱신
+    var snap = await getDocs(collection(db, 'members'));
+    MB = []; snap.forEach(function(d){ MB.push(Object.assign({id: d.id}, d.data())); });
+    var msSnap = await getDocs(collection(db, 'missions'));
+    MS = []; msSnap.forEach(function(d){ MS.push(Object.assign({id: d.id}, d.data())); });
+    var sbSnap = await getDocs(collection(db, 'submissions'));
+    SB = []; sbSnap.forEach(function(d){ SB.push(Object.assign({id: d.id}, d.data())); });
+    // 설정 읽기
+    var cfgDoc = await getDoc(doc(db, 'config', 'settings'));
+    if(cfgDoc.exists()) { var cfg = cfgDoc.data(); DISP_CNT = cfg.dispCount !== undefined ? cfg.dispCount : null; }
+
+    // 본인 최신 데이터 갱신
+    var fresh = MB.find(function(m){ return m.id===me.id; });
+    if(fresh) me = fresh;
+
+    hideLoading();
+    document.getElementById('u-cnt').textContent = DISP_CNT!==null ? DISP_CNT : MB.length;
+    document.getElementById('u-nm').textContent = me.name+'님';
+    renderRk(); renderMis(); goSc('sc-user');
+  } catch(err) {
+    hideLoading();
+    alert('데이터 로드 오류: '+err.message);
+  }
 }
 
-// 알바 대시보드
-function showUserDash() {
-  var fresh=null; for(var i=0;i<MB.length;i++){if(MB[i].id===me.id){fresh=MB[i];break;}} if(fresh) me=fresh;
-  document.getElementById('u-cnt').textContent = DISP_CNT!==null ? DISP_CNT : MB.length;
-  document.getElementById('u-nm').textContent = me.name+'님';
-  renderRk(); renderMis(); goSc('sc-user');
-}
-function setRk(mode,el) {
+window.setRk = function(mode, el) {
   rkMode=mode;
   var tabs=el.closest('.rtabs').querySelectorAll('.rt');
   for(var i=0;i<tabs.length;i++) tabs[i].classList.remove('on');
   el.classList.add('on'); renderRk();
-}
+};
 function renderRk() {
   var isW=rkMode==='week';
   var sorted=MB.slice().sort(function(a,b){return isW?(b.weekPts||0)-(a.weekPts||0):(b.monthPts||0)-(a.monthPts||0);});
@@ -510,7 +691,7 @@ function renderRk() {
   var body=document.getElementById('rk-body'); if(!body) return;
   var html='';
   if(top.length) {
-    for(var i=0;i<top.length;i++) {
+    for(var i=0;i<top.length;i++){
       var m=top[i]; var pts=isW?(m.weekPts||0):(m.monthPts||0);
       var isMe=me&&m.id===me.id;
       var bdg=i===0?'<span class="rb r1">1</span>':i===1?'<span class="rb r2">2</span>':i===2?'<span class="rb r3">3</span>':'<span class="rb rn">'+(i+1)+'</span>';
@@ -523,30 +704,30 @@ function renderRk() {
 }
 function renderMis() {
   var el=document.getElementById('u-mis'); if(!el) return;
-  var my=[]; for(var i=0;i<MS.length;i++){if(MS[i].targetId===me.id) my.push(MS[i]);}
+  var my=MS.filter(function(m){ return m.targetId===me.id; });
   if(!my.length){el.innerHTML='<div class="nm">📭 전달된 미션이 없습니다.</div>';return;}
   var html='';
   for(var i=0;i<my.length;i++){
     var m=my[i];
-    var mySubs=[]; for(var j=0;j<SB.length;j++){if(SB[j].missionId===m.id&&SB[j].userId===me.id) mySubs.push(SB[j]);}
+    var mySubs=SB.filter(function(s){ return s.missionId===m.id && s.userId===me.id; });
     var last=mySubs.length?mySubs[mySubs.length-1]:null;
     var bdg='<span class="bdg bn">미참여</span>';
     if(last){if(last.status==='approved')bdg='<span class="bdg bo">✓ 승인완료</span>';else if(last.status==='rejected')bdg='<span class="bdg br3">반려</span>';else bdg='<span class="bdg bp">⏳ 검토중</span>';}
     var canUp=!last||(last.status==='rejected');
-    var safeDesc=ex(m.desc).replace(/\n/g,'<br>');
-    html+='<div class="mc"><div class="mc-h"><div class="mc-ht">'+ex(m.title||'광고 미션')+'</div>'+bdg+'</div><div class="mc-b"><div class="mc-d">'+safeDesc+'</div><a class="mc-a" href="'+ex(m.link)+'" target="_blank">🔗 광고 링크 바로가기</a><div class="mc-r">참여 리워드: <b>'+m.points.toLocaleString()+'원</b></div>';
+    var safeDesc=ex(m.desc||'').replace(/\n/g,'<br>');
+    html+='<div class="mc"><div class="mc-h"><div class="mc-ht">'+ex(m.title||'광고 미션')+'</div>'+bdg+'</div><div class="mc-b"><div class="mc-d">'+safeDesc+'</div><a class="mc-a" href="'+ex(m.link)+'" target="_blank">🔗 광고 링크 바로가기</a><div class="mc-r">참여 리워드: <b>'+(m.points||1500).toLocaleString()+'원</b></div>';
     if(canUp){
       html+='<div class="ub" onclick="trigUp(\''+m.id+'\')"><div style="font-size:30px;margin-bottom:8px">📷</div><div style="font-size:14px;font-weight:700;color:#1a1a2e">참여 완료 후 캡처 업로드</div><div style="font-size:13px;margin-top:4px;color:#64748b">탭하여 사진 선택</div><input type="file" id="fu-'+m.id+'" accept="image/*" capture="environment" style="display:none" onchange="onSel(\''+m.id+'\',this)"><div id="up-'+m.id+'"></div></div><div class="submit-btn-wrap" id="sbw-'+m.id+'" style="display:none"><button class="btn btnG" onclick="doUp(\''+m.id+'\')">📤 제출하기</button></div>';
     } else {
-      html+='<div style="background:'+(last&&last.status==='approved'?'#f0fdf4':'#f8fafc')+'1;border-radius:10px;padding:11px;font-size:13px;color:'+(last&&last.status==='approved'?'#15803d':'#64748b')+';text-align:center;font-weight:600">'+(last&&last.status==='approved'?'✅ 승인 완료! 리워드가 적립되었습니다.':'📤 업로드 완료. 관리자 검토 중입니다.')+'</div>';
+      html+='<div style="background:'+(last&&last.status==='approved'?'#f0fdf4':'#f8fafc')+';border-radius:10px;padding:11px;font-size:13px;color:'+(last&&last.status==='approved'?'#15803d':'#64748b')+';text-align:center;font-weight:600">'+(last&&last.status==='approved'?'✅ 승인 완료! 리워드가 적립되었습니다.':'📤 업로드 완료. 관리자 검토 중입니다.')+'</div>';
     }
     html+='</div></div>';
   }
   el.innerHTML=html;
 }
-var pendingFiles={};
-function trigUp(mid){document.getElementById('fu-'+mid).click();}
-function onSel(mid,inp){
+
+window.trigUp = function(mid){ document.getElementById('fu-'+mid).click(); };
+window.onSel = function(mid, inp) {
   var file=inp.files[0]; if(!file) return;
   pendingFiles[mid]=file;
   var reader=new FileReader();
@@ -557,35 +738,101 @@ function onSel(mid,inp){
     if(sbw) sbw.style.display='block';
   };
   reader.readAsDataURL(file);
-}
-function doUp(mid){
-  var file=pendingFiles[mid]; if(!file) return;
-  var reader=new FileReader();
-  reader.onload=function(e){
-    var b64=e.target.result;
-    var mis=null; for(var i=0;i<MS.length;i++){if(MS[i].id===mid){mis=MS[i];break;}}
-    SB.push({id:'s'+Date.now(),missionId:mid,userId:me.id,userName:me.name,image:b64,status:'pending',at:new Date().toISOString()});
-    saveData();
-    delete pendingFiles[mid];
-    renderMis();
+};
+
+// 이미지를 Canvas로 압축 (무료 플랜 대응 - Firestore에 저장)
+function compressImage(file, maxWidth, quality, callback) {
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var img = new Image();
+    img.onload = function() {
+      var canvas = document.createElement('canvas');
+      var w = img.width, h = img.height;
+      if(w > maxWidth) { h = Math.round(h * maxWidth / w); w = maxWidth; }
+      canvas.width = w; canvas.height = h;
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      callback(canvas.toDataURL('image/jpeg', quality));
+    };
+    img.src = e.target.result;
   };
   reader.readAsDataURL(file);
 }
 
-// 관리자
-function showAdmDash(){
+window.doUp = async function(mid) {
+  var file=pendingFiles[mid]; if(!file) return;
+  showLoading('이미지 압축 및 저장 중...');
+  try {
+    compressImage(file, 800, 0.6, async function(compressed) {
+      try {
+        // Firestore에 압축된 이미지(base64) 저장
+        var newSub = {
+          missionId: mid,
+          userId: me.id,
+          userName: me.name,
+          image: compressed,   // base64 압축 이미지
+          status: 'pending',
+          at: new Date().toISOString()
+        };
+        var subRef = await addDoc(collection(db, 'submissions'), newSub);
+        newSub.id = subRef.id;
+        SB.push(newSub);
+        delete pendingFiles[mid];
+        hideLoading();
+        renderMis();
+      } catch(err2) {
+        hideLoading();
+        alert('저장 오류: '+err2.message);
+      }
+    });
+  } catch(err) {
+    hideLoading();
+    alert('오류: '+err.message);
+  }
+};
+
+// ── 관리자 대시보드 ───────────────────────────────────────
+async function showAdmDash() {
+  showLoading('관리자 데이터 로딩 중...');
+  try {
+    var snap = await getDocs(collection(db, 'members'));
+    MB=[]; snap.forEach(function(d){ MB.push(Object.assign({id:d.id},d.data())); });
+    var msSnap = await getDocs(collection(db, 'missions'));
+    MS=[]; msSnap.forEach(function(d){ MS.push(Object.assign({id:d.id},d.data())); });
+    var sbSnap = await getDocs(collection(db, 'submissions'));
+    SB=[]; sbSnap.forEach(function(d){ SB.push(Object.assign({id:d.id},d.data())); });
+    var cfgDoc = await getDoc(doc(db, 'config', 'settings'));
+    if(cfgDoc.exists()){ var cfg=cfgDoc.data(); DISP_CNT=cfg.dispCount!==undefined?cfg.dispCount:null; }
+    hideLoading();
+    updateAdmStats();
+    renderMem();
+    refreshMisTgt();
+    var ci=document.getElementById('set-cnt'); if(ci) ci.value=DISP_CNT!==null?DISP_CNT:'';
+    goSc('sc-adm');
+    startRealtimeListeners(); // 실시간 리스너 시작
+  } catch(err) {
+    hideLoading();
+    alert('관리자 데이터 로드 오류: '+err.message);
+  }
+}
+
+function updateAdmStats() {
   document.getElementById('a-tot').textContent=MB.length;
   document.getElementById('a-pnd').textContent=SB.filter(function(s){return s.status==='pending';}).length;
   document.getElementById('a-apr').textContent=SB.filter(function(s){return s.status==='approved';}).length;
   document.getElementById('a-pts').textContent=MB.reduce(function(a,m){return a+(m.points||0);},0).toLocaleString()+'원';
-  renderMem();
+}
+
+function refreshMisTgt() {
   var sel=document.getElementById('m-tgt');
+  if(!sel) return;
+  var cur = sel.value;
   sel.innerHTML='<option value="">선택</option>';
   for(var i=0;i<MB.length;i++) sel.innerHTML+='<option value="'+MB[i].id+'">'+ex(MB[i].name)+' ('+MB[i].phone+')</option>';
-  var ci=document.getElementById('set-cnt'); if(ci) ci.value=DISP_CNT!==null?DISP_CNT:'';
-  goSc('sc-adm');
+  if(cur) sel.value=cur;
 }
-function atab(id,el){
+
+window.atab = function(id, el) {
   var tabs=el.closest('.tabs').querySelectorAll('.tab');
   for(var i=0;i<tabs.length;i++) tabs[i].classList.remove('on');
   el.classList.add('on');
@@ -595,19 +842,36 @@ function atab(id,el){
   if(id==='t-mem') renderMem();
   if(id==='t-sub') renderSub();
   if(id==='t-mis') renderSentMis();
-}
-function renderMem(){
+};
+
+function renderMem() {
   var el=document.getElementById('mem-list'); if(!el) return;
   if(!MB.length){el.innerHTML='<div class="ep">등록된 알바인원이 없습니다.</div>';return;}
   var html='';
   for(var i=0;i<MB.length;i++){
     var m=MB[i];
-    html+='<div class="ar"><div class="ai"><div class="an">'+ex(m.name)+' <span style="font-size:11px;color:#94a3b8">('+m.age+')</span></div><div class="as">📱 '+ex(m.phone)+' · '+(m.os||'')+'</div><div class="as">🏦 '+ex(m.bank||'')+' '+ex(m.account||'')+' / '+ex(m.holder||'')+'</div><div class="ap2">누적: '+(m.points||0).toLocaleString()+'원 · 주간: '+(m.weekPts||0).toLocaleString()+'원</div></div><button class="bsm bng" onclick="delMem(\''+m.id+'\')">삭제</button></div>';
+    html+='<div class="ar"><div class="ai"><div class="an">'+ex(m.name)+' <span style="font-size:11px;color:#94a3b8">('+ex(m.age||'')+')</span></div><div class="as">📱 '+ex(m.phone)+' · '+ex(m.os||'')+'</div><div class="as">🏦 '+ex(m.bank||'')+' '+ex(m.account||'')+' / '+ex(m.holder||'')+'</div><div class="ap2">누적: '+(m.points||0).toLocaleString()+'원 · 주간: '+(m.weekPts||0).toLocaleString()+'원</div></div><button class="bsm bng" onclick="delMem(\''+m.id+'\')">삭제</button></div>';
   }
   el.innerHTML=html;
 }
-function delMem(id){if(!confirm('삭제하시겠습니까?'))return;MB=MB.filter(function(m){return m.id!==id;});saveData();showAdmDash();}
-function renderSub(){
+
+window.delMem = async function(id) {
+  if(!confirm('삭제하시겠습니까?')) return;
+  showLoading('삭제 중...');
+  try {
+    await deleteDoc(doc(db, 'members', id));
+    MB=MB.filter(function(m){return m.id!==id;});
+    hideLoading();
+    updateAdmStats();
+    renderMem();
+    refreshMisTgt();
+  } catch(err) {
+    hideLoading();
+    alert('삭제 오류: '+err.message);
+  }
+};
+
+function renderSub() {
   var el=document.getElementById('sub-list'); if(!el) return;
   var pend=SB.filter(function(s){return s.status==='pending';});
   var appr=SB.filter(function(s){return s.status==='approved';});
@@ -617,78 +881,149 @@ function renderSub(){
   var html='';
   for(var i=0;i<all.length;i++){
     var s=all[i];
-    var mis=null; for(var j=0;j<MS.length;j++){if(MS[j].id===s.missionId){mis=MS[j];break;}}
+    var mis=MS.find(function(m){return m.id===s.missionId;})||null;
     var bdg=s.status==='pending'?'bp':s.status==='approved'?'bo':'br3';
     var lbl=s.status==='pending'?'⏳ 검토중':s.status==='approved'?'✅ 승인완료':'❌ 반려됨';
-    html+='<div class="pc"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div><div style="font-weight:700;font-size:14px;color:#1a1a2e">'+ex(s.userName)+'</div><div style="font-size:12px;color:#64748b">'+(mis?ex(mis.title||'미션'):'삭제된 미션')+'</div></div><span class="bdg '+bdg+'">'+lbl+'</span></div><img src="'+s.image+'" class="it" onclick="openModal(\''+s.id+'\')" title="크게 보기"><div style="font-size:12px;color:#94a3b8;margin-top:7px">'+new Date(s.at).toLocaleString('ko-KR')+'</div>';
-    if(s.status==='pending') html+='<div style="display:flex;gap:8px;margin-top:10px"><button class="bsm bok" onclick="approve(\''+s.id+'\')" style="flex:1;padding:10px">✓ 승인 (+1,000P)</button><button class="bsm bng" onclick="reject(\''+s.id+'\')" style="flex:1;padding:10px">✕ 반려</button></div>';
+    var imgSrc = s.image || s.imageUrl || '';
+    html+='<div class="pc"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div><div style="font-weight:700;font-size:14px;color:#1a1a2e">'+ex(s.userName)+'</div><div style="font-size:12px;color:#64748b">'+(mis?ex(mis.title||'미션'):'삭제된 미션')+'</div></div><span class="bdg '+bdg+'">'+lbl+'</span></div>';
+    if(imgSrc) html+='<img src="'+imgSrc+'" class="it" onclick="openModal(\''+s.id+'\')" title="크게 보기">';
+    html+='<div style="font-size:12px;color:#94a3b8;margin-top:7px">'+new Date(s.at).toLocaleString('ko-KR')+'</div>';
+    if(s.status==='pending') html+='<div style="display:flex;gap:8px;margin-top:10px"><button class="bsm bok" onclick="approve(\''+s.id+'\')" style="flex:1;padding:10px">✓ 승인 (+리워드)</button><button class="bsm bng" onclick="reject(\''+s.id+'\')" style="flex:1;padding:10px">✕ 반려</button></div>';
     html+='</div>';
   }
   el.innerHTML=html;
 }
-function approve(sid){
-  var s=null; for(var i=0;i<SB.length;i++){if(SB[i].id===sid){s=SB[i];break;}} if(!s) return;
-  s.status='approved';
-  var m=null; for(var i=0;i<MB.length;i++){if(MB[i].id===s.userId){m=MB[i];break;}}
-  if(m){m.points=(m.points||0)+1000;m.weekPts=(m.weekPts||0)+1000;m.monthPts=(m.monthPts||0)+1000;}
-  saveData();
-  document.getElementById('a-pnd').textContent=SB.filter(function(s){return s.status==='pending';}).length;
-  document.getElementById('a-apr').textContent=SB.filter(function(s){return s.status==='approved';}).length;
-  document.getElementById('a-pts').textContent=MB.reduce(function(a,m){return a+(m.points||0);},0).toLocaleString()+'원';
-  renderSub();
-}
-function reject(sid){
-  var s=null; for(var i=0;i<SB.length;i++){if(SB[i].id===sid){s=SB[i];break;}} if(!s) return;
-  s.status='rejected'; saveData();
-  document.getElementById('a-pnd').textContent=SB.filter(function(x){return x.status==='pending';}).length;
-  renderSub();
-}
-function sendMis(){
+
+window.approve = async function(sid) {
+  var s=SB.find(function(x){return x.id===sid;}); if(!s) return;
+  var mis=MS.find(function(m){return m.id===s.missionId;});
+  var pts=(mis&&mis.points)||1000;
+  showLoading('승인 처리 중...');
+  try {
+    // 제출 상태 업데이트
+    await updateDoc(doc(db, 'submissions', sid), {status:'approved'});
+    s.status='approved';
+    // 회원 포인트 업데이트
+    var m=MB.find(function(x){return x.id===s.userId;});
+    if(m){
+      m.points=(m.points||0)+pts;
+      m.weekPts=(m.weekPts||0)+pts;
+      m.monthPts=(m.monthPts||0)+pts;
+      await updateDoc(doc(db, 'members', m.id), {points:m.points, weekPts:m.weekPts, monthPts:m.monthPts});
+    }
+    hideLoading();
+    updateAdmStats();
+    renderSub();
+  } catch(err) {
+    hideLoading();
+    alert('승인 오류: '+err.message);
+  }
+};
+
+window.reject = async function(sid) {
+  var s=SB.find(function(x){return x.id===sid;}); if(!s) return;
+  showLoading('반려 처리 중...');
+  try {
+    await updateDoc(doc(db, 'submissions', sid), {status:'rejected'});
+    s.status='rejected';
+    hideLoading();
+    updateAdmStats();
+    renderSub();
+  } catch(err) {
+    hideLoading();
+    alert('반려 오류: '+err.message);
+  }
+};
+
+window.sendMis = async function() {
   var tid=document.getElementById('m-tgt').value;
   var lnk=document.getElementById('m-lnk').value.trim();
   var dsc=document.getElementById('m-dsc').value;
   var pts=parseInt(document.getElementById('m-pts').value)||1500;
   var msg=document.getElementById('m-msg');
   if(!tid||!lnk||!dsc.trim()){msg.innerHTML='<div class="er on">모든 항목을 입력해 주세요.</div>';return;}
-  var tgt=null; for(var i=0;i<MB.length;i++){if(MB[i].id===tid){tgt=MB[i];break;}}
-  MS.push({id:'m'+Date.now(),targetId:tid,targetName:tgt?tgt.name:'',title:'광고 미션',link:lnk,desc:dsc,points:pts,at:new Date().toISOString()});
-  saveData();
-  msg.innerHTML='<div class="ok-msg">✓ '+ex(tgt?tgt.name:'')+'님께 미션이 전달되었습니다.</div>';
-  document.getElementById('m-lnk').value='';
-  document.getElementById('m-dsc').value='';
-  renderSentMis();
-  setTimeout(function(){msg.innerHTML='';},2500);
-}
-function renderSentMis(){
+  var tgt=MB.find(function(m){return m.id===tid;})||null;
+  showLoading('미션 전달 중...');
+  try {
+    var newMis={
+      targetId:tid,
+      targetName:tgt?tgt.name:'',
+      title:'광고 미션',
+      link:lnk,
+      desc:dsc,
+      points:pts,
+      at:new Date().toISOString(),
+      createdAt:serverTimestamp()
+    };
+    var ref2=await addDoc(collection(db,'missions'),newMis);
+    newMis.id=ref2.id;
+    MS.push(newMis);
+    hideLoading();
+    msg.innerHTML='<div class="ok-msg">✓ '+ex(tgt?tgt.name:'')+'님께 미션이 전달되었습니다.</div>';
+    document.getElementById('m-lnk').value='';
+    document.getElementById('m-dsc').value='';
+    renderSentMis();
+    setTimeout(function(){msg.innerHTML='';},2500);
+  } catch(err) {
+    hideLoading();
+    msg.innerHTML='<div class="er on">오류: '+err.message+'</div>';
+  }
+};
+
+function renderSentMis() {
   var el=document.getElementById('mis-list'); if(!el) return;
   if(!MS.length){el.innerHTML='<div class="ep">전달된 미션이 없습니다.</div>';return;}
   var html='<div style="font-size:14px;font-weight:700;margin-bottom:11px;color:#1a1a2e">전달된 미션 목록</div>';
   for(var i=0;i<MS.length;i++){
     var m=MS[i];
     var ms=SB.filter(function(s){return s.missionId===m.id;});
-    var preview=m.desc.length>60?m.desc.substring(0,60)+'…':m.desc;
-    html+='<div class="mc" style="margin-bottom:10px"><div class="mc-h"><div class="mc-ht">→ '+ex(m.targetName)+'</div><span class="bdg bn">'+m.points.toLocaleString()+'원</span></div><div class="mc-b"><div style="font-size:13px;color:#475569;white-space:pre-wrap;margin-bottom:8px">'+ex(preview)+'</div><div style="font-size:12px;color:#94a3b8">제출: '+ms.length+'건 · 승인: '+ms.filter(function(s){return s.status==='approved';}).length+'건</div><button class="bsm bng" style="margin-top:8px" onclick="delMis(\''+m.id+'\')">삭제</button></div></div>';
+    var preview=m.desc&&m.desc.length>60?m.desc.substring(0,60)+'…':m.desc||'';
+    html+='<div class="mc" style="margin-bottom:10px"><div class="mc-h"><div class="mc-ht">→ '+ex(m.targetName)+'</div><span class="bdg bn">'+(m.points||1500).toLocaleString()+'원</span></div><div class="mc-b"><div style="font-size:13px;color:#475569;white-space:pre-wrap;margin-bottom:8px">'+ex(preview)+'</div><div style="font-size:12px;color:#94a3b8">제출: '+ms.length+'건 · 승인: '+ms.filter(function(s){return s.status==='approved';}).length+'건</div><button class="bsm bng" style="margin-top:8px" onclick="delMis(\''+m.id+'\')">삭제</button></div></div>';
   }
   el.innerHTML=html;
 }
-function delMis(mid){if(!confirm('삭제하시겠습니까?'))return;MS=MS.filter(function(m){return m.id!==mid;});saveData();renderSentMis();}
-function saveCnt(){
+
+window.delMis = async function(mid) {
+  if(!confirm('삭제하시겠습니까?')) return;
+  showLoading('삭제 중...');
+  try {
+    await deleteDoc(doc(db,'missions',mid));
+    MS=MS.filter(function(m){return m.id!==mid;});
+    hideLoading();
+    renderSentMis();
+  } catch(err) {
+    hideLoading();
+    alert('삭제 오류: '+err.message);
+  }
+};
+
+window.saveCnt = async function() {
   var val=document.getElementById('set-cnt').value.trim();
   DISP_CNT=val===''?null:parseInt(val);
-  saveData();
-  var msg=document.getElementById('set-msg');
-  msg.innerHTML='<div class="ok-msg">✓ 저장! 총 회원수: '+(DISP_CNT!==null?DISP_CNT+'명 고정':'실제 인원 자동표시')+'</div>';
-  setTimeout(function(){msg.innerHTML='';},2500);
-}
-function openModal(sid){var s=null;for(var i=0;i<SB.length;i++){if(SB[i].id===sid){s=SB[i];break;}}if(!s)return;document.getElementById('mi').src=s.image;document.getElementById('im').classList.add('on');}
-function closeModal(){document.getElementById('im').classList.remove('on');}
+  showLoading('저장 중...');
+  try {
+    await setDoc(doc(db,'config','settings'), {dispCount: DISP_CNT !== null ? DISP_CNT : null}, {merge:true});
+    hideLoading();
+    var msg=document.getElementById('set-msg');
+    msg.innerHTML='<div class="ok-msg">✓ 저장! 총 회원수: '+(DISP_CNT!==null?DISP_CNT+'명 고정':'실제 인원 자동표시')+'</div>';
+    setTimeout(function(){msg.innerHTML='';},2500);
+  } catch(err) {
+    hideLoading();
+    alert('저장 오류: '+err.message);
+  }
+};
 
-// 시작
-if(location.search.indexOf('admin')!==-1){
-  goSc('sc-adm-login');
-} else {
-  goSc('sc-login');
-}
+window.openModal = function(sid) {
+  var s=SB.find(function(x){return x.id===sid;}); if(!s) return;
+  var src = s.image || s.imageUrl || '';
+  if(!src) return;
+  document.getElementById('mi').src=src;
+  document.getElementById('im').classList.add('on');
+};
+window.closeModal = function(){ document.getElementById('im').classList.remove('on'); };
+
+// ── 시작 ────────────────────────────────────────────────
+loadAllData();
 </script>
 </body>
 </html>
