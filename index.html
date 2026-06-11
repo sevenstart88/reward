@@ -267,6 +267,10 @@ textarea{resize:none;min-height:80px;line-height:1.6}
     <div class="card">
       <div class="fl"><span class="lbl">성함</span><input type="text" id="l-name" placeholder="신청 시 입력한 성함" autocomplete="off"></div>
       <div class="fl"><span class="lbl">연락처 (숫자만)</span><input type="tel" id="l-phone" placeholder="01012345678" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'')"></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <input type="checkbox" id="l-auto" style="width:18px;height:18px;padding:0;border-radius:4px;flex-shrink:0;accent-color:#3b82f6" checked>
+        <label for="l-auto" style="font-size:14px;color:#374151;cursor:pointer;font-weight:500">자동 로그인</label>
+      </div>
       <div id="l-er" class="er"></div>
       <button class="btn btnP" onclick="doLogin()">로그인</button>
     </div>
@@ -315,6 +319,10 @@ textarea{resize:none;min-height:80px;line-height:1.6}
   <div class="wp">
     <div class="card">
       <div class="fl"><span class="lbl">비밀번호</span><input type="password" id="adm-pw" placeholder="관리자 비밀번호"></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <input type="checkbox" id="adm-auto" style="width:18px;height:18px;padding:0;border-radius:4px;flex-shrink:0;accent-color:#3b82f6" checked>
+        <label for="adm-auto" style="font-size:14px;color:#374151;cursor:pointer;font-weight:500">자동 로그인</label>
+      </div>
       <div id="adm-er" class="er"></div>
       <button class="btn btnP" onclick="doAdmLogin()">로그인</button>
       <button class="btn btnS" onclick="goSc('sc-login')" style="margin-top:8px">← 뒤로</button>
@@ -338,9 +346,28 @@ textarea{resize:none;min-height:80px;line-height:1.6}
       <div class="tab" onclick="atab('t-mis',this)">미션전달</div>
       <div class="tab" onclick="atab('t-set',this)">설정</div>
     </div>
-    <div class="tc on" id="t-mem"><div class="card" style="padding:0;overflow:hidden"><div id="mem-list"><div class="ep">로딩 중...</div></div></div></div>
-    <div class="tc" id="t-sub"><div id="sub-list"><div class="ep">로딩 중...</div></div></div>
+    <!-- 알바목록 탭 -->
+    <div class="tc on" id="t-mem">
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">
+        <input type="text" id="srch-mem" placeholder="🔍 이름 또는 전화번호 검색" style="font-size:13px;padding:9px 12px" oninput="renderMem()">
+        <input type="date" id="srch-mem-date" style="font-size:13px;padding:9px 12px" onchange="renderMem()">
+      </div>
+      <div class="card" style="padding:0;overflow:hidden"><div id="mem-list"><div class="ep">로딩 중...</div></div></div>
+    </div>
+    <!-- 제출관리 탭 -->
+    <div class="tc" id="t-sub">
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">
+        <input type="text" id="srch-sub-name" placeholder="🔍 이름 또는 전화번호 검색" style="font-size:13px;padding:9px 12px" oninput="renderSub()">
+        <input type="date" id="srch-sub-date" style="font-size:13px;padding:9px 12px" onchange="renderSub()">
+      </div>
+      <div id="sub-list"><div class="ep">로딩 중...</div></div>
+    </div>
+    <!-- 미션전달 탭 -->
     <div class="tc" id="t-mis">
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px">
+        <input type="text" id="srch-mis" placeholder="🔍 이름 또는 전화번호 검색" style="font-size:13px;padding:9px 12px" oninput="renderSentMis()">
+        <input type="date" id="srch-mis-date" style="font-size:13px;padding:9px 12px" onchange="renderSentMis()">
+      </div>
       <div class="card" style="margin-bottom:13px">
         <div style="font-size:15px;font-weight:800;margin-bottom:13px;color:#1a1a2e">개별 미션 전달</div>
         <div class="fl"><span class="lbl">대상 알바 *</span><select id="m-tgt"><option value="">선택</option></select></div>
@@ -360,6 +387,43 @@ textarea{resize:none;min-height:80px;line-height:1.6}
         <div id="set-msg"></div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- 4) 리워드 내역 팝업 (관리자용) -->
+<div id="reward-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9000;overflow-y:auto">
+  <div style="background:#fff;max-width:460px;margin:40px auto;border-radius:20px;overflow:hidden">
+    <div style="background:linear-gradient(135deg,#1e40af,#4f46e5);padding:16px 18px;display:flex;align-items:center;justify-content:space-between">
+      <div style="font-size:16px;font-weight:800;color:#fff" id="rw-modal-name">리워드 내역</div>
+      <div onclick="closeRewardModal()" style="color:#fff;font-size:20px;cursor:pointer;font-weight:700">✕</div>
+    </div>
+    <div style="padding:12px 16px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+      <input type="date" id="rw-from" style="font-size:12px;padding:7px 10px;flex:1;min-width:110px" onchange="renderRewardHistory()">
+      <span style="color:#64748b;font-size:13px">~</span>
+      <input type="date" id="rw-to" style="font-size:12px;padding:7px 10px;flex:1;min-width:110px" onchange="renderRewardHistory()">
+      <button onclick="clearRewardFilter()" style="padding:7px 12px;font-size:12px;border:1px solid #dde1e7;border-radius:8px;background:#fff;cursor:pointer;color:#64748b;font-weight:600">초기화</button>
+    </div>
+    <div id="rw-total" style="padding:12px 16px;font-size:14px;font-weight:700;color:#1e40af;border-bottom:1px solid #f1f5f9"></div>
+    <div id="rw-list" style="padding:12px 16px;max-height:50vh;overflow-y:auto"></div>
+  </div>
+</div>
+
+<!-- 5) 알바 참여내역 팝업 -->
+<div id="hist-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9000;overflow-y:auto">
+  <div style="background:#fff;max-width:460px;margin:40px auto 20px;border-radius:20px;overflow:hidden">
+    <div style="background:linear-gradient(135deg,#0f172a,#1e293b);padding:16px 18px;display:flex;align-items:center;justify-content:space-between">
+      <div style="font-size:16px;font-weight:800;color:#fff">📋 참여 내역</div>
+      <div onclick="closeHistModal()" style="color:#fff;font-size:20px;cursor:pointer;font-weight:700">✕</div>
+    </div>
+    <!-- 기간 조회 -->
+    <div style="padding:12px 16px;background:#f8fafc;border-bottom:1px solid #e2e8f0;display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+      <input type="date" id="hist-from" style="font-size:12px;padding:7px 10px;flex:1;min-width:110px" onchange="renderHistModal()">
+      <span style="color:#64748b;font-size:13px">~</span>
+      <input type="date" id="hist-to" style="font-size:12px;padding:7px 10px;flex:1;min-width:110px" onchange="renderHistModal()">
+      <button onclick="clearHistFilter()" style="padding:7px 12px;font-size:12px;border:1px solid #dde1e7;border-radius:8px;background:#fff;cursor:pointer;color:#64748b;font-weight:600">초기화</button>
+    </div>
+    <div id="hist-total" style="padding:12px 16px;font-size:14px;font-weight:700;color:#1e40af;border-bottom:1px solid #f1f5f9"></div>
+    <div id="hist-list" style="padding:12px 16px;max-height:55vh;overflow-y:auto"></div>
   </div>
 </div>
 
@@ -437,7 +501,7 @@ function startUserAutoRefresh() {
       var sb=await getDocs(collection(db,'submissions')); SB=[]; sb.forEach(function(d){SB.push(Object.assign({id:d.id},d.data()));});
       var fresh=MB.find(function(m){return m.id===me.id;}); if(fresh) me=fresh;
       document.getElementById('u-pts').textContent=(me.points||0).toLocaleString()+'원';
-      document.getElementById('u-cnt').textContent=DISP_CNT!==null?DISP_CNT:MB.length;
+      document.getElementById('u-cnt').textContent=(DISP_CNT!==null?DISP_CNT:MB.length).toLocaleString()+'명';
       renderRk(); renderMis();
     } catch(e){}
   }, 30000);
@@ -678,7 +742,9 @@ window.doLogin = async function() {
       return;
     }
     me = found;
-    saveSession(me.id); // 자동로그인 저장
+    var autoChk = document.getElementById('l-auto');
+    if(autoChk && autoChk.checked) saveSession(me.id);
+    else clearSession();
     await showUserDash();
   } catch(err) {
     hideLoading();
@@ -690,7 +756,9 @@ window.doAdmLogin = function() {
   var pw = document.getElementById('adm-pw').value;
   var er = document.getElementById('adm-er');
   if(pw!==ADM_PW) { er.textContent='비밀번호가 틀렸습니다.'; er.classList.add('on'); return; }
-  saveAdmSession(); // 관리자 자동로그인 저장
+  var autoChk = document.getElementById('adm-auto');
+  if(autoChk && autoChk.checked) saveAdmSession();
+  else { try{localStorage.removeItem(ADM_SESSION_KEY);}catch(e){} }
   me=null; showAdmDash();
 };
 
@@ -722,7 +790,7 @@ async function showUserDash() {
     hideLoading();
     // ① 누적 리워드 표시
     document.getElementById('u-pts').textContent = (me.points||0).toLocaleString()+'원';
-    document.getElementById('u-cnt').textContent = DISP_CNT!==null ? DISP_CNT : MB.length;
+    document.getElementById('u-cnt').textContent = (DISP_CNT!==null ? DISP_CNT : MB.length).toLocaleString()+'명';
     document.getElementById('u-nm').textContent = me.name+'님';
     renderRk(); renderMis(); goSc('sc-user');
     startUserAutoRefresh(); // ② 30초 자동갱신 시작
@@ -760,11 +828,24 @@ function renderRk() {
 function renderMis() {
   var el=document.getElementById('u-mis'); if(!el) return;
   var my=MS.filter(function(m){ return m.targetId===me.id; });
-  // 미션 개수 배지
+  // 미참여 미션 수만 배지에 표시
+  var undoneCnt=my.filter(function(m){
+    var mySubs=SB.filter(function(s){return s.missionId===m.id&&s.userId===me.id;});
+    var last=mySubs.length?mySubs[mySubs.length-1]:null;
+    return !last||(last.status==='rejected');
+  }).length;
   var badge=document.getElementById('mis-cnt-badge');
-  if(badge) badge.textContent=my.length?my.length+'개':'';
+  if(badge) badge.textContent=undoneCnt>0?undoneCnt+'개':'';
   if(!my.length){el.innerHTML='<div class="nm">📭 전달된 미션이 없습니다.</div>';return;}
+  // 참여내역 보기 버튼
+  var doneCnt=SB.filter(function(s){return s.userId===me.id&&s.status==='approved';}).length;
   var html='';
+  if(doneCnt>0){
+    html+='<div onclick="openHistModal()" style="background:linear-gradient(135deg,#1e40af,#4f46e5);border-radius:14px;padding:13px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;margin-bottom:14px">'
+      +'<div><div style="font-size:14px;font-weight:800;color:#fff">📊 참여 내역 보기</div>'
+      +'<div style="font-size:12px;color:rgba(255,255,255,.8);margin-top:2px">승인 완료 '+doneCnt+'건 · 날짜별 조회 가능</div></div>'
+      +'<div style="font-size:20px">→</div></div>';
+  }
   for(var i=0;i<my.length;i++){
     var m=my[i];
     var mySubs=SB.filter(function(s){ return s.missionId===m.id && s.userId===me.id; });
@@ -775,7 +856,8 @@ function renderMis() {
     var safeDesc=ex(m.desc||'').replace(/\n/g,'<br>');
     html+='<div class="mc"><div class="mc-h"><div class="mc-ht">'+ex(m.title||'광고 미션')+'</div>'+bdg+'</div><div class="mc-b"><div class="mc-d">'+safeDesc+'</div><a class="mc-a" href="'+ex(m.link)+'" target="_blank">🔗 광고 링크 바로가기</a><div class="mc-r">참여 리워드: <b>'+(m.points||1500).toLocaleString()+'원</b></div>';
     if(canUp){
-      html+='<div class="ub" onclick="trigUp(\''+m.id+'\')"><div style="font-size:30px;margin-bottom:8px">📷</div><div style="font-size:14px;font-weight:700;color:#1a1a2e">참여 완료 후 캡처 업로드</div><div style="font-size:13px;margin-top:4px;color:#64748b">탭하여 사진 선택</div><input type="file" id="fu-'+m.id+'" accept="image/*" capture="environment" style="display:none" onchange="onSel(\''+m.id+'\',this)"><div id="up-'+m.id+'"></div></div><div class="submit-btn-wrap" id="sbw-'+m.id+'" style="display:none"><button class="btn btnG" onclick="doUp(\''+m.id+'\')">📤 제출하기</button></div>';
+      // 1) 갤러리 선택 가능 (capture 제거) + 최대 5장
+      html+='<div class="ub" onclick="trigUp(\''+m.id+'\')"><div style="font-size:30px;margin-bottom:8px">📷</div><div style="font-size:14px;font-weight:700;color:#1a1a2e">참여 완료 후 캡처 업로드</div><div style="font-size:13px;margin-top:4px;color:#64748b">탭하여 갤러리에서 사진 선택 (최대 5장)</div><input type="file" id="fu-'+m.id+'" accept="image/*" multiple style="display:none" onchange="onSel(\''+m.id+'\',this)"><div id="up-'+m.id+'"></div></div><div id="sbw-'+m.id+'" style="display:none"><button class="btn btnG" onclick="doUp(\''+m.id+'\')">📤 제출하기</button></div>';
     } else {
       html+='<div style="background:'+(last&&last.status==='approved'?'#f0fdf4':'#f8fafc')+';border-radius:10px;padding:11px;font-size:13px;color:'+(last&&last.status==='approved'?'#15803d':'#64748b')+';text-align:center;font-weight:600">'+(last&&last.status==='approved'?'✅ 승인 완료! 리워드가 적립되었습니다.':'📤 업로드 완료. 관리자 검토 중입니다.')+'</div>';
     }
@@ -786,19 +868,31 @@ function renderMis() {
 
 window.trigUp = function(mid){ document.getElementById('fu-'+mid).click(); };
 window.onSel = function(mid, inp) {
-  var file=inp.files[0]; if(!file) return;
-  pendingFiles[mid]=file;
-  var reader=new FileReader();
-  reader.onload=function(e){
-    var prev=document.getElementById('up-'+mid);
-    if(prev) prev.innerHTML='<img src="'+e.target.result+'" style="width:100%;max-height:200px;object-fit:contain;border-radius:10px;margin-top:10px">';
-    var sbw=document.getElementById('sbw-'+mid);
-    if(sbw) sbw.style.display='block';
-  };
-  reader.readAsDataURL(file);
+  var files = Array.from(inp.files);
+  if(!files.length) return;
+  // 최대 5장 제한
+  if(files.length > 5){ alert('사진은 최대 5장까지 선택 가능합니다.'); inp.value=''; return; }
+  pendingFiles[mid] = files;
+  var prev = document.getElementById('up-'+mid);
+  if(prev){
+    var previewHtml = '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px">';
+    var loaded = 0;
+    files.forEach(function(file, idx){
+      var reader = new FileReader();
+      reader.onload = function(e){
+        previewHtml += '<img src="'+e.target.result+'" style="width:calc(33% - 4px);aspect-ratio:1;object-fit:cover;border-radius:8px">';
+        loaded++;
+        if(loaded === files.length){
+          prev.innerHTML = previewHtml + '</div><div style="font-size:12px;color:#64748b;margin-top:6px;text-align:center">'+files.length+'장 선택됨</div>';
+          var sbw = document.getElementById('sbw-'+mid); if(sbw) sbw.style.display='block';
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+  }
 };
 
-// 이미지를 Canvas로 압축 (무료 플랜 대응 - Firestore에 저장)
+// 이미지를 Canvas로 압축
 function compressImage(file, maxWidth, quality, callback) {
   var reader = new FileReader();
   reader.onload = function(e) {
@@ -808,8 +902,7 @@ function compressImage(file, maxWidth, quality, callback) {
       var w = img.width, h = img.height;
       if(w > maxWidth) { h = Math.round(h * maxWidth / w); w = maxWidth; }
       canvas.width = w; canvas.height = h;
-      var ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, w, h);
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
       callback(canvas.toDataURL('image/jpeg', quality));
     };
     img.src = e.target.result;
@@ -818,35 +911,32 @@ function compressImage(file, maxWidth, quality, callback) {
 }
 
 window.doUp = async function(mid) {
-  var file=pendingFiles[mid]; if(!file) return;
-  showLoading('이미지 압축 및 저장 중...');
+  var files = pendingFiles[mid]; if(!files || !files.length) return;
+  showLoading('이미지 저장 중... ('+files.length+'장)');
   try {
-    compressImage(file, 800, 0.6, async function(compressed) {
-      try {
-        // Firestore에 압축된 이미지(base64) 저장
-        var newSub = {
-          missionId: mid,
-          userId: me.id,
-          userName: me.name,
-          image: compressed,   // base64 압축 이미지
-          status: 'pending',
-          at: new Date().toISOString()
-        };
-        var subRef = await addDoc(collection(db, 'submissions'), newSub);
-        newSub.id = subRef.id;
-        SB.push(newSub);
-        delete pendingFiles[mid];
-        hideLoading();
-        renderMis();
-      } catch(err2) {
-        hideLoading();
-        alert('저장 오류: '+err2.message);
-      }
+    var compressed = [];
+    var done = 0;
+    files.forEach(function(file){
+      compressImage(file, 800, 0.6, async function(c){
+        compressed.push(c);
+        done++;
+        if(done === files.length){
+          try {
+            var newSub = {
+              missionId: mid, userId: me.id, userName: me.name,
+              images: compressed,   // 다중 이미지 배열
+              image: compressed[0], // 첫번째 (하위호환)
+              status: 'pending', at: new Date().toISOString()
+            };
+            var subRef = await addDoc(collection(db,'submissions'), newSub);
+            newSub.id = subRef.id; SB.push(newSub);
+            delete pendingFiles[mid];
+            hideLoading(); renderMis();
+          } catch(e2){ hideLoading(); alert('저장 오류: '+e2.message); }
+        }
+      });
     });
-  } catch(err) {
-    hideLoading();
-    alert('오류: '+err.message);
-  }
+  } catch(err) { hideLoading(); alert('오류: '+err.message); }
 };
 
 // ── 관리자 대시보드 ───────────────────────────────────────
@@ -904,13 +994,20 @@ window.atab = function(id, el) {
 
 function renderMem() {
   var el=document.getElementById('mem-list'); if(!el) return;
-  if(!MB.length){el.innerHTML='<div class="ep">등록된 알바인원이 없습니다.</div>';return;}
-  var html='';
-  for(var i=0;i<MB.length;i++){
-    var m=MB[i];
-    html+='<div class="ar"><div class="ai"><div class="an">'+ex(m.name)+' <span style="font-size:11px;color:#94a3b8">('+ex(m.age||'')+')</span></div><div class="as">📱 '+ex(m.phone)+' · '+ex(m.os||'')+'</div><div class="as">🏦 '+ex(m.bank||'')+' '+ex(m.account||'')+' / '+ex(m.holder||'')+'</div><div class="ap2">누적: '+(m.points||0).toLocaleString()+'원 · 주간: '+(m.weekPts||0).toLocaleString()+'원</div></div><button class="bsm bng" onclick="delMem(\''+m.id+'\')">삭제</button></div>';
-  }
-  el.innerHTML=html;
+  var kw=((document.getElementById('srch-mem')||{}).value||'').trim().toLowerCase();
+  var dt=((document.getElementById('srch-mem-date')||{}).value||'').trim();
+  var list=MB.slice();
+  if(kw) list=list.filter(function(m){return (m.name||'').toLowerCase().includes(kw)||(m.phone||'').includes(kw);});
+  if(dt) list=list.filter(function(m){return (m.joinDate||'').startsWith(dt)||(m.createdAt&&m.createdAt.seconds&&new Date(m.createdAt.seconds*1000).toISOString().startsWith(dt));});
+  if(!list.length){el.innerHTML='<div class="ep">'+(kw||dt?'검색 결과가 없습니다.':'등록된 알바인원이 없습니다.')+'</div>';return;}
+  el.innerHTML=list.map(function(m){
+    return '<div class="ar"><div class="ai"><div class="an">'+ex(m.name)+' <span style="font-size:11px;color:#94a3b8">('+ex(m.age||'')+')</span></div>'
+      +'<div class="as">📱 '+ex(m.phone)+' · '+ex(m.os||'')+'</div>'
+      +'<div class="as">🏦 '+ex(m.bank||'')+' '+ex(m.account||'')+' / '+ex(m.holder||'')+'</div>'
+      +'<div class="as">📅 가입일: '+(m.joinDate||'-')+'</div>'
+      +'<div class="ap2" style="cursor:pointer;text-decoration:underline" onclick="openRewardModal(\''+m.id+'\')">💰 누적: '+(m.points||0).toLocaleString()+'원 (내역 보기) · 주간: '+(m.weekPts||0).toLocaleString()+'원</div></div>'
+      +'<button class="bsm bng" onclick="delMem(\''+m.id+'\')">삭제</button></div>';
+  }).join('');
 }
 
 window.delMem = async function(id) {
@@ -931,26 +1028,43 @@ window.delMem = async function(id) {
 
 function renderSub() {
   var el=document.getElementById('sub-list'); if(!el) return;
-  var pend=SB.filter(function(s){return s.status==='pending';});
-  var appr=SB.filter(function(s){return s.status==='approved';});
-  var rej=SB.filter(function(s){return s.status==='rejected';});
-  var all=pend.concat(appr).concat(rej);
+  var kw=((document.getElementById('srch-sub-name')||{}).value||'').trim().toLowerCase();
+  var dt=((document.getElementById('srch-sub-date')||{}).value||'').trim();
+  var all=SB.filter(function(s){return s.status==='pending';}).concat(SB.filter(function(s){return s.status==='approved';})).concat(SB.filter(function(s){return s.status==='rejected';}));
+  if(kw) all=all.filter(function(s){
+    // 이름 + 전화번호 검색 (전화번호는 SB에 없으므로 MB에서 찾기)
+    if((s.userName||'').toLowerCase().includes(kw)) return true;
+    var m=MB.find(function(x){return x.id===s.userId;});
+    return m&&(m.phone||'').includes(kw);
+  });
+  if(dt) all=all.filter(function(s){return (s.at||'').startsWith(dt);});
   if(!all.length){el.innerHTML='<div class="ep">제출된 캡처가 없습니다.</div>';return;}
-  var html='';
-  for(var i=0;i<all.length;i++){
-    var s=all[i];
+  el.innerHTML=all.map(function(s){
     var mis=MS.find(function(m){return m.id===s.missionId;})||null;
+    var mem=MB.find(function(m){return m.id===s.userId;})||null;
     var bdg=s.status==='pending'?'bp':s.status==='approved'?'bo':'br3';
     var lbl=s.status==='pending'?'⏳ 검토중':s.status==='approved'?'✅ 승인완료':'❌ 반려됨';
-    var imgSrc = s.image || s.imageUrl || '';
-    html+='<div class="pc"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><div><div style="font-weight:700;font-size:14px;color:#1a1a2e">'+ex(s.userName)+'</div><div style="font-size:12px;color:#64748b">'+(mis?ex(mis.title||'미션'):'삭제된 미션')+'</div></div><span class="bdg '+bdg+'">'+lbl+'</span></div>';
-    if(imgSrc) html+='<img src="'+imgSrc+'" class="it" onclick="openModal(\''+s.id+'\')" title="크게 보기">';
+    var imgs=s.images||([s.image||s.imageUrl||''].filter(Boolean));
+    var imgHtml=imgs.length?'<div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px">'+imgs.map(function(src,i){return '<img src="'+src+'" class="it" onclick="openModalImg(\''+s.id+'\','+i+')" title="크게 보기">';}).join('')+'</div>':'';
+    var html='<div class="pc"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">'
+      +'<div><div style="font-weight:700;font-size:14px;color:#1a1a2e">'+ex(s.userName)+(mem?' <span style="font-size:11px;color:#94a3b8">('+ex(mem.phone||'')+')</span>':'')+'</div>'
+      +'<div style="font-size:12px;color:#64748b">'+(mis?ex(mis.title||'미션'):'삭제된 미션')+'</div></div>'
+      +'<span class="bdg '+bdg+'">'+lbl+'</span></div>';
+    html+=imgHtml;
     html+='<div style="font-size:12px;color:#94a3b8;margin-top:7px">'+new Date(s.at).toLocaleString('ko-KR')+'</div>';
-    if(s.status==='pending') html+='<div style="display:flex;gap:8px;margin-top:10px"><button class="bsm bok" onclick="approve(\''+s.id+'\')" style="flex:1;padding:10px">✓ 승인 (+리워드)</button><button class="bsm bng" onclick="reject(\''+s.id+'\')" style="flex:1;padding:10px">✕ 반려</button></div>';
+    if(s.status==='pending') html+='<div style="display:flex;gap:8px;margin-top:10px"><button class="bsm bok" onclick="approve(\''+s.id+'\')" style="flex:1;padding:10px">✓ 승인</button><button class="bsm bng" onclick="reject(\''+s.id+'\')" style="flex:1;padding:10px">✕ 반려</button></div>';
     html+='</div>';
-  }
-  el.innerHTML=html;
+    return html;
+  }).join('');
 }
+
+// 다중 이미지 모달
+window.openModalImg = function(sid, idx) {
+  var s=SB.find(function(x){return x.id===sid;}); if(!s) return;
+  var imgs=s.images||([s.image||s.imageUrl||''].filter(Boolean));
+  var src=imgs[idx||0]; if(!src) return;
+  document.getElementById('mi').src=src; document.getElementById('im').classList.add('on');
+};
 
 window.approve = async function(sid) {
   var s=SB.find(function(x){return x.id===sid;}); if(!s) return;
@@ -1030,16 +1144,137 @@ window.sendMis = async function() {
 
 function renderSentMis() {
   var el=document.getElementById('mis-list'); if(!el) return;
-  if(!MS.length){el.innerHTML='<div class="ep">전달된 미션이 없습니다.</div>';return;}
-  var html='<div style="font-size:14px;font-weight:700;margin-bottom:11px;color:#1a1a2e">전달된 미션 목록</div>';
-  for(var i=0;i<MS.length;i++){
-    var m=MS[i];
+  var kw=((document.getElementById('srch-mis')||{}).value||'').trim().toLowerCase();
+  var dt=((document.getElementById('srch-mis-date')||{}).value||'').trim();
+  var list=MS.slice();
+  if(kw) list=list.filter(function(m){
+    if((m.targetName||'').toLowerCase().includes(kw)) return true;
+    var mem=MB.find(function(x){return x.id===m.targetId;});
+    return mem&&(mem.phone||'').includes(kw);
+  });
+  if(dt) list=list.filter(function(m){return (m.at||'').startsWith(dt);});
+  if(!list.length){el.innerHTML='<div class="ep">전달된 미션이 없습니다.</div>';return;}
+  var html='<div style="font-size:14px;font-weight:700;margin-bottom:11px;color:#1a1a2e">전달된 미션 목록 ('+list.length+'건)</div>';
+  list.forEach(function(m){
+    var mem=MB.find(function(x){return x.id===m.targetId;})||null;
     var ms=SB.filter(function(s){return s.missionId===m.id;});
     var preview=m.desc&&m.desc.length>60?m.desc.substring(0,60)+'…':m.desc||'';
-    html+='<div class="mc" style="margin-bottom:10px"><div class="mc-h"><div class="mc-ht">→ '+ex(m.targetName)+'</div><span class="bdg bn">'+(m.points||1500).toLocaleString()+'원</span></div><div class="mc-b"><div style="font-size:13px;color:#475569;white-space:pre-wrap;margin-bottom:8px">'+ex(preview)+'</div><div style="font-size:12px;color:#94a3b8">제출: '+ms.length+'건 · 승인: '+ms.filter(function(s){return s.status==='approved';}).length+'건</div><button class="bsm bng" style="margin-top:8px" onclick="delMis(\''+m.id+'\')">삭제</button></div></div>';
-  }
+    html+='<div class="mc" style="margin-bottom:10px"><div class="mc-h">'
+      +'<div><div class="mc-ht">→ '+ex(m.targetName)+'</div>'
+      +(mem?'<div style="font-size:11px;color:#64748b;margin-top:2px">📱 '+ex(mem.phone||'')+'</div>':'')
+      +'<div style="font-size:11px;color:#94a3b8;margin-top:1px">📅 '+new Date(m.at).toLocaleDateString('ko-KR')+'</div></div>'
+      +'<span class="bdg bn">'+(m.points||1500).toLocaleString()+'원</span></div>'
+      +'<div class="mc-b"><div style="font-size:13px;color:#475569;white-space:pre-wrap;margin-bottom:8px">'+ex(preview)+'</div>'
+      +'<div style="font-size:12px;color:#94a3b8">제출: '+ms.length+'건 · 승인: '+ms.filter(function(s){return s.status==='approved';}).length+'건</div>'
+      +'<button class="bsm bng" style="margin-top:8px" onclick="delMis(\''+m.id+'\')">삭제</button></div></div>';
+  });
   el.innerHTML=html;
 }
+
+// ── 5) 알바 참여내역 팝업 ────────────────────────────────
+window.openHistModal = function() {
+  document.getElementById('hist-from').value='';
+  document.getElementById('hist-to').value='';
+  document.getElementById('hist-modal').style.display='block';
+  renderHistModal();
+};
+window.closeHistModal = function() {
+  document.getElementById('hist-modal').style.display='none';
+};
+window.clearHistFilter = function() {
+  document.getElementById('hist-from').value='';
+  document.getElementById('hist-to').value='';
+  renderHistModal();
+};
+window.renderHistModal = function() {
+  if(!me) return;
+  var from=document.getElementById('hist-from').value;
+  var to=document.getElementById('hist-to').value;
+  // 내 모든 제출 내역 (승인+검토중+반려 모두 포함)
+  var list=SB.filter(function(s){ return s.userId===me.id; });
+  if(from) list=list.filter(function(s){return s.at>=from;});
+  if(to) list=list.filter(function(s){return s.at<=(to+'T23:59:59');});
+  list.sort(function(a,b){return b.at.localeCompare(a.at);});
+  var totalPts=0;
+  var html='';
+  if(!list.length){
+    html='<div style="text-align:center;padding:30px;color:#94a3b8;font-size:14px">참여 내역이 없습니다.</div>';
+  } else {
+    list.forEach(function(s){
+      var mis=MS.find(function(m){return m.id===s.missionId;})||null;
+      var pts=(mis&&mis.points)||1000;
+      if(s.status==='approved') totalPts+=pts;
+      var stColor=s.status==='approved'?'#16a34a':s.status==='rejected'?'#ef4444':'#92400e';
+      var stText=s.status==='approved'?'✅ 승인완료':s.status==='rejected'?'❌ 반려':'⏳ 검토중';
+      var imgs=s.images||([s.image||s.imageUrl||''].filter(Boolean));
+      html+='<div style="border-bottom:1px solid #f1f5f9;padding:12px 0">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start">'
+        +'<div style="flex:1">'
+        +'<div style="font-size:13px;font-weight:700;color:#1a1a2e">'+ex(mis?mis.title||'광고 미션':'삭제된 미션')+'</div>'
+        +'<div style="font-size:11px;color:#94a3b8;margin-top:3px">'+new Date(s.at).toLocaleString('ko-KR')+'</div>'
+        +'</div>'
+        +'<div style="text-align:right;flex-shrink:0;margin-left:8px">'
+        +'<div style="font-size:13px;font-weight:800;color:'+stColor+'">'+stText+'</div>'
+        +(s.status==='approved'?'<div style="font-size:13px;font-weight:700;color:#16a34a">+'+pts.toLocaleString()+'원</div>':'')
+        +'</div></div>'
+        +(imgs.length?'<div style="display:flex;gap:4px;margin-top:7px">'+imgs.map(function(src,i){
+          return '<img src="'+src+'" style="width:52px;height:52px;object-fit:cover;border-radius:8px;cursor:pointer" onclick="document.getElementById(\'mi\').src=\''+src+'\';document.getElementById(\'im\').classList.add(\'on\')">';
+        }).join('')+'</div>':'')
+        +'</div>';
+    });
+  }
+  document.getElementById('hist-total').textContent='총 참여: '+list.length+'건 · 승인 합계: '+totalPts.toLocaleString()+'원';
+  document.getElementById('hist-list').innerHTML=html;
+};
+
+// ── 4) 리워드 내역 팝업 ────────────────────────────────
+var rewardModalMemberId = null;
+window.openRewardModal = function(memberId) {
+  rewardModalMemberId = memberId;
+  var m = MB.find(function(x){return x.id===memberId;}); if(!m) return;
+  document.getElementById('rw-modal-name').textContent = m.name+'님 리워드 내역';
+  document.getElementById('rw-from').value='';
+  document.getElementById('rw-to').value='';
+  document.getElementById('reward-modal').style.display='block';
+  renderRewardHistory();
+};
+window.closeRewardModal = function() {
+  document.getElementById('reward-modal').style.display='none';
+  rewardModalMemberId=null;
+};
+window.clearRewardFilter = function() {
+  document.getElementById('rw-from').value='';
+  document.getElementById('rw-to').value='';
+  renderRewardHistory();
+};
+window.renderRewardHistory = function() {
+  if(!rewardModalMemberId) return;
+  var from = document.getElementById('rw-from').value;
+  var to = document.getElementById('rw-to').value;
+  // 해당 회원의 승인된 제출 내역
+  var list = SB.filter(function(s){
+    return s.userId===rewardModalMemberId && s.status==='approved';
+  });
+  if(from) list=list.filter(function(s){return s.at>=from;});
+  if(to) list=list.filter(function(s){return s.at<=(to+'T23:59:59');});
+  list.sort(function(a,b){return b.at.localeCompare(a.at);});
+  var total=0;
+  var html='';
+  if(!list.length){ html='<div style="text-align:center;padding:30px;color:#94a3b8;font-size:14px">내역이 없습니다.</div>'; }
+  else {
+    list.forEach(function(s){
+      var mis=MS.find(function(m){return m.id===s.missionId;})||null;
+      var pts=(mis&&mis.points)||1000;
+      total+=pts;
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid #f1f5f9">'
+        +'<div><div style="font-size:13px;font-weight:700;color:#1a1a2e">'+ex(mis?mis.title||'광고 미션':'삭제된 미션')+'</div>'
+        +'<div style="font-size:11px;color:#94a3b8;margin-top:2px">'+new Date(s.at).toLocaleString('ko-KR')+'</div></div>'
+        +'<div style="font-size:14px;font-weight:800;color:#16a34a">+'+pts.toLocaleString()+'원</div></div>';
+    });
+  }
+  document.getElementById('rw-total').textContent='총 합계: '+total.toLocaleString()+'원 ('+list.length+'건)';
+  document.getElementById('rw-list').innerHTML=html;
+};
 
 window.delMis = async function(mid) {
   if(!confirm('삭제하시겠습니까?')) return;
@@ -1073,8 +1308,8 @@ window.saveCnt = async function() {
 
 window.openModal = function(sid) {
   var s=SB.find(function(x){return x.id===sid;}); if(!s) return;
-  var src = s.image || s.imageUrl || '';
-  if(!src) return;
+  var imgs=s.images||([s.image||s.imageUrl||''].filter(Boolean));
+  var src=imgs[0]; if(!src) return;
   document.getElementById('mi').src=src;
   document.getElementById('im').classList.add('on');
 };
