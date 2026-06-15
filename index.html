@@ -941,6 +941,14 @@ function showAdmDash(){
     const el=document.getElementById('sec-'+s);
     if(el) el.style.display='none';
   });
+  // 엑셀 버튼 카드도 초기에는 숨김
+  const excelBtn=document.getElementById('btn-excel');
+  if(excelBtn) excelBtn.style.display='none';
+  // 버튼 테두리 초기화
+  ['tot','today','excel'].forEach(s=>{
+    const btn=document.getElementById('btn-'+s);
+    if(btn) btn.style.outline='none';
+  });
   const home=document.getElementById('sec-home');
   if(home) home.style.display='block';
   goSc('sc-adm');
@@ -1133,6 +1141,10 @@ window.showAdmSection = function(name){
     const btn=document.getElementById('btn-'+s);
     if(btn) btn.style.outline = s===name?'3px solid #3b82f6':'none';
   });
+  // 엑셀 버튼 카드: 엑셀 섹션 선택했을 때만 표시, 나머지는 숨김
+  const excelBtn=document.getElementById('btn-excel');
+  if(excelBtn) excelBtn.style.display = name==='excel' ? 'block' : 'none';
+
   // 해당 섹션만 표시
   const sec=document.getElementById('sec-'+name);
   if(sec) sec.style.display='block';
