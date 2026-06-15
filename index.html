@@ -356,65 +356,85 @@ textarea{resize:none;min-height:80px;line-height:1.6}
     <span onclick="doLogout()" style="font-size:13px;color:rgba(255,255,255,.9);cursor:pointer;font-weight:700;background:rgba(255,255,255,.2);padding:7px 13px;border-radius:10px">로그아웃 ↩</span>
   </div>
   <div class="adm-wrap">
-    <!-- 통계 -->
-    <div class="stat-grid">
-      <div class="stat-card" style="cursor:pointer" onclick="toggleSearch()">
+
+    <!-- 통계 버튼 3개 -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px">
+      <div class="stat-card" style="cursor:pointer" id="btn-tot" onclick="showAdmSection('tot')">
         <div class="stat-n" id="a-tot">0</div>
         <div class="stat-l">총 알바인원 🔍</div>
       </div>
-      <div class="stat-card" style="cursor:pointer" onclick="showTodayJoin()">
+      <div class="stat-card" style="cursor:pointer" id="btn-today" onclick="showAdmSection('today')">
         <div class="stat-n" id="a-today">0</div>
         <div class="stat-l">오늘 가입 👁️</div>
       </div>
     </div>
+    <!-- 엑셀 업로드 버튼 (별도) -->
+    <div class="stat-card" style="cursor:pointer;margin-bottom:14px;text-align:center;padding:13px" id="btn-excel" onclick="showAdmSection('excel')">
+      <div style="font-size:16px;font-weight:800;color:#1a1a2e">📊 주간 리워드 일괄 설정</div>
+      <div style="font-size:12px;color:#64748b;margin-top:3px">엑셀 업로드로 리워드 적용</div>
+    </div>
 
-    <!-- 검색 영역 (처음엔 숨김) -->
-    <div class="search-box" id="search-box" style="display:none">
-      <div class="search-title">🔍 검색 (검색 버튼을 눌러야 결과가 나타납니다)</div>
-
-      <!-- 날짜 검색 -->
-      <div style="background:#f8fafc;border-radius:12px;padding:12px;margin-bottom:10px">
-        <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px">📅 가입 날짜로 검색</div>
-        <div style="display:flex;gap:8px;align-items:center">
-          <input type="date" id="srch-date" style="font-size:13px;padding:9px 12px;flex:1">
-          <button class="srch-btn" onclick="doDateSearch()">검색</button>
-          <button class="reset-btn" onclick="resetDateSearch()">초기화</button>
-        </div>
-      </div>
-
-      <!-- 성함+연락처 검색 -->
-      <div style="background:#f8fafc;border-radius:12px;padding:12px">
-        <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px">👤 성함 + 연락처로 검색 (둘 다 입력 필요)</div>
-        <div style="display:flex;flex-direction:column;gap:7px">
-          <input type="text" id="srch-name" placeholder="성함 입력" style="font-size:13px;padding:9px 12px">
-          <input type="tel" id="srch-phone" placeholder="연락처 입력 (숫자만)" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'')" style="font-size:13px;padding:9px 12px">
-          <div style="display:flex;gap:8px">
-            <button class="srch-btn" style="flex:1" onclick="doNameSearch()">검색</button>
-            <button class="reset-btn" style="flex:1" onclick="resetNameSearch()">초기화</button>
+    <!-- ── 섹션1: 총 알바인원 검색 ── -->
+    <div id="sec-tot" style="display:none">
+      <div class="search-box">
+        <div class="search-title">🔍 알바인원 검색</div>
+        <!-- 날짜 검색 -->
+        <div style="background:#f8fafc;border-radius:12px;padding:12px;margin-bottom:10px">
+          <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px">📅 가입 날짜로 검색</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input type="date" id="srch-date" style="font-size:13px;padding:9px 12px;flex:1">
+            <button class="srch-btn" onclick="doDateSearch()">검색</button>
+            <button class="reset-btn" onclick="resetDateSearch()">초기화</button>
           </div>
         </div>
+        <!-- 성함+연락처 검색 -->
+        <div style="background:#f8fafc;border-radius:12px;padding:12px">
+          <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px">👤 성함 + 연락처로 검색 (둘 다 입력 필요)</div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <input type="text" id="srch-name" placeholder="성함 입력" style="font-size:13px;padding:9px 12px">
+            <input type="tel" id="srch-phone" placeholder="연락처 입력 (숫자만)" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'')" style="font-size:13px;padding:9px 12px">
+            <div style="display:flex;gap:8px">
+              <button class="srch-btn" style="flex:1" onclick="doNameSearch()">검색</button>
+              <button class="reset-btn" style="flex:1" onclick="resetNameSearch()">초기화</button>
+            </div>
+          </div>
+        </div>
+        <div id="srch-summary" style="font-size:12px;color:#3b82f6;margin-top:8px;font-weight:600;display:none"></div>
       </div>
-
-      <div id="srch-summary" style="font-size:12px;color:#3b82f6;margin-top:8px;font-weight:600;display:none"></div>
+      <div id="mem-list"></div>
     </div>
 
-    <!-- 엑셀 업로드 (주간 리워드 일괄 설정) -->
-    <div class="search-box" style="margin-bottom:14px">
-      <div class="search-title">📊 주간 리워드 일괄 설정 (엑셀 업로드)</div>
-      <div style="font-size:12px;color:#64748b;margin-bottom:10px;line-height:1.6">
-        엑셀 파일 형식: <b>A열=성함, B열=연락처, C열=닉네임, D열=앱명, E열=금액</b><br>
-        (1행은 제목행, 2행부터 데이터 / 한 명이 여러 앱 참여 시 여러 행으로 입력)
+    <!-- ── 섹션2: 오늘 가입 ── -->
+    <div id="sec-today" style="display:none">
+      <div class="search-box">
+        <div class="search-title">👁️ 오늘 가입한 알바인원</div>
+        <div id="today-summary" style="font-size:12px;color:#3b82f6;margin-bottom:8px;font-weight:600"></div>
       </div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <input type="file" id="excel-file" accept=".xlsx,.xls,.csv" style="font-size:12px;padding:8px;flex:1">
-        <button class="srch-btn" onclick="uploadExcel()">업로드</button>
-      </div>
-      <div id="excel-msg" style="margin-top:8px;font-size:12px;display:none"></div>
-      <div id="excel-preview" style="margin-top:10px;display:none"></div>
+      <div id="today-list"></div>
     </div>
 
-    <!-- 목록 (검색 전 빈 상태) -->
-    <div id="mem-list"><div class="ep" style="padding:20px;color:#94a3b8;font-size:14px">🔍 위에서 검색하면 알바인원 정보가 표시됩니다.</div></div>
+    <!-- ── 섹션3: 엑셀 업로드 ── -->
+    <div id="sec-excel" style="display:none">
+      <div class="search-box">
+        <div class="search-title">📊 주간 리워드 일괄 설정 (엑셀 업로드)</div>
+        <div style="font-size:12px;color:#64748b;margin-bottom:10px;line-height:1.6">
+          엑셀 파일 형식: <b>A열=성함, B열=연락처, C열=닉네임, D열=앱명, E열=금액</b><br>
+          (1행은 제목행, 2행부터 데이터 / 한 명이 여러 앱 참여 시 여러 행으로 입력)
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="file" id="excel-file" accept=".xlsx,.xls,.csv" style="font-size:12px;padding:8px;flex:1">
+          <button class="srch-btn" onclick="uploadExcel()">업로드</button>
+        </div>
+        <div id="excel-msg" style="margin-top:8px;font-size:12px;display:none"></div>
+        <div id="excel-preview" style="margin-top:10px;display:none"></div>
+      </div>
+    </div>
+
+    <!-- 초기 안내 -->
+    <div id="sec-home" style="text-align:center;padding:30px 20px;color:#94a3b8;font-size:14px">
+      위 버튼을 눌러 원하는 기능을 선택하세요.
+    </div>
+
   </div>
 </div>
 
@@ -745,15 +765,24 @@ async function showUserDash(){
     hideLoading();
     document.getElementById('u-nm').textContent = me.name+'님';
     document.getElementById('u-total-pts').textContent = (me.points||0).toLocaleString()+'원';
-    // 주간 합계 헤더
-    const wr=getWeekRange();
-    const weekAmt = (me.weekPts||0);
+    // 주간 리워드 = weekHistory 이번주 합산 (카드와 동일하게)
+    const weekAmt = calcMyWeekTotal();
     document.getElementById('u-week-pts').textContent = weekAmt.toLocaleString()+'원';
     selWeekDay=null;
     renderWeekCard();
     renderRk();
     goSc('sc-user');
   }catch(e){hideLoading();alert('오류: '+e.message);}
+}
+
+// 내 이번주 실제 합산 금액 (weekHistory 기준)
+function calcMyWeekTotal(){
+  if(!me) return 0;
+  const wr=getWeekRange();
+  const hist=me.weekHistory||[];
+  return hist.filter(h=>{
+    const t=new Date(h.date); return t>=wr.from&&t<=wr.to;
+  }).reduce((s,h)=>s+(h.amt||0),0);
 }
 
 // ── 주간 리워드 카드 ─────────────────────────────────────
@@ -791,8 +820,8 @@ function renderWeekCard(){
 
   let html='', total=0;
   if(selWeekDay===null){
-    // 전체 주간 합계 = weekHistory 합산
-    total=hist.reduce((s,h)=>s+(h.amt||0),0);
+    // 전체 주간 합계 = weekHistory 이번주 합산 (헤더와 동일)
+    total = calcMyWeekTotal();
     if(total>0){
       // 날짜별 그룹핑
       const byDate={};
@@ -907,10 +936,13 @@ window.doLogout = function(){
 
 function showAdmDash(){
   updateStats();
-  // 검색박스 숨김, 목록 초기 메시지
-  const sb=document.getElementById('search-box');
-  if(sb) sb.style.display='none';
-  document.getElementById('mem-list').innerHTML='<div class="ep" style="padding:20px;color:#94a3b8;font-size:14px">🔍 위에서 검색하면 알바인원 정보가 표시됩니다.</div>';
+  // 모든 섹션 숨기고 홈 안내만 표시
+  ADM_SECTIONS.forEach(s=>{
+    const el=document.getElementById('sec-'+s);
+    if(el) el.style.display='none';
+  });
+  const home=document.getElementById('sec-home');
+  if(home) home.style.display='block';
   goSc('sc-adm');
   startListener();
 }
@@ -929,9 +961,10 @@ function startListener(){
     snap.forEach(d=>MB.push({id:d.id,...d.data()}));
     MB.sort((a,b)=>(b.joinDate||'').localeCompare(a.joinDate||'')||(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
     updateStats();
-    // 이미 검색 결과가 표시 중이면 갱신
+    // 현재 활성 섹션 자동 갱신
     const sumEl=document.getElementById('srch-summary');
     if(sumEl&&sumEl.style.display!=='none') doCurrentSearch();
+    if(document.getElementById('sec-today')?.style.display==='block') renderTodaySection();
   });
 }
 function stopListener(){if(unsubMem){unsubMem();unsubMem=null;}}
@@ -997,6 +1030,7 @@ function hideResult(){
 // ── 목록 렌더 (닉네임 인라인 입력) ─────────────────────
 function renderList(list){
   const el=document.getElementById('mem-list');
+  if(!el) return;
   if(!list.length){el.innerHTML='<div class="ep">검색 결과가 없습니다.</div>';return;}
   el.innerHTML=list.map(m=>{
     const tags=(m.nicknames||[]).map(n=>`<span class="nick-tag">${ex(n)}</span>`).join('');
@@ -1086,18 +1120,63 @@ window.saveEdit = async function(){
   }catch(e){ hideLoading(); alert('저장 오류: '+e.message); }
 };
 
-// ── 4) 오늘 가입 목록 보기 ───────────────────────────────
-window.showTodayJoin = function(){
+// ── 관리자 섹션 전환 ─────────────────────────────────────
+const ADM_SECTIONS = ['tot','today','excel','home'];
+window.showAdmSection = function(name){
+  // 모든 섹션 숨김
+  ADM_SECTIONS.forEach(s=>{
+    const el=document.getElementById('sec-'+s);
+    if(el) el.style.display='none';
+  });
+  // 버튼 활성화 표시
+  ['tot','today','excel'].forEach(s=>{
+    const btn=document.getElementById('btn-'+s);
+    if(btn) btn.style.outline = s===name?'3px solid #3b82f6':'none';
+  });
+  // 해당 섹션만 표시
+  const sec=document.getElementById('sec-'+name);
+  if(sec) sec.style.display='block';
+
+  // 오늘 가입 섹션이면 자동으로 목록 표시
+  if(name==='today') renderTodaySection();
+};
+
+function renderTodaySection(){
   const today=new Date().toISOString().split('T')[0];
   const list=MB.filter(m=>m.joinDate===today);
-  const sumEl=document.getElementById('srch-summary');
-  sumEl.textContent=`📅 오늘(${today}) 가입: ${list.length}명`;
-  sumEl.style.display='block';
-  // 검색박스 열기
-  const sb=document.getElementById('search-box');
-  if(sb) sb.style.display='block';
-  renderList(list);
-};
+  const sumEl=document.getElementById('today-summary');
+  if(sumEl) sumEl.textContent=`📅 ${today} 가입: ${list.length}명`;
+  const listEl=document.getElementById('today-list');
+  if(!listEl) return;
+  if(!list.length){
+    listEl.innerHTML='<div class="ep">오늘 가입한 알바인원이 없습니다.</div>';
+  } else {
+    listEl.innerHTML=list.map(m=>{
+      const tags=(m.nicknames||[]).map(n=>`<span class="nick-tag">${ex(n)}</span>`).join('');
+      return `<div class="mem-card">
+        <div class="mem-head">
+          <div class="mem-name">${ex(m.name)} <span style="font-size:12px;color:#64748b;font-weight:500">(${ex(m.age||'')})</span></div>
+          <div class="mem-date">📅 ${m.joinDate||'-'}</div>
+        </div>
+        <div class="mem-body">
+          <div class="mem-row"><span class="mem-key">📱 연락처</span><span class="mem-val">${ex(m.phone)}</span></div>
+          <div class="mem-row"><span class="mem-key">📲 폰 종류</span><span class="mem-val">${ex(m.os||'')}</span></div>
+          <div class="mem-row"><span class="mem-key">🏦 은행</span><span class="mem-val">${ex(m.bank||'')} ${ex(m.account||'')}</span></div>
+          <div class="mem-row"><span class="mem-key">👤 예금주</span><span class="mem-val">${ex(m.holder||'')}</span></div>
+          <div class="nick-area">
+            <div class="nick-title"><span>🏷️ 닉네임</span>
+            <button class="bsm bbl" style="font-size:11px;padding:4px 10px" onclick="openNickModal('${m.id}')">+ 관리</button></div>
+            <div class="nick-list">${tags||'<span style="font-size:12px;color:#94a3b8">등록된 닉네임 없음</span>'}</div>
+          </div>
+          <div style="margin-top:10px;display:flex;justify-content:flex-end;gap:8px">
+            <button class="bsm" style="background:#f1f5f9;color:#374151" onclick="openEditModal('${m.id}')">✏️ 정보 수정</button>
+            <button class="bsm bng" onclick="delMem('${m.id}')">삭제</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+}
 
 // ── 5) 엑셀 업로드 (A=성함, B=연락처, C=닉네임, D=앱명, E=금액) ──
 window.uploadExcel = async function(){
