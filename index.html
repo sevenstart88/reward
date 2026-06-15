@@ -108,7 +108,7 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 .uh-stats{display:flex;gap:10px}
 .uh-stat{flex:1;background:#fff;border-radius:14px;padding:12px 10px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.1);transition:transform .15s}
 .uh-stat:active{transform:scale(.97)}
-.uh-stat-lbl{font-size:11px;color:#64748b;font-weight:700;display:block;margin-bottom:5px}
+.uh-stat-lbl{font-size:14px;color:#64748b;font-weight:700;display:block;margin-bottom:5px}
 .uh-stat-val{font-size:17px;font-weight:800;color:#1e40af;display:block}
 
 /* 대시보드 본문 */
@@ -362,9 +362,9 @@ textarea{resize:none;min-height:80px;line-height:1.6}
         <div class="stat-n" id="a-tot">0</div>
         <div class="stat-l">총 알바인원 🔍</div>
       </div>
-      <div class="stat-card">
+      <div class="stat-card" style="cursor:pointer" onclick="showTodayJoin()">
         <div class="stat-n" id="a-today">0</div>
-        <div class="stat-l">오늘 가입</div>
+        <div class="stat-l">오늘 가입 👁️</div>
       </div>
     </div>
 
@@ -402,8 +402,8 @@ textarea{resize:none;min-height:80px;line-height:1.6}
     <div class="search-box" style="margin-bottom:14px">
       <div class="search-title">📊 주간 리워드 일괄 설정 (엑셀 업로드)</div>
       <div style="font-size:12px;color:#64748b;margin-bottom:10px;line-height:1.6">
-        엑셀 파일 형식: <b>A열=연락처, B열=주간리워드금액</b><br>
-        (1행은 제목행, 2행부터 데이터)
+        엑셀 파일 형식: <b>A열=성함, B열=연락처, C열=닉네임, D열=앱명, E열=금액</b><br>
+        (1행은 제목행, 2행부터 데이터 / 한 명이 여러 앱 참여 시 여러 행으로 입력)
       </div>
       <div style="display:flex;gap:8px;align-items:center">
         <input type="file" id="excel-file" accept=".xlsx,.xls,.csv" style="font-size:12px;padding:8px;flex:1">
@@ -771,37 +771,76 @@ window.selectWeekDay = function(idx){
 function renderWeekCard(){
   const wr=getWeekRange();
   const dayNames=['월','화','수','목','금','토','일'];
+  // 요일별 실제 금액 계산 (weekHistory 배열에서)
+  // weekHistory: [{date:'2026-06-15', amt:1500, appName:'앱명'}, ...]
+  const hist = me.weekHistory||[];
+
   // 요일 탭
   let daysHtml='';
   for(let i=0;i<7;i++){
     const d=new Date(wr.from); d.setDate(wr.from.getDate()+i);
+    const dateStr=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const dayAmt=hist.filter(h=>h.date===dateStr).reduce((s,h)=>s+(h.amt||0),0);
     const on=selWeekDay===i;
-    daysHtml+=`<div class="wday${on?' on':''}" onclick="selectWeekDay(${i})">${dayNames[i]}<div style="font-size:10px;margin-top:2px">${d.getMonth()+1}/${d.getDate()}</div></div>`;
+    daysHtml+=`<div class="wday${on?' on':''}" onclick="selectWeekDay(${i})">
+      ${dayNames[i]}<div style="font-size:10px;margin-top:2px">${d.getMonth()+1}/${d.getDate()}</div>
+      ${dayAmt>0?`<div style="font-size:10px;color:${on?'#fff':'#16a34a'};font-weight:800;margin-top:1px">${dayAmt.toLocaleString()}</div>`:''}
+    </div>`;
   }
   document.getElementById('week-days').innerHTML=daysHtml;
 
-  // 내 승인 내역 (points 기록이 없으므로 weekPts 전체 표시)
-  // 랭킹에서 내 주간 포인트를 요일별로 구분할 데이터가 없으므로
-  // 총 주간 금액 + 요일 선택 시 안내 표시
-  const wr2=getWeekRange();
   let html='', total=0;
   if(selWeekDay===null){
-    total=me.weekPts||0;
-    html=total>0
-      ?`<div class="week-list-item"><div><div class="week-item-name">이번 주 승인 합계</div><div class="week-item-date">${wr2.from.toLocaleDateString('ko-KR')} ~ ${wr2.to.toLocaleDateString('ko-KR')}</div></div><div class="week-item-amt">+${total.toLocaleString()}원</div></div>`
-      :'<div style="text-align:center;padding:16px;color:#94a3b8;font-size:13px">이번주 승인된 리워드가 없습니다.</div>';
+    // 전체 주간 합계 = weekHistory 합산
+    total=hist.reduce((s,h)=>s+(h.amt||0),0);
+    if(total>0){
+      // 날짜별 그룹핑
+      const byDate={};
+      hist.forEach(h=>{if(!byDate[h.date])byDate[h.date]=[];byDate[h.date].push(h);});
+      html=Object.keys(byDate).sort().map(date=>{
+        const items=byDate[date];
+        const dayTotal=items.reduce((s,h)=>s+(h.amt||0),0);
+        return `<div class="week-list-item">
+          <div>
+            <div class="week-item-name">${date} (${items.map(h=>ex(h.appName||'미션')).join(', ')})</div>
+            <div class="week-item-date">승인 완료</div>
+          </div>
+          <div class="week-item-amt">+${dayTotal.toLocaleString()}원</div>
+        </div>`;
+      }).join('');
+    } else {
+      html='<div style="text-align:center;padding:16px;color:#94a3b8;font-size:13px">이번주 승인된 리워드가 없습니다. (0원)</div>';
+    }
   } else {
-    html=`<div style="text-align:center;padding:14px;color:#64748b;font-size:13px">📅 ${dayNames[selWeekDay]}요일 상세 내역은<br>관리자 승인 후 반영됩니다.</div>`;
-    total=0;
+    // 선택한 요일
+    const d=new Date(wr.from); d.setDate(wr.from.getDate()+selWeekDay);
+    const dateStr=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const dayItems=hist.filter(h=>h.date===dateStr);
+    total=dayItems.reduce((s,h)=>s+(h.amt||0),0);
+    if(total>0){
+      html=dayItems.map(h=>`<div class="week-list-item">
+        <div><div class="week-item-name">${ex(h.appName||'미션')}</div><div class="week-item-date">승인 완료</div></div>
+        <div class="week-item-amt">+${(h.amt||0).toLocaleString()}원</div>
+      </div>`).join('');
+    } else {
+      html=`<div style="text-align:center;padding:16px;color:#94a3b8;font-size:13px">${dayNames[selWeekDay]}요일 승인된 리워드가 없습니다. (0원)</div>`;
+    }
   }
   document.getElementById('week-total').textContent=`${selWeekDay===null?'이번주 전체':dayNames[selWeekDay]+'요일'}: ${total.toLocaleString()}원`;
   document.getElementById('week-list').innerHTML=html;
 }
 
 // ── 랭킹 렌더 ────────────────────────────────────────────
+// 주간 랭킹 기준: 총 누적 + 주간 금액 합산
+// 월간 랭킹 기준: 총 누적 + 월간 금액 합산
+function calcRkPts(m, isWeek){
+  const base = m.points||0;
+  const extra = isWeek ? (m.weekPts||0) : (m.monthPts||0);
+  return base + extra;
+}
 function renderRk(){
   const isW=rkMode==='week';
-  const sorted=MB.slice().sort((a,b)=>isW?(b.weekPts||0)-(a.weekPts||0):(b.monthPts||0)-(a.monthPts||0));
+  const sorted=MB.slice().sort((a,b)=>calcRkPts(b,isW)-calcRkPts(a,isW));
   const top=sorted.slice(0,5);
   const myIdx=sorted.findIndex(m=>me&&m.id===me.id);
 
@@ -820,7 +859,7 @@ function renderRk(){
   let podHtml='<div class="podium">';
   order.forEach(idx=>{
     if(idx>=top3.length){podHtml+='<div style="width:80px"></div>';return;}
-    const m=top3[idx]; const pts=isW?(m.weekPts||0):(m.monthPts||0);
+    const m=top3[idx]; const pts=calcRkPts(m,isW);
     const rank=idx+1; const isFirst=rank===1;
     const bc=['b1','b2','b3'][idx];
     const isMe=me&&m.id===me.id;
@@ -839,7 +878,7 @@ function renderRk(){
   // 4~5위
   let restHtml='';
   for(let i=3;i<top.length;i++){
-    const m=top[i]; const pts=isW?(m.weekPts||0):(m.monthPts||0);
+    const m=top[i]; const pts=calcRkPts(m,isW);
     const isMe=me&&m.id===me.id;
     restHtml+=`<div class="rk-row"><div class="rk-rank">${i+1}</div><div class="rk-name">${ex(displayName(m))}${isMe?' ★':''}</div><div class="rk-pts">${pts.toLocaleString()}P</div></div>`;
   }
@@ -1047,7 +1086,20 @@ window.saveEdit = async function(){
   }catch(e){ hideLoading(); alert('저장 오류: '+e.message); }
 };
 
-// ── 엑셀 업로드 (주간 리워드 일괄 설정) ─────────────────
+// ── 4) 오늘 가입 목록 보기 ───────────────────────────────
+window.showTodayJoin = function(){
+  const today=new Date().toISOString().split('T')[0];
+  const list=MB.filter(m=>m.joinDate===today);
+  const sumEl=document.getElementById('srch-summary');
+  sumEl.textContent=`📅 오늘(${today}) 가입: ${list.length}명`;
+  sumEl.style.display='block';
+  // 검색박스 열기
+  const sb=document.getElementById('search-box');
+  if(sb) sb.style.display='block';
+  renderList(list);
+};
+
+// ── 5) 엑셀 업로드 (A=성함, B=연락처, C=닉네임, D=앱명, E=금액) ──
 window.uploadExcel = async function(){
   const fileInput=document.getElementById('excel-file');
   const msgEl=document.getElementById('excel-msg');
@@ -1063,31 +1115,51 @@ window.uploadExcel = async function(){
       const rows=XLSX.utils.sheet_to_json(ws,{header:1});
       if(rows.length<2){alert('데이터가 없습니다. (2행부터 데이터)');return;}
 
-      // 미리보기 파싱
-      const items=[]; // {phone, weekPts}
-      const notFound=[];
+      // A=성함, B=연락처, C=닉네임, D=앱명, E=금액
+      const items=[], notFound=[];
       for(let i=1;i<rows.length;i++){
         const row=rows[i];
-        if(!row||!row[0]) continue;
-        const phone=np(String(row[0]||''));
-        const weekPts=parseInt(row[1])||0;
-        if(!phone) continue;
-        const member=MB.find(m=>np(m.phone||'')===phone);
-        if(member) items.push({id:member.id, name:member.name, phone, weekPts});
-        else notFound.push(phone);
+        if(!row||(!row[0]&&!row[1])) continue;
+        const name  = String(row[0]||'').trim();
+        const phone = np(String(row[1]||''));
+        const nick  = String(row[2]||'').trim();
+        const appName = String(row[3]||'미션').trim();
+        const amt   = parseInt(row[4])||0;
+        if(!phone||!amt) continue;
+        // 연락처+성함으로 매칭
+        let member=MB.find(m=>np(m.phone||'')===phone);
+        if(!member&&name) member=MB.find(m=>m.name===name&&np(m.phone||'').includes(phone.slice(-4)));
+        if(member){
+          items.push({id:member.id, name:member.name, phone, nick, appName, amt});
+        } else {
+          notFound.push(`${name}(${phone})`);
+        }
       }
 
-      // 미리보기 표시
-      let previewHtml=`<div style="font-size:13px;font-weight:700;color:#1a1a2e;margin-bottom:8px">📋 업로드 미리보기 (${items.length}명)</div>`;
-      previewHtml+=items.slice(0,10).map(it=>
-        `<div style="display:flex;justify-content:space-between;font-size:12px;padding:5px 0;border-bottom:1px solid #f1f5f9">
-          <span>${ex(it.name)} (${it.phone})</span>
-          <span style="color:#16a34a;font-weight:700">${it.weekPts.toLocaleString()}원</span>
-        </div>`
-      ).join('');
-      if(items.length>10) previewHtml+=`<div style="font-size:11px;color:#94a3b8;margin-top:4px">... 외 ${items.length-10}명</div>`;
-      if(notFound.length) previewHtml+=`<div style="font-size:11px;color:#ef4444;margin-top:6px">⚠️ 미매칭 연락처 ${notFound.length}건: ${notFound.slice(0,3).join(', ')}${notFound.length>3?'...':''}</div>`;
-      previewHtml+=`<button class="btn btnP" style="margin-top:12px" onclick="confirmExcel(${JSON.stringify(items)})">✅ ${items.length}명 일괄 적용</button>`;
+      // 알바별로 그룹핑 (한 명에 여러 앱이 있을 수 있음)
+      const grouped={};
+      items.forEach(it=>{
+        if(!grouped[it.id]) grouped[it.id]={id:it.id,name:it.name,phone:it.phone,nick:it.nick,entries:[]};
+        grouped[it.id].entries.push({appName:it.appName,amt:it.amt});
+      });
+      const groupList=Object.values(grouped);
+
+      // 미리보기
+      let previewHtml=`<div style="font-size:13px;font-weight:700;color:#1a1a2e;margin-bottom:8px">📋 업로드 미리보기 (${groupList.length}명 / ${items.length}건)</div>`;
+      previewHtml+=groupList.slice(0,10).map(g=>{
+        const total=g.entries.reduce((s,e)=>s+e.amt,0);
+        const apps=g.entries.map(e=>`${ex(e.appName)} ${e.amt.toLocaleString()}원`).join(', ');
+        return `<div style="padding:7px 0;border-bottom:1px solid #f1f5f9;font-size:12px">
+          <div style="display:flex;justify-content:space-between">
+            <span style="font-weight:700">${ex(g.name)} (${g.phone})</span>
+            <span style="color:#16a34a;font-weight:800">+${total.toLocaleString()}원</span>
+          </div>
+          <div style="color:#94a3b8;margin-top:2px">${apps}</div>
+        </div>`;
+      }).join('');
+      if(groupList.length>10) previewHtml+=`<div style="font-size:11px;color:#94a3b8;margin-top:4px">... 외 ${groupList.length-10}명</div>`;
+      if(notFound.length) previewHtml+=`<div style="font-size:11px;color:#ef4444;margin-top:6px">⚠️ 미매칭 ${notFound.length}건: ${notFound.slice(0,3).join(', ')}${notFound.length>3?'...':''}</div>`;
+      previewHtml+=`<button class="btn btnP" style="margin-top:12px" onclick="confirmExcel(${JSON.stringify(groupList)})">✅ ${groupList.length}명 주간 리워드 적용</button>`;
       prevEl.innerHTML=previewHtml;
       prevEl.style.display='block';
       msgEl.style.display='none';
@@ -1099,21 +1171,42 @@ window.uploadExcel = async function(){
   reader.readAsArrayBuffer(file);
 };
 
-window.confirmExcel = async function(items){
-  if(!confirm(`${items.length}명의 주간 리워드를 일괄 적용하시겠습니까?`)) return;
+window.confirmExcel = async function(groupList){
+  if(!confirm(`${groupList.length}명의 주간 리워드를 적용하시겠습니까?`)) return;
   showLoading('일괄 적용 중...');
+  const today=new Date().toISOString().split('T')[0];
   try{
     let done=0;
-    for(const it of items){
-      const m=MB.find(x=>x.id===it.id); if(!m) continue;
-      const newPoints=(m.points||0)+(it.weekPts-(m.weekPts||0));
-      await updateDoc(doc(db,'members',it.id),{
-        weekPts: it.weekPts,
-        points: newPoints>0?newPoints:(m.points||0)
+    for(const g of groupList){
+      const m=MB.find(x=>x.id===g.id); if(!m) continue;
+      const entryTotal=g.entries.reduce((s,e)=>s+e.amt,0);
+      // weekHistory: 오늘 날짜로 앱별 기록 추가
+      const hist=Array.from(m.weekHistory||[]);
+      // 오늘 동일 앱 중복 제거 후 추가
+      g.entries.forEach(e=>{
+        const dup=hist.findIndex(h=>h.date===today&&h.appName===e.appName);
+        if(dup>=0) hist[dup].amt=e.amt; // 덮어쓰기
+        else hist.push({date:today, appName:e.appName, amt:e.amt});
       });
-      m.weekPts=it.weekPts;
+      // 주간 합계 재계산
+      const wr=getWeekRange();
+      const newWeekPts=hist.filter(h=>{
+        const t=new Date(h.date); return t>=wr.from&&t<=wr.to;
+      }).reduce((s,h)=>s+h.amt,0);
+      // 월간/누적 합계
+      const newMonthPts=(m.monthPts||0)+entryTotal;
+      const newPoints=(m.points||0)+entryTotal;
+      // 닉네임 업데이트 (있을 경우)
+      const nicknames=Array.from(m.nicknames||[]);
+      if(g.nick&&!nicknames.includes(g.nick)) nicknames.push(g.nick);
+      await updateDoc(doc(db,'members',g.id),{
+        weekHistory:hist, weekPts:newWeekPts,
+        monthPts:newMonthPts, points:newPoints, nicknames
+      });
+      m.weekHistory=hist; m.weekPts=newWeekPts;
+      m.monthPts=newMonthPts; m.points=newPoints; m.nicknames=nicknames;
       done++;
-      document.getElementById('loading-txt').textContent=`적용 중... (${done}/${items.length})`;
+      document.getElementById('loading-txt').textContent=`적용 중... (${done}/${groupList.length})`;
     }
     hideLoading();
     document.getElementById('excel-preview').style.display='none';
@@ -1121,7 +1214,7 @@ window.confirmExcel = async function(items){
     const msgEl=document.getElementById('excel-msg');
     msgEl.textContent=`✅ ${done}명 주간 리워드 적용 완료!`;
     msgEl.style.color='#16a34a'; msgEl.style.display='block';
-    setTimeout(()=>{msgEl.style.display='none';},3000);
+    setTimeout(()=>{msgEl.style.display='none';},3500);
     doCurrentSearch();
   }catch(err){hideLoading();alert('오류: '+err.message);}
 };
