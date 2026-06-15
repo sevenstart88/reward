@@ -92,6 +92,64 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 .nick-del{color:#94a3b8;cursor:pointer;font-size:15px;font-weight:800;line-height:1}
 .ep{text-align:center;padding:30px;color:#94a3b8;font-size:14px}
 .lhero{background:linear-gradient(135deg,#3b82f6,#6366f1);padding:44px 24px 32px;text-align:center;color:#fff}
+
+/* 알바 로그인 */
+.login-hero{background:linear-gradient(135deg,#3b82f6,#6366f1);padding:52px 24px 36px;text-align:center;color:#fff}
+.login-hero-ic{font-size:52px;margin-bottom:14px}
+.login-hero-t{font-size:26px;font-weight:800;margin-bottom:6px}
+.login-hero-s{font-size:15px;opacity:.85}
+
+/* 알바 대시보드 헤더 */
+.uh{background:linear-gradient(135deg,#1e40af,#4f46e5);padding:16px}
+.uh-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.uh-name{font-size:17px;font-weight:800;color:#fff}
+.lo{font-size:11px;color:rgba(255,255,255,.9);cursor:pointer;font-weight:700;padding:6px 11px;background:rgba(255,255,255,.18);border-radius:10px}
+.uh-stats{display:flex;gap:8px}
+.uh-stat{flex:1;background:rgba(255,255,255,.15);border-radius:14px;padding:10px 8px;text-align:center;border:1px solid rgba(255,255,255,.15)}
+.uh-stat-val{font-size:15px;font-weight:800;color:#fde68a;display:block}
+.uh-stat-lbl{font-size:11px;color:rgba(255,255,255,.75);margin-top:2px;font-weight:600}
+
+/* 대시보드 본문 */
+.dash-wrap{padding:14px 14px 60px}
+
+/* 주간 리워드 카드 */
+.week-card{background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.week-card-title{font-size:15px;font-weight:800;color:#1a1a2e;margin-bottom:4px}
+.week-card-sub{font-size:11px;color:#94a3b8;margin-bottom:12px}
+.week-days{display:flex;gap:4px;margin-bottom:12px}
+.wday{flex:1;text-align:center;padding:8px 2px;border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;color:#64748b;background:#f8fafc;border:1px solid #e2e8f0}
+.wday.on{background:#3b82f6;color:#fff;border-color:#3b82f6}
+.week-total{font-size:13px;font-weight:700;color:#dc2626;margin-bottom:8px}
+.week-list-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f1f5f9;font-size:13px}
+.week-list-item:last-child{border-bottom:none}
+.week-item-name{color:#1a1a2e;font-weight:600}
+.week-item-date{font-size:11px;color:#94a3b8;margin-top:2px}
+.week-item-amt{color:#16a34a;font-weight:800}
+
+/* 랭킹 카드 */
+.rk-card{background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.rk-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.rk-card-title{font-size:15px;font-weight:800;color:#1a1a2e}
+.rk-tabs{display:flex;background:#f1f5f9;border-radius:20px;padding:3px;gap:2px}
+.rk-tab{padding:6px 14px;font-size:12px;font-weight:700;border-radius:18px;cursor:pointer;color:#64748b;border:none;background:transparent;font-family:inherit}
+.rk-tab.on{background:#3b82f6;color:#fff}
+/* 포디움 */
+.podium{display:flex;justify-content:center;align-items:flex-end;gap:16px;margin-bottom:16px;padding-top:6px}
+.pod-card{display:flex;flex-direction:column;align-items:center;width:80px}
+.pod-avatar{border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;position:relative;flex-shrink:0}
+.pod-avatar.first{width:68px;height:68px;font-size:26px}
+.pod-avatar.second,.pod-avatar.third{width:52px;height:52px}
+.pod-badge{position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);width:20px;height:20px;border-radius:50%;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid #fff}
+.b1{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#78350f}
+.b2{background:linear-gradient(135deg,#94a3b8,#64748b);color:#fff}
+.b3{background:linear-gradient(135deg,#f97316,#ea580c);color:#fff}
+.pod-name{font-size:12px;font-weight:700;color:#1a1a2e;margin-top:9px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:80px}
+.pod-pts{font-size:12px;color:#3b82f6;font-weight:800;text-align:center;margin-top:1px}
+.rk-row{display:flex;justify-content:space-between;align-items:center;padding:9px 2px;border-top:1px solid #f1f5f9;font-size:13px}
+.rk-rank{width:24px;color:#94a3b8;font-weight:700;font-size:12px}
+.rk-name{flex:1;color:#1a1a2e;font-weight:600}
+.rk-pts{color:#3b82f6;font-weight:800}
+.rk-note{font-size:11px;color:#94a3b8;text-align:right;margin-top:6px}
 .loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,.92);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
 .loading-spinner{width:42px;height:42px;border:4px solid #e2e8f0;border-top-color:#3b82f6;border-radius:50%;animation:spin .8s linear infinite}
 .loading-txt{font-size:14px;color:#64748b;font-weight:500}
@@ -203,6 +261,67 @@ textarea{resize:none;min-height:80px;line-height:1.6}
   </div>
 </div>
 
+<!-- 알바 로그인 -->
+<div id="sc-login" class="screen">
+  <div class="login-hero">
+    <div class="login-hero-ic">🏆</div>
+    <div class="login-hero-t">리워드 체험단</div>
+    <div class="login-hero-s">성함과 연락처로 로그인하세요</div>
+  </div>
+  <div class="wp">
+    <div class="card">
+      <div class="fl"><span class="lbl">성함</span><input type="text" id="l-name" placeholder="신청 시 입력한 성함" autocomplete="off"></div>
+      <div class="fl"><span class="lbl">연락처 (숫자만)</span><input type="tel" id="l-phone" placeholder="01012345678" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'')"></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <input type="checkbox" id="l-auto" checked>
+        <label for="l-auto" style="font-size:14px;color:#374151;cursor:pointer;font-weight:500">자동 로그인</label>
+      </div>
+      <div id="l-er" class="er"></div>
+      <button class="btn btnP" onclick="doLogin()">로그인</button>
+    </div>
+    <div style="text-align:center;margin-top:18px;font-size:15px;color:#64748b">
+      처음이신가요? <span style="color:#3b82f6;font-weight:700;cursor:pointer" onclick="goSc('sc-apply')">신청서 작성 →</span>
+    </div>
+  </div>
+</div>
+
+<!-- 알바 대시보드 -->
+<div id="sc-user" class="screen">
+  <div class="uh">
+    <div class="uh-top">
+      <div class="uh-name" id="u-nm">이름님</div>
+      <div class="lo" onclick="doUserLogout()">로그아웃</div>
+    </div>
+    <div class="uh-stats">
+      <div class="uh-stat"><span class="uh-stat-val" id="u-total-pts">0원</span><span class="uh-stat-lbl">💰 총 누적 리워드</span></div>
+      <div class="uh-stat"><span class="uh-stat-val" id="u-week-pts">0원</span><span class="uh-stat-lbl">📅 주간 리워드</span></div>
+    </div>
+  </div>
+  <div class="dash-wrap">
+    <!-- 주간 리워드 카드 -->
+    <div class="week-card">
+      <div class="week-card-title">📅 주간 리워드 금액</div>
+      <div class="week-card-sub">(매주 월요일~일요일 까지, 일주일 합산 금액)</div>
+      <div class="week-days" id="week-days"></div>
+      <div class="week-total" id="week-total"></div>
+      <div id="week-list"></div>
+    </div>
+    <!-- 랭킹 카드 -->
+    <div class="rk-card">
+      <div class="rk-card-head">
+        <div class="rk-card-title">🏆 알바 랭킹</div>
+        <div class="rk-tabs">
+          <button class="rk-tab on" onclick="setRk('week',this)">주간</button>
+          <button class="rk-tab" onclick="setRk('month',this)">월간</button>
+        </div>
+      </div>
+      <div id="rk-podium"></div>
+      <div id="rk-rest"></div>
+      <div class="rk-note" id="rk-note"></div>
+    </div>
+  </div>
+</div>
+
 <!-- 관리자 로그인 -->
 <div id="sc-adm-login" class="screen">
   <div class="lhero">
@@ -295,10 +414,14 @@ const db = getFirestore(app);
 
 const ADM_PW = 'admin1234';
 const ADM_KEY = 'rw_adm_session';
+const USER_KEY = 'rw_user_id';
 const np = v => String(v||'').replace(/\D/g,'');
 const ex = s => s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
 
 let MB = [];
+let me = null;   // 로그인한 알바 회원
+let rkMode = 'week';
+let selWeekDay = null;
 let unsubMem = null;
 let ageVal='', osVal='', ag1='', ag2='', aCur=1;
 let nickTargetId=null, nickTags=[];
@@ -319,16 +442,37 @@ window.goSc = id => {
 const saveAdm=()=>{try{localStorage.setItem(ADM_KEY,'1');}catch(e){}};
 const loadAdm=()=>{try{return localStorage.getItem(ADM_KEY);}catch(e){return null;}};
 const clearAdm=()=>{try{localStorage.removeItem(ADM_KEY);}catch(e){}};
+const saveUser=id=>{try{localStorage.setItem(USER_KEY,id);}catch(e){}};
+const loadUser=()=>{try{return localStorage.getItem(USER_KEY);}catch(e){return null;}};
+const clearUser=()=>{try{localStorage.removeItem(USER_KEY);}catch(e){}};
 
 // ── 초기화 ───────────────────────────────────────────────
 async function init(){
   const isAdmin = location.search.includes('admin');
-  if(!isAdmin){ hideLoading(); goSc('sc-apply'); return; }
-  if(loadAdm()){
-    showLoading('데이터 로딩 중...');
-    try{ await loadMB(); hideLoading(); showAdmDash(); showToast('✅ 자동로그인'); }
-    catch(e){ hideLoading(); goSc('sc-adm-login'); }
-  } else { hideLoading(); goSc('sc-adm-login'); }
+
+  // 관리자 페이지
+  if(isAdmin){
+    if(loadAdm()){
+      showLoading('데이터 로딩 중...');
+      try{ await loadMB(); hideLoading(); showAdmDash(); showToast('✅ 자동로그인'); }
+      catch(e){ hideLoading(); goSc('sc-adm-login'); }
+    } else { hideLoading(); goSc('sc-adm-login'); }
+    return;
+  }
+
+  // 알바 페이지 — 자동로그인 확인
+  const savedId = loadUser();
+  if(savedId){
+    showLoading('로딩 중...');
+    try{
+      await loadMB();
+      const found = MB.find(m=>m.id===savedId);
+      if(found){ me=found; hideLoading(); showUserDash(); showToast('✅ '+me.name+'님 자동로그인'); return; }
+      else{ clearUser(); }
+    }catch(e){}
+    hideLoading();
+  }
+  goSc('sc-login');
 }
 
 async function loadMB(){
@@ -336,6 +480,158 @@ async function loadMB(){
   MB=[];
   snap.forEach(d=>MB.push({id:d.id,...d.data()}));
   MB.sort((a,b)=>(b.joinDate||'').localeCompare(a.joinDate||'')||(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+}
+
+// ── 알바 로그인 ──────────────────────────────────────────
+window.doLogin = async function(){
+  const nameIn = document.getElementById('l-name').value.trim();
+  const phoneIn = np(document.getElementById('l-phone').value);
+  const er = document.getElementById('l-er'); er.classList.remove('on');
+  if(!nameIn||!phoneIn){er.textContent='성함과 연락처를 모두 입력하세요.';er.classList.add('on');return;}
+  showLoading('로그인 중...');
+  try{
+    await loadMB();
+    const found = MB.find(m=>m.name===nameIn && np(m.phone)===phoneIn);
+    hideLoading();
+    if(!found){
+      er.textContent = MB.length===0?'신청서를 먼저 작성해 주세요.':'성함 또는 연락처가 일치하지 않습니다.';
+      er.classList.add('on'); return;
+    }
+    me = found;
+    if(document.getElementById('l-auto').checked) saveUser(me.id);
+    showUserDash();
+  }catch(e){hideLoading();er.textContent='오류: '+e.message;er.classList.add('on');}
+};
+
+window.doUserLogout = function(){
+  clearUser(); me=null;
+  document.getElementById('l-name').value='';
+  document.getElementById('l-phone').value='';
+  goSc('sc-login');
+};
+
+// ── 알바 대시보드 ────────────────────────────────────────
+function getWeekRange(){
+  const now=new Date(), day=now.getDay();
+  const diffToMon=day===0?-6:1-day;
+  const mon=new Date(now); mon.setDate(now.getDate()+diffToMon); mon.setHours(0,0,0,0);
+  const sun=new Date(mon); sun.setDate(mon.getDate()+6); sun.setHours(23,59,59,999);
+  return {from:mon,to:sun};
+}
+function displayName(m){ return m.nicknames&&m.nicknames.length?m.nicknames[0]:'*****'; }
+const AVATAR_COLORS=['#3b82f6','#6366f1','#8b5cf6','#ec4899','#f59e0b','#10b981'];
+function avatarColor(name){let s=0;for(let c of name)s+=c.charCodeAt(0);return AVATAR_COLORS[s%AVATAR_COLORS.length];}
+
+async function showUserDash(){
+  showLoading('데이터 로딩 중...');
+  try{
+    await loadMB();
+    const fresh=MB.find(m=>m.id===me.id); if(fresh) me=fresh;
+    hideLoading();
+    document.getElementById('u-nm').textContent = me.name+'님';
+    document.getElementById('u-total-pts').textContent = (me.points||0).toLocaleString()+'원';
+    // 주간 합계 헤더
+    const wr=getWeekRange();
+    const weekAmt = (me.weekPts||0);
+    document.getElementById('u-week-pts').textContent = weekAmt.toLocaleString()+'원';
+    selWeekDay=null;
+    renderWeekCard();
+    renderRk();
+    goSc('sc-user');
+  }catch(e){hideLoading();alert('오류: '+e.message);}
+}
+
+// ── 주간 리워드 카드 ─────────────────────────────────────
+window.setRk = function(mode,el){
+  rkMode=mode;
+  el.closest('.rk-tabs').querySelectorAll('.rk-tab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on'); renderRk();
+};
+
+window.selectWeekDay = function(idx){
+  selWeekDay = selWeekDay===idx?null:idx;
+  renderWeekCard();
+};
+
+function renderWeekCard(){
+  const wr=getWeekRange();
+  const dayNames=['월','화','수','목','금','토','일'];
+  // 요일 탭
+  let daysHtml='';
+  for(let i=0;i<7;i++){
+    const d=new Date(wr.from); d.setDate(wr.from.getDate()+i);
+    const on=selWeekDay===i;
+    daysHtml+=`<div class="wday${on?' on':''}" onclick="selectWeekDay(${i})">${dayNames[i]}<div style="font-size:10px;margin-top:2px">${d.getMonth()+1}/${d.getDate()}</div></div>`;
+  }
+  document.getElementById('week-days').innerHTML=daysHtml;
+
+  // 내 승인 내역 (points 기록이 없으므로 weekPts 전체 표시)
+  // 랭킹에서 내 주간 포인트를 요일별로 구분할 데이터가 없으므로
+  // 총 주간 금액 + 요일 선택 시 안내 표시
+  const wr2=getWeekRange();
+  let html='', total=0;
+  if(selWeekDay===null){
+    total=me.weekPts||0;
+    html=total>0
+      ?`<div class="week-list-item"><div><div class="week-item-name">이번 주 승인 합계</div><div class="week-item-date">${wr2.from.toLocaleDateString('ko-KR')} ~ ${wr2.to.toLocaleDateString('ko-KR')}</div></div><div class="week-item-amt">+${total.toLocaleString()}원</div></div>`
+      :'<div style="text-align:center;padding:16px;color:#94a3b8;font-size:13px">이번주 승인된 리워드가 없습니다.</div>';
+  } else {
+    html=`<div style="text-align:center;padding:14px;color:#64748b;font-size:13px">📅 ${dayNames[selWeekDay]}요일 상세 내역은<br>관리자 승인 후 반영됩니다.</div>`;
+    total=0;
+  }
+  document.getElementById('week-total').textContent=`${selWeekDay===null?'이번주 전체':dayNames[selWeekDay]+'요일'}: ${total.toLocaleString()}원`;
+  document.getElementById('week-list').innerHTML=html;
+}
+
+// ── 랭킹 렌더 ────────────────────────────────────────────
+function renderRk(){
+  const isW=rkMode==='week';
+  const sorted=MB.slice().sort((a,b)=>isW?(b.weekPts||0)-(a.weekPts||0):(b.monthPts||0)-(a.monthPts||0));
+  const top=sorted.slice(0,5);
+  const myIdx=sorted.findIndex(m=>me&&m.id===me.id);
+
+  const podEl=document.getElementById('rk-podium');
+  const restEl=document.getElementById('rk-rest');
+  if(!podEl||!restEl) return;
+
+  if(!top.length){
+    podEl.innerHTML='<div style="text-align:center;padding:20px;color:#94a3b8;font-size:13px">아직 데이터가 없습니다</div>';
+    restEl.innerHTML=''; return;
+  }
+
+  // TOP3 포디움 (2위-1위-3위 순서)
+  const top3=top.slice(0,3);
+  const order=[1,0,2];
+  let podHtml='<div class="podium">';
+  order.forEach(idx=>{
+    if(idx>=top3.length){podHtml+='<div style="width:80px"></div>';return;}
+    const m=top3[idx]; const pts=isW?(m.weekPts||0):(m.monthPts||0);
+    const rank=idx+1; const isFirst=rank===1;
+    const bc=['b1','b2','b3'][idx];
+    const isMe=me&&m.id===me.id;
+    const initial=(displayName(m)||'?').charAt(0);
+    podHtml+=`<div class="pod-card">
+      <div class="pod-avatar ${isFirst?'first':'second'}" style="background:${avatarColor(m.name||'')}">
+        ${ex(initial)}<span class="pod-badge ${bc}">${rank}</span>
+      </div>
+      <div class="pod-name">${ex(displayName(m))}${isMe?' ★':''}</div>
+      <div class="pod-pts">${pts.toLocaleString()}P</div>
+    </div>`;
+  });
+  podHtml+='</div>';
+  podEl.innerHTML=podHtml;
+
+  // 4~5위
+  let restHtml='';
+  for(let i=3;i<top.length;i++){
+    const m=top[i]; const pts=isW?(m.weekPts||0):(m.monthPts||0);
+    const isMe=me&&m.id===me.id;
+    restHtml+=`<div class="rk-row"><div class="rk-rank">${i+1}</div><div class="rk-name">${ex(displayName(m))}${isMe?' ★':''}</div><div class="rk-pts">${pts.toLocaleString()}P</div></div>`;
+  }
+  restEl.innerHTML=restHtml;
+
+  const noteEl=document.getElementById('rk-note');
+  if(noteEl&&me) noteEl.textContent=myIdx>=5?'내 순위: '+(myIdx+1)+'위':'';
 }
 
 // ── 관리자 로그인 ────────────────────────────────────────
