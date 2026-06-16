@@ -415,11 +415,32 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 
     <!-- ── 섹션3: 엑셀 업로드 ── -->
     <div id="sec-excel" style="display:none">
+
+      <!-- 날짜별 업로드 내역 조회 -->
+      <div class="search-box" style="margin-bottom:12px">
+        <div class="search-title">📅 날짜별 업로드 내역 조회</div>
+        <div style="font-size:12px;color:#64748b;margin-bottom:10px">날짜를 선택하면 해당 날 업로드된 리워드 내역을 확인할 수 있습니다.</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="date" id="excel-srch-date" style="font-size:13px;padding:9px 12px;flex:1">
+          <button class="srch-btn" onclick="searchExcelHistory()">조회</button>
+          <button class="reset-btn" onclick="resetExcelHistory()">초기화</button>
+        </div>
+        <div id="excel-history-result" style="margin-top:12px;display:none"></div>
+      </div>
+
+      <!-- 엑셀 업로드 -->
       <div class="search-box">
         <div class="search-title">📊 주간 리워드 일괄 설정 (엑셀 업로드)</div>
-        <div style="font-size:12px;color:#64748b;margin-bottom:10px;line-height:1.6">
-          엑셀 파일 형식: <b>A열=성함, B열=연락처, C열=닉네임, D열=앱명, E열=금액</b><br>
-          (1행은 제목행, 2행부터 데이터 / 한 명이 여러 앱 참여 시 여러 행으로 입력)
+        <div style="background:#eff6ff;border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:#1d4ed8;line-height:1.7">
+          📌 <b>업로드 날짜:</b> <span id="upload-date-label" style="font-weight:800"></span><br>
+          📋 <b>엑셀 형식:</b> A열=성함, B열=연락처, C열=닉네임, D열=앱명, E열=금액<br>
+          (1행은 제목행, 2행부터 데이터 / 한 명 여러 앱 참여 시 여러 행 입력)
+        </div>
+        <!-- 업로드 날짜 직접 지정 -->
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
+          <span style="font-size:12px;color:#374151;font-weight:700;white-space:nowrap">적용 날짜</span>
+          <input type="date" id="excel-apply-date" style="font-size:13px;padding:9px 12px;flex:1" onchange="updateUploadDateLabel()">
+          <button class="reset-btn" onclick="setTodayDate()">오늘</button>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
           <input type="file" id="excel-file" accept=".xlsx,.xls,.csv" style="font-size:12px;padding:8px;flex:1">
@@ -1131,26 +1152,70 @@ window.saveEdit = async function(){
 // ── 관리자 섹션 전환 ─────────────────────────────────────
 const ADM_SECTIONS = ['tot','today','excel','home'];
 window.showAdmSection = function(name){
-  // 모든 섹션 숨김
   ADM_SECTIONS.forEach(s=>{
     const el=document.getElementById('sec-'+s);
     if(el) el.style.display='none';
   });
-  // 버튼 활성화 표시
   ['tot','today','excel'].forEach(s=>{
     const btn=document.getElementById('btn-'+s);
     if(btn) btn.style.outline = s===name?'3px solid #3b82f6':'none';
   });
-  // 엑셀 버튼 카드는 항상 표시 유지
   const excelBtn=document.getElementById('btn-excel');
   if(excelBtn) excelBtn.style.display='block';
-
-  // 해당 섹션만 표시
   const sec=document.getElementById('sec-'+name);
   if(sec) sec.style.display='block';
-
-  // 오늘 가입 섹션이면 자동으로 목록 표시
   if(name==='today') renderTodaySection();
+  if(name==='excel') setTodayDate();
+};
+
+// 오늘 날짜 자동 설정
+window.setTodayDate = function(){
+  const today=new Date().toISOString().split('T')[0];
+  const inp=document.getElementById('excel-apply-date');
+  if(inp&&!inp.value){ inp.value=today; }
+  updateUploadDateLabel();
+};
+window.updateUploadDateLabel = function(){
+  const v=(document.getElementById('excel-apply-date')||{}).value||'';
+  const lbl=document.getElementById('upload-date-label');
+  if(lbl) lbl.textContent = v ? v+' (이 날짜로 업로드됩니다)' : '날짜를 선택하세요';
+};
+
+// ── 날짜별 업로드 내역 조회 ──────────────────────────────
+window.searchExcelHistory = function(){
+  const date=(document.getElementById('excel-srch-date')||{}).value||'';
+  if(!date){alert('날짜를 선택해 주세요.');return;}
+  const resultEl=document.getElementById('excel-history-result');
+  const records=[];
+  MB.forEach(m=>{
+    const hist=(m.weekHistory||[]).filter(h=>h.date===date);
+    if(hist.length>0){
+      const dayTotal=hist.reduce((s,h)=>s+(h.amt||0),0);
+      records.push({name:m.name,phone:m.phone,hist,dayTotal,nicknames:m.nicknames||[]});
+    }
+  });
+  if(!records.length){
+    resultEl.innerHTML=`<div style="text-align:center;padding:16px;color:#94a3b8;font-size:13px">📭 ${date} 업로드된 리워드 내역이 없습니다.</div>`;
+    resultEl.style.display='block'; return;
+  }
+  const grandTotal=records.reduce((s,r)=>s+r.dayTotal,0);
+  let html=`<div style="font-size:13px;font-weight:700;color:#1e40af;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid #dbeafe">
+    📅 ${date} 내역 — ${records.length}명 / 합계 ${grandTotal.toLocaleString()}원</div>`;
+  html+=records.map(r=>{
+    const apps=r.hist.map(h=>`<span style="font-size:11px;color:#64748b">${ex(h.appName||'미션')} ${(h.amt||0).toLocaleString()}원</span>`).join(' · ');
+    const nick=r.nicknames.length?`<span style="font-size:11px;color:#3b82f6">[${ex(r.nicknames[0])}]</span> `:'';
+    return `<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:9px 0;border-bottom:1px solid #f1f5f9">
+      <div><div style="font-size:13px;font-weight:700;color:#1a1a2e">${nick}${ex(r.name)} <span style="color:#94a3b8;font-size:11px">(${r.phone})</span></div>
+      <div style="margin-top:3px">${apps}</div></div>
+      <div style="font-size:14px;font-weight:800;color:#16a34a;flex-shrink:0;margin-left:8px">+${r.dayTotal.toLocaleString()}원</div>
+    </div>`;
+  }).join('');
+  resultEl.innerHTML=html;
+  resultEl.style.display='block';
+};
+window.resetExcelHistory = function(){
+  const d=document.getElementById('excel-srch-date'); if(d) d.value='';
+  const r=document.getElementById('excel-history-result'); if(r) r.style.display='none';
 };
 
 function renderTodaySection(){
@@ -1235,8 +1300,12 @@ window.uploadExcel = async function(){
       });
       const groupList=Object.values(grouped);
 
+      // 적용 날짜 가져오기 (지정 날짜 or 오늘)
+      const applyDate=(document.getElementById('excel-apply-date')||{}).value||new Date().toISOString().split('T')[0];
+
       // 미리보기
-      let previewHtml=`<div style="font-size:13px;font-weight:700;color:#1a1a2e;margin-bottom:8px">📋 업로드 미리보기 (${groupList.length}명 / ${items.length}건)</div>`;
+      let previewHtml=`<div style="font-size:13px;font-weight:700;color:#1a1a2e;margin-bottom:4px">📋 업로드 미리보기 (${groupList.length}명 / ${items.length}건)</div>`;
+      previewHtml+=`<div style="font-size:12px;color:#1d4ed8;background:#eff6ff;border-radius:8px;padding:6px 10px;margin-bottom:8px">📅 적용 날짜: <b>${applyDate}</b></div>`;
       previewHtml+=groupList.slice(0,10).map(g=>{
         const total=g.entries.reduce((s,e)=>s+e.amt,0);
         const apps=g.entries.map(e=>`${ex(e.appName)} ${e.amt.toLocaleString()}원`).join(', ');
@@ -1250,7 +1319,8 @@ window.uploadExcel = async function(){
       }).join('');
       if(groupList.length>10) previewHtml+=`<div style="font-size:11px;color:#94a3b8;margin-top:4px">... 외 ${groupList.length-10}명</div>`;
       if(notFound.length) previewHtml+=`<div style="font-size:11px;color:#ef4444;margin-top:6px">⚠️ 미매칭 ${notFound.length}건: ${notFound.slice(0,3).join(', ')}${notFound.length>3?'...':''}</div>`;
-      previewHtml+=`<button class="btn btnP" style="margin-top:12px" onclick="confirmExcel(${JSON.stringify(groupList)})">✅ ${groupList.length}명 주간 리워드 적용</button>`;
+      // applyDate를 함께 전달
+      previewHtml+=`<button class="btn btnP" style="margin-top:12px" onclick="confirmExcel(${JSON.stringify(groupList)}, '${applyDate}')">✅ ${groupList.length}명 주간 리워드 적용 (${applyDate})</button>`;
       prevEl.innerHTML=previewHtml;
       prevEl.style.display='block';
       msgEl.style.display='none';
@@ -1262,22 +1332,21 @@ window.uploadExcel = async function(){
   reader.readAsArrayBuffer(file);
 };
 
-window.confirmExcel = async function(groupList){
-  if(!confirm(`${groupList.length}명의 주간 리워드를 적용하시겠습니까?`)) return;
+window.confirmExcel = async function(groupList, applyDate){
+  const targetDate = applyDate || new Date().toISOString().split('T')[0];
+  if(!confirm(`${groupList.length}명의 주간 리워드를 ${targetDate} 날짜로 적용하시겠습니까?`)) return;
   showLoading('일괄 적용 중...');
-  const today=new Date().toISOString().split('T')[0];
   try{
     let done=0;
     for(const g of groupList){
       const m=MB.find(x=>x.id===g.id); if(!m) continue;
       const entryTotal=g.entries.reduce((s,e)=>s+e.amt,0);
-      // weekHistory: 오늘 날짜로 앱별 기록 추가
+      // weekHistory: 지정 날짜로 앱별 기록 추가
       const hist=Array.from(m.weekHistory||[]);
-      // 오늘 동일 앱 중복 제거 후 추가
       g.entries.forEach(e=>{
-        const dup=hist.findIndex(h=>h.date===today&&h.appName===e.appName);
-        if(dup>=0) hist[dup].amt=e.amt; // 덮어쓰기
-        else hist.push({date:today, appName:e.appName, amt:e.amt});
+        const dup=hist.findIndex(h=>h.date===targetDate&&h.appName===e.appName);
+        if(dup>=0) hist[dup].amt=e.amt;
+        else hist.push({date:targetDate, appName:e.appName, amt:e.amt});
       });
       // 주간 합계 재계산
       const wr=getWeekRange();
