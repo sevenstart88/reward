@@ -438,9 +438,8 @@ textarea{resize:none;min-height:80px;line-height:1.6}
         </div>
         <!-- 업로드 날짜 직접 지정 -->
         <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px">
-          <span style="font-size:12px;color:#374151;font-weight:700;white-space:nowrap">적용 날짜</span>
+          <span style="font-size:12px;color:#374151;font-weight:700;white-space:nowrap">적용 날짜 *</span>
           <input type="date" id="excel-apply-date" style="font-size:13px;padding:9px 12px;flex:1" onchange="updateUploadDateLabel()">
-          <button class="reset-btn" onclick="setTodayDate()">오늘</button>
         </div>
         <div style="display:flex;gap:8px;align-items:center">
           <input type="file" id="excel-file" accept=".xlsx,.xls,.csv" style="font-size:12px;padding:8px;flex:1">
@@ -672,6 +671,8 @@ window.doLogin = async function(){
 
 window.doUserLogout = function(){
   clearUser(); me=null;
+  if(userRefreshTimer){ clearInterval(userRefreshTimer); userRefreshTimer=null; }
+  if(unsubUser){ unsubUser(); unsubUser=null; }
   document.getElementById('l-name').value='';
   document.getElementById('l-phone').value='';
   goSc('sc-login');
@@ -778,22 +779,44 @@ window.renderTotalModal = function(){
   document.getElementById('tot-list').innerHTML=html;
 };
 
+let userRefreshTimer = null;
+let unsubUser = null; // 알바 실시간 리스너
+
 async function showUserDash(){
   showLoading('데이터 로딩 중...');
   try{
     await loadMB();
     const fresh=MB.find(m=>m.id===me.id); if(fresh) me=fresh;
     hideLoading();
-    document.getElementById('u-nm').textContent = me.name+'님';
-    document.getElementById('u-total-pts').textContent = (me.points||0).toLocaleString()+'원';
-    // 주간 리워드 = weekHistory 이번주 합산 (카드와 동일하게)
-    const weekAmt = calcMyWeekTotal();
-    document.getElementById('u-week-pts').textContent = weekAmt.toLocaleString()+'원';
-    selWeekDay=null;
-    renderWeekCard();
-    renderRk();
+    updateUserUI();
     goSc('sc-user');
+    // 실시간 리스너 (Firebase 즉시 반영)
+    startUserListener();
   }catch(e){hideLoading();alert('오류: '+e.message);}
+}
+
+// 알바 본인 데이터 실시간 리스너
+function startUserListener(){
+  if(unsubUser){ unsubUser(); unsubUser=null; }
+  if(!me) return;
+  unsubUser = onSnapshot(doc(db,'members',me.id), snap=>{
+    if(!snap.exists()) return;
+    me = {id:snap.id,...snap.data()};
+    // MB도 동기화
+    const idx=MB.findIndex(m=>m.id===me.id);
+    if(idx>=0) MB[idx]=me; else MB.push(me);
+    updateUserUI();
+  });
+}
+
+function updateUserUI(){
+  if(!me) return;
+  document.getElementById('u-nm').textContent = me.name+'님';
+  document.getElementById('u-total-pts').textContent = (me.points||0).toLocaleString()+'원';
+  const weekAmt = calcMyWeekTotal();
+  document.getElementById('u-week-pts').textContent = weekAmt.toLocaleString()+'원';
+  renderWeekCard();
+  renderRk();
 }
 
 // 내 이번주 실제 합산 금액 (weekHistory 기준)
@@ -1168,11 +1191,9 @@ window.showAdmSection = function(name){
   if(name==='excel') setTodayDate();
 };
 
-// 오늘 날짜 자동 설정
+// 엑셀 섹션 열릴 때 날짜 초기화 (직접 선택하도록)
 window.setTodayDate = function(){
-  const today=new Date().toISOString().split('T')[0];
-  const inp=document.getElementById('excel-apply-date');
-  if(inp&&!inp.value){ inp.value=today; }
+  // 날짜를 비워서 직접 선택하도록 유도
   updateUploadDateLabel();
 };
 window.updateUploadDateLabel = function(){
@@ -1261,6 +1282,8 @@ window.uploadExcel = async function(){
   const msgEl=document.getElementById('excel-msg');
   const prevEl=document.getElementById('excel-preview');
   if(!fileInput.files||!fileInput.files.length){alert('파일을 선택해 주세요.');return;}
+  const applyDate=(document.getElementById('excel-apply-date')||{}).value||'';
+  if(!applyDate){alert('적용 날짜를 먼저 선택해 주세요!');return;}
   const file=fileInput.files[0];
   const reader=new FileReader();
   reader.onload=async function(e){
@@ -1372,9 +1395,14 @@ window.confirmExcel = async function(groupList, applyDate){
     document.getElementById('excel-preview').style.display='none';
     document.getElementById('excel-file').value='';
     const msgEl=document.getElementById('excel-msg');
-    msgEl.textContent=`✅ ${done}명 주간 리워드 적용 완료!`;
+    msgEl.textContent=`✅ ${done}명 주간 리워드 적용 완료! (${targetDate})`;
     msgEl.style.color='#16a34a'; msgEl.style.display='block';
+    // MB 최신 데이터 새로고침 후 날짜 조회 자동 실행
+    await loadMB();
     setTimeout(()=>{msgEl.style.display='none';},3500);
+    // 날짜 조회창에 적용 날짜 자동 입력 후 조회
+    const srchDate=document.getElementById('excel-srch-date');
+    if(srchDate){ srchDate.value=targetDate; searchExcelHistory(); }
     doCurrentSearch();
   }catch(err){hideLoading();alert('오류: '+err.message);}
 };
