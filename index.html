@@ -1280,6 +1280,8 @@ function renderTodaySection(){
 }
 
 // ── 5) 엑셀 업로드 (A=성함, B=연락처, C=닉네임, D=앱명, E=금액) ──
+let pendingExcelData = null; // 전역으로 저장
+
 window.uploadExcel = async function(){
   const fileInput=document.getElementById('excel-file');
   const msgEl=document.getElementById('excel-msg');
@@ -1299,18 +1301,20 @@ window.uploadExcel = async function(){
 
       // A=성함, B=연락처, C=닉네임, D=앱명, E=금액
       const items=[], notFound=[];
+      // MB 최신 데이터 새로고침
+      await loadMB();
       for(let i=1;i<rows.length;i++){
         const row=rows[i];
         if(!row||(!row[0]&&!row[1])) continue;
-        const name  = String(row[0]||'').trim();
-        const phone = np(String(row[1]||''));
-        const nick  = String(row[2]||'').trim();
+        const name    = String(row[0]||'').trim();
+        const phone   = np(String(row[1]||''));
+        const nick    = String(row[2]||'').trim();
         const appName = String(row[3]||'미션').trim();
-        const amt   = parseInt(row[4])||0;
+        const amt     = parseInt(row[4])||0;
         if(!phone||!amt) continue;
-        // 연락처+성함으로 매칭
-        let member=MB.find(m=>np(m.phone||'')===phone);
-        if(!member&&name) member=MB.find(m=>m.name===name&&np(m.phone||'').includes(phone.slice(-4)));
+        // 연락처로 매칭
+        let member = MB.find(m=>np(m.phone||'')===phone);
+        if(!member && name) member = MB.find(m=>m.name===name);
         if(member){
           items.push({id:member.id, name:member.name, phone, nick, appName, amt});
         } else {
@@ -1318,7 +1322,7 @@ window.uploadExcel = async function(){
         }
       }
 
-      // 알바별로 그룹핑 (한 명에 여러 앱이 있을 수 있음)
+      // 알바별로 그룹핑
       const grouped={};
       items.forEach(it=>{
         if(!grouped[it.id]) grouped[it.id]={id:it.id,name:it.name,phone:it.phone,nick:it.nick,entries:[]};
@@ -1326,8 +1330,8 @@ window.uploadExcel = async function(){
       });
       const groupList=Object.values(grouped);
 
-      // 적용 날짜 가져오기 (지정 날짜 or 오늘)
-      const applyDate=(document.getElementById('excel-apply-date')||{}).value||new Date().toISOString().split('T')[0];
+      // 전역 변수에 저장 (HTML onclick에 JSON 직접 넣으면 따옴표 충돌 위험)
+      pendingExcelData = {groupList, applyDate};
 
       // 미리보기
       let previewHtml=`<div style="font-size:13px;font-weight:700;color:#1a1a2e;margin-bottom:4px">📋 업로드 미리보기 (${groupList.length}명 / ${items.length}건)</div>`;
@@ -1345,8 +1349,8 @@ window.uploadExcel = async function(){
       }).join('');
       if(groupList.length>10) previewHtml+=`<div style="font-size:11px;color:#94a3b8;margin-top:4px">... 외 ${groupList.length-10}명</div>`;
       if(notFound.length) previewHtml+=`<div style="font-size:11px;color:#ef4444;margin-top:6px">⚠️ 미매칭 ${notFound.length}건: ${notFound.slice(0,3).join(', ')}${notFound.length>3?'...':''}</div>`;
-      // applyDate를 함께 전달
-      previewHtml+=`<button class="btn btnP" style="margin-top:12px" onclick="confirmExcel(${JSON.stringify(groupList)}, '${applyDate}')">✅ ${groupList.length}명 주간 리워드 적용 (${applyDate})</button>`;
+      // 전역 변수 사용 (따옴표 충돌 방지)
+      previewHtml+=`<button class="btn btnP" style="margin-top:12px" onclick="confirmExcel()">✅ ${groupList.length}명 주간 리워드 적용 (${applyDate})</button>`;
       prevEl.innerHTML=previewHtml;
       prevEl.style.display='block';
       msgEl.style.display='none';
@@ -1358,75 +1362,69 @@ window.uploadExcel = async function(){
   reader.readAsArrayBuffer(file);
 };
 
-window.confirmExcel = async function(groupList, applyDate){
-  const targetDate = applyDate || new Date().toISOString().split('T')[0];
+window.confirmExcel = async function(){
+  if(!pendingExcelData){alert('업로드 데이터가 없습니다. 다시 파일을 선택해주세요.');return;}
+  const {groupList, applyDate:targetDate} = pendingExcelData;
+  if(!groupList||!groupList.length){alert('적용할 데이터가 없습니다.');return;}
   if(!confirm(`${groupList.length}명의 주간 리워드를 ${targetDate} 날짜로 적용하시겠습니까?`)) return;
   showLoading('일괄 적용 중...');
   try{
     let done=0;
     for(const g of groupList){
       const m=MB.find(x=>x.id===g.id); if(!m) continue;
-
       // 기존 weekHistory 복사
       const hist=Array.from(m.weekHistory||[]);
-
-      // 이번 업로드 전 targetDate의 기존 금액 합산 (중복 방지용)
+      // 이번 업로드 전 targetDate 금액 합산
       const prevDayAmt=hist.filter(h=>h.date===targetDate).reduce((s,h)=>s+(h.amt||0),0);
-
-      // targetDate + 앱명으로 중복 제거 후 추가/덮어쓰기
+      // targetDate + 앱명으로 추가/덮어쓰기
       g.entries.forEach(e=>{
         const dup=hist.findIndex(h=>h.date===targetDate && h.appName===e.appName);
         if(dup>=0) hist[dup].amt=e.amt;
         else hist.push({date:targetDate, appName:e.appName, amt:e.amt});
       });
-
-      // 이번 업로드 후 targetDate 금액 합산
+      // 이번 업로드 후 targetDate 금액
       const newDayAmt=hist.filter(h=>h.date===targetDate).reduce((s,h)=>s+(h.amt||0),0);
-      // 순증분 (새로 추가된 금액만)
-      const diff = newDayAmt - prevDayAmt;
-
-      // 주간 합계 (weekHistory 전체에서 이번주 합산)
+      const diff=newDayAmt-prevDayAmt;
+      // 주간 합계 (이번주 범위)
       const wr=getWeekRange();
       const newWeekPts=hist.filter(h=>{
-        const t=new Date(h.date+'T00:00:00');
+        const t=new Date(h.date+'T12:00:00');
         return t>=wr.from && t<=wr.to;
       }).reduce((s,h)=>s+(h.amt||0),0);
-
-      // 누적/월간은 순증분만 더함 (중복 방지)
-      const newPoints=(m.points||0)+diff;
-      const newMonthPts=(m.monthPts||0)+diff;
-
-      // 닉네임 업데이트
+      // 누적/월간은 순증분만
+      const newPoints=Math.max(0,(m.points||0)+diff);
+      const newMonthPts=Math.max(0,(m.monthPts||0)+diff);
+      // 닉네임
       const nicknames=Array.from(m.nicknames||[]);
       if(g.nick && !nicknames.includes(g.nick)) nicknames.push(g.nick);
 
       await updateDoc(doc(db,'members',g.id),{
         weekHistory:hist,
         weekPts:newWeekPts,
-        points:Math.max(0,newPoints),
-        monthPts:Math.max(0,newMonthPts),
+        points:newPoints,
+        monthPts:newMonthPts,
         nicknames
       });
-      // 로컬 MB 동기화
+      // 로컬 동기화
       m.weekHistory=hist; m.weekPts=newWeekPts;
-      m.points=Math.max(0,newPoints); m.monthPts=Math.max(0,newMonthPts);
-      m.nicknames=nicknames;
+      m.points=newPoints; m.monthPts=newMonthPts; m.nicknames=nicknames;
       done++;
       document.getElementById('loading-txt').textContent=`적용 중... (${done}/${groupList.length})`;
     }
-    // 완료 후 MB 새로고침
+    // 완료 후 최신 데이터 새로고침
     await loadMB();
     hideLoading();
+    pendingExcelData=null;
     document.getElementById('excel-preview').style.display='none';
     document.getElementById('excel-file').value='';
     const msgEl=document.getElementById('excel-msg');
     msgEl.textContent=`✅ ${done}명 주간 리워드 적용 완료! (${targetDate})`;
     msgEl.style.color='#16a34a'; msgEl.style.display='block';
     setTimeout(()=>{ msgEl.style.display='none'; }, 4000);
-    // 날짜 조회창에 적용 날짜 자동 입력 후 조회
+    // 날짜 조회창에 자동 입력 후 조회
     const srchDate=document.getElementById('excel-srch-date');
-    if(srchDate){ srchDate.value=targetDate; searchExcelHistory(); }
-  }catch(err){ hideLoading(); alert('오류: '+err.message); }
+    if(srchDate){ srchDate.value=targetDate; await searchExcelHistory(); }
+  }catch(err){ hideLoading(); alert('오류: '+err.message); console.error(err); }
 };
 
 // ── 삭제 ─────────────────────────────────────────────────
