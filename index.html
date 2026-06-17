@@ -1188,7 +1188,17 @@ window.showAdmSection = function(name){
   const sec=document.getElementById('sec-'+name);
   if(sec) sec.style.display='block';
   if(name==='today') renderTodaySection();
-  if(name==='excel') setTodayDate();
+  if(name==='excel'){
+    // 2) 섹션 열릴 때 미리보기/파일 초기화
+    const prev=document.getElementById('excel-preview');
+    const msg=document.getElementById('excel-msg');
+    const fi=document.getElementById('excel-file');
+    if(prev){ prev.style.display='none'; prev.innerHTML=''; }
+    if(msg) msg.style.display='none';
+    if(fi) fi.value='';
+    pendingExcelData=null;
+    updateUploadDateLabel();
+  }
 };
 
 // 엑셀 섹션 열릴 때 날짜 초기화 (직접 선택하도록)
@@ -1367,64 +1377,86 @@ window.confirmExcel = async function(){
   const {groupList, applyDate:targetDate} = pendingExcelData;
   if(!groupList||!groupList.length){alert('적용할 데이터가 없습니다.');return;}
   if(!confirm(`${groupList.length}명의 주간 리워드를 ${targetDate} 날짜로 적용하시겠습니까?`)) return;
-  showLoading('일괄 적용 중...');
-  try{
-    let done=0;
-    for(const g of groupList){
-      const m=MB.find(x=>x.id===g.id); if(!m) continue;
-      // 기존 weekHistory 복사
-      const hist=Array.from(m.weekHistory||[]);
-      // 이번 업로드 전 targetDate 금액 합산
+  showLoading('적용 중... (0/'+groupList.length+')');
+  const errors=[];
+  let done=0;
+  for(const g of groupList){
+    try{
+      // Firebase에서 직접 최신 데이터 가져오기 (로컬 캐시 무시)
+      const snap=await getDoc(doc(db,'members',g.id));
+      if(!snap.exists()){ errors.push(g.name+': 회원 없음'); continue; }
+      const mData=snap.data();
+
+      // weekHistory 업데이트
+      const hist=Array.from(mData.weekHistory||[]);
       const prevDayAmt=hist.filter(h=>h.date===targetDate).reduce((s,h)=>s+(h.amt||0),0);
-      // targetDate + 앱명으로 추가/덮어쓰기
       g.entries.forEach(e=>{
         const dup=hist.findIndex(h=>h.date===targetDate && h.appName===e.appName);
         if(dup>=0) hist[dup].amt=e.amt;
         else hist.push({date:targetDate, appName:e.appName, amt:e.amt});
       });
-      // 이번 업로드 후 targetDate 금액
       const newDayAmt=hist.filter(h=>h.date===targetDate).reduce((s,h)=>s+(h.amt||0),0);
       const diff=newDayAmt-prevDayAmt;
-      // 주간 합계 (이번주 범위)
+
+      // 이번주 주간 합계
       const wr=getWeekRange();
       const newWeekPts=hist.filter(h=>{
         const t=new Date(h.date+'T12:00:00');
-        return t>=wr.from && t<=wr.to;
+        return t>=wr.from&&t<=wr.to;
       }).reduce((s,h)=>s+(h.amt||0),0);
-      // 누적/월간은 순증분만
-      const newPoints=Math.max(0,(m.points||0)+diff);
-      const newMonthPts=Math.max(0,(m.monthPts||0)+diff);
-      // 닉네임
-      const nicknames=Array.from(m.nicknames||[]);
-      if(g.nick && !nicknames.includes(g.nick)) nicknames.push(g.nick);
 
+      const newPoints=Math.max(0,(mData.points||0)+diff);
+      const newMonthPts=Math.max(0,(mData.monthPts||0)+diff);
+      const nicknames=Array.from(mData.nicknames||[]);
+      if(g.nick&&!nicknames.includes(g.nick)) nicknames.push(g.nick);
+
+      // Firebase 저장
       await updateDoc(doc(db,'members',g.id),{
-        weekHistory:hist,
-        weekPts:newWeekPts,
-        points:newPoints,
-        monthPts:newMonthPts,
-        nicknames
+        weekHistory: hist,
+        weekPts: newWeekPts,
+        points: newPoints,
+        monthPts: newMonthPts,
+        nicknames: nicknames
       });
-      // 로컬 동기화
-      m.weekHistory=hist; m.weekPts=newWeekPts;
-      m.points=newPoints; m.monthPts=newMonthPts; m.nicknames=nicknames;
+
+      // 로컬 MB도 동기화
+      const local=MB.find(x=>x.id===g.id);
+      if(local){
+        local.weekHistory=hist; local.weekPts=newWeekPts;
+        local.points=newPoints; local.monthPts=newMonthPts;
+        local.nicknames=nicknames;
+      }
       done++;
       document.getElementById('loading-txt').textContent=`적용 중... (${done}/${groupList.length})`;
+    }catch(err){
+      errors.push(g.name+': '+err.message);
     }
-    // 완료 후 최신 데이터 새로고침
-    await loadMB();
-    hideLoading();
-    pendingExcelData=null;
-    document.getElementById('excel-preview').style.display='none';
-    document.getElementById('excel-file').value='';
-    const msgEl=document.getElementById('excel-msg');
+  }
+
+  // MB 전체 새로고침
+  await loadMB();
+  hideLoading();
+  pendingExcelData=null;
+
+  const prev=document.getElementById('excel-preview');
+  const fi=document.getElementById('excel-file');
+  if(prev){ prev.style.display='none'; prev.innerHTML=''; }
+  if(fi) fi.value='';
+
+  const msgEl=document.getElementById('excel-msg');
+  if(errors.length){
+    msgEl.textContent=`⚠️ ${done}명 완료, ${errors.length}건 오류: ${errors.slice(0,2).join(' / ')}`;
+    msgEl.style.color='#ef4444';
+  } else {
     msgEl.textContent=`✅ ${done}명 주간 리워드 적용 완료! (${targetDate})`;
-    msgEl.style.color='#16a34a'; msgEl.style.display='block';
-    setTimeout(()=>{ msgEl.style.display='none'; }, 4000);
-    // 날짜 조회창에 자동 입력 후 조회
-    const srchDate=document.getElementById('excel-srch-date');
-    if(srchDate){ srchDate.value=targetDate; await searchExcelHistory(); }
-  }catch(err){ hideLoading(); alert('오류: '+err.message); console.error(err); }
+    msgEl.style.color='#16a34a';
+  }
+  msgEl.style.display='block';
+  setTimeout(()=>{ msgEl.style.display='none'; }, 5000);
+
+  // 날짜 조회창 자동 조회
+  const srchDate=document.getElementById('excel-srch-date');
+  if(srchDate){ srchDate.value=targetDate; await searchExcelHistory(); }
 };
 
 // ── 삭제 ─────────────────────────────────────────────────
