@@ -564,7 +564,7 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import {
-  getFirestore, collection, doc, getDocs, getDoc, addDoc, updateDoc, deleteDoc,
+  getFirestore, collection, doc, getDocs, addDoc, updateDoc, deleteDoc,
   onSnapshot, serverTimestamp
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
@@ -1377,18 +1377,20 @@ window.confirmExcel = async function(){
   const {groupList, applyDate:targetDate} = pendingExcelData;
   if(!groupList||!groupList.length){alert('적용할 데이터가 없습니다.');return;}
   if(!confirm(`${groupList.length}명의 주간 리워드를 ${targetDate} 날짜로 적용하시겠습니까?`)) return;
+  showLoading('최신 데이터 확인 중...');
+  // Firebase에서 최신 데이터 새로고침
+  await loadMB();
   showLoading('적용 중... (0/'+groupList.length+')');
   const errors=[];
   let done=0;
   for(const g of groupList){
     try{
-      // Firebase에서 직접 최신 데이터 가져오기 (로컬 캐시 무시)
-      const snap=await getDoc(doc(db,'members',g.id));
-      if(!snap.exists()){ errors.push(g.name+': 회원 없음'); continue; }
-      const mData=snap.data();
+      // 최신 MB에서 회원 찾기
+      const m=MB.find(x=>x.id===g.id);
+      if(!m){ errors.push(g.name+': 회원 없음'); continue; }
 
       // weekHistory 업데이트
-      const hist=Array.from(mData.weekHistory||[]);
+      const hist=Array.from(m.weekHistory||[]);
       const prevDayAmt=hist.filter(h=>h.date===targetDate).reduce((s,h)=>s+(h.amt||0),0);
       g.entries.forEach(e=>{
         const dup=hist.findIndex(h=>h.date===targetDate && h.appName===e.appName);
@@ -1405,9 +1407,9 @@ window.confirmExcel = async function(){
         return t>=wr.from&&t<=wr.to;
       }).reduce((s,h)=>s+(h.amt||0),0);
 
-      const newPoints=Math.max(0,(mData.points||0)+diff);
-      const newMonthPts=Math.max(0,(mData.monthPts||0)+diff);
-      const nicknames=Array.from(mData.nicknames||[]);
+      const newPoints=Math.max(0,(m.points||0)+diff);
+      const newMonthPts=Math.max(0,(m.monthPts||0)+diff);
+      const nicknames=Array.from(m.nicknames||[]);
       if(g.nick&&!nicknames.includes(g.nick)) nicknames.push(g.nick);
 
       // Firebase 저장
@@ -1419,13 +1421,9 @@ window.confirmExcel = async function(){
         nicknames: nicknames
       });
 
-      // 로컬 MB도 동기화
-      const local=MB.find(x=>x.id===g.id);
-      if(local){
-        local.weekHistory=hist; local.weekPts=newWeekPts;
-        local.points=newPoints; local.monthPts=newMonthPts;
-        local.nicknames=nicknames;
-      }
+      // 로컬 MB 동기화
+      m.weekHistory=hist; m.weekPts=newWeekPts;
+      m.points=newPoints; m.monthPts=newMonthPts; m.nicknames=nicknames;
       done++;
       document.getElementById('loading-txt').textContent=`적용 중... (${done}/${groupList.length})`;
     }catch(err){
@@ -1433,8 +1431,6 @@ window.confirmExcel = async function(){
     }
   }
 
-  // MB 전체 새로고침
-  await loadMB();
   hideLoading();
   pendingExcelData=null;
 
