@@ -652,40 +652,26 @@ async function init(){
     if(loadAdm()){
       document.getElementById('loading-txt').textContent='데이터 로딩 중...';
       try{
-        await withTimeout(loadMB(), 10000);
-        hideLoading();
-        showAdmDash();
-        showToast('✅ 자동로그인');
+        await withTimeout(loadMB(), 3000);
+        hideLoading(); showAdmDash(); showToast('✅ 자동로그인');
       }catch(e){
-        hideLoading();
-        goSc('sc-adm-login');
+        hideLoading(); goSc('sc-adm-login');
       }
     } else {
-      hideLoading();
-      goSc('sc-adm-login');
+      hideLoading(); goSc('sc-adm-login');
     }
     return;
   }
 
-  // 알바 페이지
   const savedId = loadUser();
   if(savedId){
     document.getElementById('loading-txt').textContent='로딩 중...';
     try{
-      await withTimeout(loadMB(), 10000);
+      await withTimeout(loadMB(), 3000);
       const found = MB.find(m=>m.id===savedId);
-      if(found){
-        me=found;
-        hideLoading();
-        showUserDash();
-        showToast('✅ '+me.name+'님 자동로그인');
-        return;
-      } else {
-        clearUser();
-      }
-    }catch(e){
-      console.error('자동로그인 오류:', e.message);
-    }
+      if(found){ me=found; hideLoading(); showUserDash(); showToast('✅ '+me.name+'님 자동로그인'); return; }
+      else { clearUser(); }
+    }catch(e){ console.error('init 오류:', e.message); }
   }
   hideLoading();
   goSc('sc-login');
