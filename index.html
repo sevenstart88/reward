@@ -162,7 +162,7 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 </head>
 <body>
 
-<div class="loading-overlay" id="loading-overlay">
+<div class="loading-overlay" id="loading-overlay" style="display:none">
   <div class="loading-spinner"></div>
   <div class="loading-txt" id="loading-txt">연결 중...</div>
 </div>
@@ -640,26 +640,46 @@ const clearUser=()=>{try{localStorage.removeItem(USER_KEY);}catch(e){}};
 async function init(){
   const isAdmin = location.search.includes('admin');
 
-  // 관리자 페이지
   if(isAdmin){
     if(loadAdm()){
       showLoading('데이터 로딩 중...');
-      try{ await loadMB(); hideLoading(); showAdmDash(); showToast('✅ 자동로그인'); }
-      catch(e){ hideLoading(); goSc('sc-adm-login'); }
-    } else { hideLoading(); goSc('sc-adm-login'); }
+      try{
+        await loadMB();
+        hideLoading();
+        showAdmDash();
+        showToast('✅ 자동로그인');
+      }catch(e){
+        hideLoading();
+        goSc('sc-adm-login');
+      }
+    } else {
+      hideLoading();
+      goSc('sc-adm-login');
+    }
     return;
   }
 
-  // 알바 페이지 — 자동로그인 확인
+  // 알바 페이지
   const savedId = loadUser();
   if(savedId){
     showLoading('로딩 중...');
     try{
       await loadMB();
       const found = MB.find(m=>m.id===savedId);
-      if(found){ me=found; hideLoading(); showUserDash(); showToast('✅ '+me.name+'님 자동로그인'); return; }
-      else{ clearUser(); }
-    }catch(e){}
+      if(found){
+        me=found;
+        hideLoading();
+        showUserDash();
+        showToast('✅ '+me.name+'님 자동로그인');
+        return;
+      } else {
+        clearUser();
+      }
+    }catch(e){
+      console.error('자동로그인 오류:', e);
+    }
+    hideLoading();
+  } else {
     hideLoading();
   }
   goSc('sc-login');
@@ -1662,7 +1682,6 @@ window.restart=function(){
 };
 
 // 시작
-hideLoading();
 init();
 </script>
 </body>
