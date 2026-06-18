@@ -637,15 +637,22 @@ const loadUser=()=>{try{return localStorage.getItem(USER_KEY);}catch(e){return n
 const clearUser=()=>{try{localStorage.removeItem(USER_KEY);}catch(e){}};
 
 // ── 초기화 ───────────────────────────────────────────────
+// Firebase 연결에 타임아웃 적용 (10초 내 안 되면 로그인 화면으로)
+function withTimeout(promise, ms){
+  return Promise.race([
+    promise,
+    new Promise((_,reject)=>setTimeout(()=>reject(new Error('timeout')),ms))
+  ]);
+}
+
 async function init(){
   const isAdmin = location.search.includes('admin');
 
   if(isAdmin){
-    // 관리자 페이지
     if(loadAdm()){
       document.getElementById('loading-txt').textContent='데이터 로딩 중...';
       try{
-        await loadMB();
+        await withTimeout(loadMB(), 10000);
         hideLoading();
         showAdmDash();
         showToast('✅ 자동로그인');
@@ -665,7 +672,7 @@ async function init(){
   if(savedId){
     document.getElementById('loading-txt').textContent='로딩 중...';
     try{
-      await loadMB();
+      await withTimeout(loadMB(), 10000);
       const found = MB.find(m=>m.id===savedId);
       if(found){
         me=found;
@@ -677,7 +684,7 @@ async function init(){
         clearUser();
       }
     }catch(e){
-      console.error('자동로그인 오류:', e);
+      console.error('자동로그인 오류:', e.message);
     }
   }
   hideLoading();
