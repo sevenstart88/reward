@@ -162,14 +162,14 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 </head>
 <body>
 
-<div class="loading-overlay" id="loading-overlay" style="display:none">
+<div class="loading-overlay" id="loading-overlay">
   <div class="loading-spinner"></div>
   <div class="loading-txt" id="loading-txt">연결 중...</div>
 </div>
 <div class="toast" id="toast"></div>
 
 <!-- 신청서 -->
-<div id="sc-apply" class="screen on">
+<div id="sc-apply" class="screen">
   <div class="ap-top"><div class="ap-title">🏆 리워드 체험단</div><div class="ap-sub">신청서 작성</div></div>
   <div class="pg-wrap">
     <div class="pg-lbl" id="pg-lbl">1 / 6단계</div>
@@ -641,8 +641,9 @@ async function init(){
   const isAdmin = location.search.includes('admin');
 
   if(isAdmin){
+    // 관리자 페이지
     if(loadAdm()){
-      showLoading('데이터 로딩 중...');
+      document.getElementById('loading-txt').textContent='데이터 로딩 중...';
       try{
         await loadMB();
         hideLoading();
@@ -662,7 +663,7 @@ async function init(){
   // 알바 페이지
   const savedId = loadUser();
   if(savedId){
-    showLoading('로딩 중...');
+    document.getElementById('loading-txt').textContent='로딩 중...';
     try{
       await loadMB();
       const found = MB.find(m=>m.id===savedId);
@@ -678,10 +679,8 @@ async function init(){
     }catch(e){
       console.error('자동로그인 오류:', e);
     }
-    hideLoading();
-  } else {
-    hideLoading();
   }
+  hideLoading();
   goSc('sc-login');
 }
 
