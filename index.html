@@ -306,7 +306,6 @@ textarea{resize:none;min-height:80px;line-height:1.6}
     </div>
   </div>
   <div class="dash-wrap">
-    <!-- 주간 리워드 카드 -->
     <div class="week-card">
       <div class="week-card-title">📅 주간 리워드 금액</div>
       <div class="week-card-sub">(매주 월요일~일요일 까지, 일주일 합산 금액)</div>
@@ -314,7 +313,6 @@ textarea{resize:none;min-height:80px;line-height:1.6}
       <div class="week-total" id="week-total"></div>
       <div id="week-list"></div>
     </div>
-    <!-- 랭킹 카드 -->
     <div class="rk-card">
       <div class="rk-card-head">
         <div class="rk-card-title">🏆 알바 랭킹</div>
@@ -356,8 +354,6 @@ textarea{resize:none;min-height:80px;line-height:1.6}
     <span onclick="doLogout()" style="font-size:13px;color:rgba(255,255,255,.9);cursor:pointer;font-weight:700;background:rgba(255,255,255,.2);padding:7px 13px;border-radius:10px">로그아웃 ↩</span>
   </div>
   <div class="adm-wrap">
-
-    <!-- 통계 버튼 3개 -->
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px">
       <div class="stat-card" style="cursor:pointer" id="btn-tot" onclick="showAdmSection('tot')">
         <div class="stat-n" id="a-tot">0</div>
@@ -368,17 +364,15 @@ textarea{resize:none;min-height:80px;line-height:1.6}
         <div class="stat-l">오늘 가입 👁️</div>
       </div>
     </div>
-    <!-- 엑셀 업로드 버튼 (별도) -->
     <div class="stat-card" style="cursor:pointer;margin-bottom:14px;text-align:center;padding:13px" id="btn-excel" onclick="showAdmSection('excel')">
       <div style="font-size:16px;font-weight:800;color:#1a1a2e">📊 주간 리워드 일괄 설정</div>
       <div style="font-size:12px;color:#64748b;margin-top:3px">엑셀 업로드로 리워드 적용</div>
     </div>
 
-    <!-- ── 섹션1: 총 알바인원 검색 ── -->
+    <!-- 섹션1: 총 알바인원 검색 -->
     <div id="sec-tot" style="display:none">
       <div class="search-box">
         <div class="search-title">🔍 알바인원 검색</div>
-        <!-- 날짜 검색 -->
         <div style="background:#f8fafc;border-radius:12px;padding:12px;margin-bottom:10px">
           <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px">📅 가입 날짜로 검색</div>
           <div style="display:flex;gap:8px;align-items:center">
@@ -387,7 +381,6 @@ textarea{resize:none;min-height:80px;line-height:1.6}
             <button class="reset-btn" onclick="resetDateSearch()">초기화</button>
           </div>
         </div>
-        <!-- 성함+연락처 검색 -->
         <div style="background:#f8fafc;border-radius:12px;padding:12px">
           <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px">👤 성함 + 연락처로 검색 (둘 다 입력 필요)</div>
           <div style="display:flex;flex-direction:column;gap:7px">
@@ -404,7 +397,7 @@ textarea{resize:none;min-height:80px;line-height:1.6}
       <div id="mem-list"></div>
     </div>
 
-    <!-- ── 섹션2: 오늘 가입 ── -->
+    <!-- 섹션2: 오늘 가입 -->
     <div id="sec-today" style="display:none">
       <div class="search-box">
         <div class="search-title">👁️ 오늘 가입한 알바인원</div>
@@ -413,10 +406,8 @@ textarea{resize:none;min-height:80px;line-height:1.6}
       <div id="today-list"></div>
     </div>
 
-    <!-- ── 섹션3: 엑셀 업로드 ── -->
+    <!-- 섹션3: 엑셀 업로드 -->
     <div id="sec-excel" style="display:none">
-
-      <!-- 날짜별 업로드 내역 조회 -->
       <div class="search-box" style="margin-bottom:12px">
         <div class="search-title">📅 날짜별 업로드 내역 조회</div>
         <div style="font-size:12px;color:#64748b;margin-bottom:10px">날짜를 선택하면 해당 날 업로드된 리워드 내역을 확인할 수 있습니다.</div>
@@ -427,8 +418,6 @@ textarea{resize:none;min-height:80px;line-height:1.6}
         </div>
         <div id="excel-history-result" style="margin-top:12px;display:none"></div>
       </div>
-
-      <!-- 엑셀 업로드 -->
       <div class="search-box">
         <div class="search-title">📊 주간 리워드 일괄 설정 (엑셀 업로드)</div>
         <div style="background:#eff6ff;border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:#1d4ed8;line-height:1.7">
@@ -446,11 +435,9 @@ textarea{resize:none;min-height:80px;line-height:1.6}
       </div>
     </div>
 
-    <!-- 초기 안내 -->
     <div id="sec-home" style="text-align:center;padding:30px 20px;color:#94a3b8;font-size:14px">
       위 버튼을 눌러 원하는 기능을 선택하세요.
     </div>
-
   </div>
 </div>
 
@@ -461,7 +448,6 @@ textarea{resize:none;min-height:80px;line-height:1.6}
       <div style="font-size:16px;font-weight:800;color:#fff">💰 총 누적 리워드 내역</div>
       <div onclick="closeTotalModal()" style="color:#fff;font-size:22px;cursor:pointer;font-weight:700;line-height:1">✕</div>
     </div>
-    <!-- 년도/월/일 필터 -->
     <div style="padding:12px 16px;background:#f8fafc;border-bottom:1px solid #e2e8f0">
       <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
         <select id="tot-year" style="flex:1;min-width:80px;font-size:13px;padding:9px 8px" onchange="onTotYearChange()"></select>
@@ -491,7 +477,6 @@ textarea{resize:none;min-height:80px;line-height:1.6}
       <div onclick="closeEditModal()" style="color:#fff;font-size:22px;cursor:pointer;font-weight:700;line-height:1">✕</div>
     </div>
     <div style="padding:18px">
-      <!-- 기본 정보 -->
       <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #f1f5f9">👤 기본 정보</div>
       <div class="fl"><span class="lbl">성함 *</span><input type="text" id="edit-name" placeholder="실명 입력"></div>
       <div class="fl"><span class="lbl">연락처 * (숫자만)</span><input type="tel" id="edit-phone" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'')"></div>
@@ -507,7 +492,6 @@ textarea{resize:none;min-height:80px;line-height:1.6}
           <option value="애플 (iOS)">애플 (iOS)</option>
         </select>
       </div>
-      <!-- 계좌 정보 -->
       <div style="font-size:13px;font-weight:700;color:#374151;margin:14px 0 10px;padding-bottom:6px;border-bottom:2px solid #f1f5f9">🏦 계좌 정보</div>
       <div class="fl"><span class="lbl">은행명</span>
         <select id="edit-bank">
@@ -522,12 +506,10 @@ textarea{resize:none;min-height:80px;line-height:1.6}
       </div>
       <div class="fl"><span class="lbl">계좌번호 (숫자만)</span><input type="text" id="edit-acct" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'')"></div>
       <div class="fl"><span class="lbl">예금주</span><input type="text" id="edit-holder" placeholder="예금주명"></div>
-      <!-- 리워드 -->
       <div style="font-size:13px;font-weight:700;color:#374151;margin:14px 0 10px;padding-bottom:6px;border-bottom:2px solid #f1f5f9">💰 리워드 금액 수동 수정</div>
       <div class="fl"><span class="lbl">누적 리워드 (원)</span><input type="number" id="edit-points" min="0" step="100"></div>
       <div class="fl"><span class="lbl">주간 리워드 (원)</span><input type="number" id="edit-weekpts" min="0" step="100"></div>
       <div class="fl"><span class="lbl">월간 리워드 (원)</span><input type="number" id="edit-monthpts" min="0" step="100"></div>
-      <!-- 저장 -->
       <div id="edit-msg" style="font-size:12px;color:#16a34a;margin-bottom:8px;display:none">✅ 저장되었습니다!</div>
       <div style="display:flex;gap:8px;margin-top:4px">
         <button class="btn btnS" onclick="closeEditModal()" style="margin-top:0">취소</button>
@@ -589,7 +571,7 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js';
 import {
   getFirestore, collection, doc, getDocs, addDoc, updateDoc, deleteDoc,
-  onSnapshot, serverTimestamp, enableIndexedDbPersistence
+  onSnapshot, serverTimestamp
 } from 'https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js';
 
 const firebaseConfig = {
@@ -609,26 +591,23 @@ const np = v => String(v||'').replace(/\D/g,'');
 const ex = s => s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
 
 let MB = [];
-let me = null;   // 로그인한 알바 회원
+let me = null;
 let rkMode = 'week';
 let selWeekDay = null;
 let unsubMem = null;
 let ageVal='', osVal='', ag1='', ag2='', aCur=1;
 let nickTargetId=null, nickTags=[];
 
-// ── 로딩 / 토스트 ────────────────────────────────────────
 function showLoading(txt='처리 중...'){document.getElementById('loading-txt').textContent=txt;document.getElementById('loading-overlay').style.display='flex';}
 function hideLoading(){document.getElementById('loading-overlay').style.display='none';}
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2500);}
 
-// ── 화면 전환 ────────────────────────────────────────────
 window.goSc = id => {
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
   document.getElementById(id).classList.add('on');
   window.scrollTo(0,0);
 };
 
-// ── 세션 ─────────────────────────────────────────────────
 const saveAdm=()=>{try{localStorage.setItem(ADM_KEY,'1');}catch(e){}};
 const loadAdm=()=>{try{return localStorage.getItem(ADM_KEY);}catch(e){return null;}};
 const clearAdm=()=>{try{localStorage.removeItem(ADM_KEY);}catch(e){}};
@@ -636,8 +615,6 @@ const saveUser=id=>{try{localStorage.setItem(USER_KEY,id);}catch(e){}};
 const loadUser=()=>{try{return localStorage.getItem(USER_KEY);}catch(e){return null;}};
 const clearUser=()=>{try{localStorage.removeItem(USER_KEY);}catch(e){}};
 
-// ── 초기화 ───────────────────────────────────────────────
-// Firebase 연결에 타임아웃 적용 (10초 내 안 되면 로그인 화면으로)
 function withTimeout(promise, ms){
   return Promise.race([
     promise,
@@ -652,7 +629,7 @@ async function init(){
     if(loadAdm()){
       document.getElementById('loading-txt').textContent='데이터 로딩 중...';
       try{
-        await withTimeout(loadMB(), 3000);
+        await withTimeout(loadMB(), 8000);
         hideLoading(); showAdmDash(); showToast('✅ 자동로그인');
       }catch(e){
         hideLoading(); goSc('sc-adm-login');
@@ -667,7 +644,7 @@ async function init(){
   if(savedId){
     document.getElementById('loading-txt').textContent='로딩 중...';
     try{
-      await withTimeout(loadMB(), 3000);
+      await withTimeout(loadMB(), 8000);
       const found = MB.find(m=>m.id===savedId);
       if(found){ me=found; hideLoading(); showUserDash(); showToast('✅ '+me.name+'님 자동로그인'); return; }
       else { clearUser(); }
@@ -684,7 +661,6 @@ async function loadMB(){
   MB.sort((a,b)=>(b.joinDate||'').localeCompare(a.joinDate||'')||(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
 }
 
-// ── 알바 로그인 ──────────────────────────────────────────
 window.doLogin = async function(){
   const nameIn = document.getElementById('l-name').value.trim();
   const phoneIn = np(document.getElementById('l-phone').value);
@@ -714,7 +690,6 @@ window.doUserLogout = function(){
   goSc('sc-login');
 };
 
-// ── 알바 대시보드 ────────────────────────────────────────
 function getWeekRange(){
   const now=new Date(), day=now.getDay();
   const diffToMon=day===0?-6:1-day;
@@ -726,12 +701,10 @@ function displayName(m){ return m.nicknames&&m.nicknames.length?m.nicknames[0]:'
 const AVATAR_COLORS=['#3b82f6','#6366f1','#8b5cf6','#ec4899','#f59e0b','#10b981'];
 function avatarColor(name){let s=0;for(let c of name)s+=c.charCodeAt(0);return AVATAR_COLORS[s%AVATAR_COLORS.length];}
 
-// ── 총 누적 리워드 모달 (년도/월 조회) ──────────────────
 window.openTotalModal = function(){
   const yearSel = document.getElementById('tot-year');
   const curYear = new Date().getFullYear();
   const hist = me.weekHistory||[];
-  // 실제 내역에서 연도 범위 추출
   const years=[...new Set(hist.map(h=>h.date.split('-')[0]))].sort().reverse();
   const joinYear = me.joinDate ? parseInt(me.joinDate.split('-')[0]) : curYear;
   yearSel.innerHTML = '<option value="">전체 연도</option>';
@@ -752,13 +725,11 @@ window.resetTotalFilter = function(){
   document.getElementById('tot-day').innerHTML='<option value="">전체 일</option>';
   renderTotalModal();
 };
-// 연도 변경 시 월 초기화
 window.onTotYearChange = function(){
   document.getElementById('tot-month').value='';
   document.getElementById('tot-day').innerHTML='<option value="">전체 일</option>';
   renderTotalModal();
 };
-// 월 변경 시 일 목록 동적 생성
 window.onTotMonthChange = function(){
   const year=document.getElementById('tot-year').value;
   const month=document.getElementById('tot-month').value;
@@ -779,24 +750,27 @@ window.renderTotalModal = function(){
   const day   = document.getElementById('tot-day').value;
   const hist  = me.weekHistory||[];
 
-  // 필터링
   let filtered=hist.slice();
-  if(year)  filtered=filtered.filter(h=>h.date.startsWith(year+'-'));
-  if(month) filtered=filtered.filter(h=>h.date.startsWith((year||'')+'-'+month+'-')||h.date.substring(5,7)===month);
-  if(year&&month) filtered=hist.filter(h=>h.date.startsWith(`${year}-${month}-`));
   if(year&&month&&day) filtered=hist.filter(h=>h.date===`${year}-${month}-${day}`);
-  if(!year&&!month&&!day) filtered=hist.slice();
+  else if(year&&month) filtered=hist.filter(h=>h.date.startsWith(`${year}-${month}-`));
+  else if(year) filtered=hist.filter(h=>h.date.startsWith(year+'-'));
 
   const total=filtered.reduce((s,h)=>s+(h.amt||0),0);
 
-  // 날짜별 그룹핑 표시
   let html='';
   if(!filtered.length){
     html='<div style="text-align:center;padding:30px;color:#94a3b8;font-size:13px">해당 기간 내역이 없습니다.</div>';
   } else {
     const byDate={};
     filtered.forEach(h=>{if(!byDate[h.date])byDate[h.date]=[];byDate[h.date].push(h);});
-    html=Object.keys(byDate).sort().reverse().map(date=>{
+    if(!year&&!month&&!day){
+      const total2=me.points||0;
+      html=`<div style="padding:12px 0;border-bottom:2px solid #dbeafe;margin-bottom:4px">
+        <div style="display:flex;justify-content:space-between"><span style="font-size:13px;font-weight:700">총 누적 리워드</span>
+        <span style="font-size:15px;font-weight:800;color:#1e40af">${total2.toLocaleString()}원</span></div>
+      </div>`;
+    }
+    html+=Object.keys(byDate).sort().reverse().map(date=>{
       const items=byDate[date];
       const dayTotal=items.reduce((s,h)=>s+(h.amt||0),0);
       return `<div style="border-bottom:1px solid #f1f5f9;padding:12px 0">
@@ -809,21 +783,14 @@ window.renderTotalModal = function(){
         </div>`).join('')}
       </div>`;
     }).join('');
-    // 전체가 아닐 때 합계 표시도 추가
-    if(!year&&!month&&!day){
-      const total2=me.points||0;
-      html=`<div style="padding:12px 0;border-bottom:2px solid #dbeafe;margin-bottom:4px">
-        <div style="display:flex;justify-content:space-between"><span style="font-size:13px;font-weight:700">총 누적 리워드</span>
-        <span style="font-size:15px;font-weight:800;color:#1e40af">${total2.toLocaleString()}원</span></div>
-      </div>`+html;
-    }
   }
   const label=year?(month?(day?`${year}년 ${parseInt(month)}월 ${parseInt(day)}일`:`${year}년 ${parseInt(month)}월`):year+'년'):'전체';
   document.getElementById('tot-summary').textContent=`${label} 합계: ${total.toLocaleString()}원`;
   document.getElementById('tot-list').innerHTML=html;
 };
+
 let userRefreshTimer = null;
-let unsubUser = null; // 알바 실시간 리스너
+let unsubUser = null;
 
 async function showUserDash(){
   showLoading('데이터 로딩 중...');
@@ -833,19 +800,16 @@ async function showUserDash(){
     hideLoading();
     updateUserUI();
     goSc('sc-user');
-    // 실시간 리스너 (Firebase 즉시 반영)
     startUserListener();
   }catch(e){hideLoading();alert('오류: '+e.message);}
 }
 
-// 알바 본인 데이터 실시간 리스너
 function startUserListener(){
   if(unsubUser){ unsubUser(); unsubUser=null; }
   if(!me) return;
   unsubUser = onSnapshot(doc(db,'members',me.id), snap=>{
     if(!snap.exists()) return;
     me = {id:snap.id,...snap.data()};
-    // MB도 동기화
     const idx=MB.findIndex(m=>m.id===me.id);
     if(idx>=0) MB[idx]=me; else MB.push(me);
     updateUserUI();
@@ -862,7 +826,6 @@ function updateUserUI(){
   renderRk();
 }
 
-// 내 이번주 실제 합산 금액 (weekHistory 기준)
 function calcMyWeekTotal(){
   if(!me) return 0;
   const wr=getWeekRange();
@@ -872,7 +835,6 @@ function calcMyWeekTotal(){
   }).reduce((s,h)=>s+(h.amt||0),0);
 }
 
-// ── 주간 리워드 카드 ─────────────────────────────────────
 window.setRk = function(mode,el){
   rkMode=mode;
   el.closest('.rk-tabs').querySelectorAll('.rk-tab').forEach(t=>t.classList.remove('on'));
@@ -887,11 +849,8 @@ window.selectWeekDay = function(idx){
 function renderWeekCard(){
   const wr=getWeekRange();
   const dayNames=['월','화','수','목','금','토','일'];
-  // 요일별 실제 금액 계산 (weekHistory 배열에서)
-  // weekHistory: [{date:'2026-06-15', amt:1500, appName:'앱명'}, ...]
   const hist = me.weekHistory||[];
 
-  // 요일 탭
   let daysHtml='';
   for(let i=0;i<7;i++){
     const d=new Date(wr.from); d.setDate(wr.from.getDate()+i);
@@ -907,10 +866,8 @@ function renderWeekCard(){
 
   let html='', total=0;
   if(selWeekDay===null){
-    // 전체 주간 합계 = weekHistory 이번주 합산 (헤더와 동일)
     total = calcMyWeekTotal();
     if(total>0){
-      // 날짜별 그룹핑
       const byDate={};
       hist.forEach(h=>{if(!byDate[h.date])byDate[h.date]=[];byDate[h.date].push(h);});
       html=Object.keys(byDate).sort().map(date=>{
@@ -928,7 +885,6 @@ function renderWeekCard(){
       html='<div style="text-align:center;padding:16px;color:#94a3b8;font-size:13px">이번주 승인된 리워드가 없습니다. (0원)</div>';
     }
   } else {
-    // 선택한 요일
     const d=new Date(wr.from); d.setDate(wr.from.getDate()+selWeekDay);
     const dateStr=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
     const dayItems=hist.filter(h=>h.date===dateStr);
@@ -946,9 +902,6 @@ function renderWeekCard(){
   document.getElementById('week-list').innerHTML=html;
 }
 
-// ── 랭킹 렌더 ────────────────────────────────────────────
-// 주간 랭킹 기준: 총 누적 + 주간 금액 합산
-// 월간 랭킹 기준: 총 누적 + 월간 금액 합산
 function calcRkPts(m, isWeek){
   const base = m.points||0;
   const extra = isWeek ? (m.weekPts||0) : (m.monthPts||0);
@@ -969,7 +922,6 @@ function renderRk(){
     restEl.innerHTML=''; return;
   }
 
-  // TOP3 포디움 (2위-1위-3위 순서)
   const top3=top.slice(0,3);
   const order=[1,0,2];
   let podHtml='<div class="podium">';
@@ -991,7 +943,6 @@ function renderRk(){
   podHtml+='</div>';
   podEl.innerHTML=podHtml;
 
-  // 4~5위
   let restHtml='';
   for(let i=3;i<top.length;i++){
     const m=top[i]; const pts=calcRkPts(m,isW);
@@ -1004,7 +955,6 @@ function renderRk(){
   if(noteEl&&me) noteEl.textContent=myIdx>=5?'내 순위: '+(myIdx+1)+'위':'';
 }
 
-// ── 관리자 로그인 ────────────────────────────────────────
 window.doAdmLogin = async function(){
   const pw=document.getElementById('adm-pw').value;
   const er=document.getElementById('adm-er'); er.classList.remove('on');
@@ -1023,15 +973,10 @@ window.doLogout = function(){
 
 function showAdmDash(){
   updateStats();
-  // 모든 섹션 숨기고 홈 안내만 표시
   ADM_SECTIONS.forEach(s=>{
     const el=document.getElementById('sec-'+s);
     if(el) el.style.display='none';
   });
-  // 엑셀 버튼 카드는 항상 표시
-  const excelBtn=document.getElementById('btn-excel');
-  if(excelBtn) excelBtn.style.display='block';
-  // 버튼 테두리 초기화
   ['tot','today','excel'].forEach(s=>{
     const btn=document.getElementById('btn-'+s);
     if(btn) btn.style.outline='none';
@@ -1048,7 +993,6 @@ function updateStats(){
   document.getElementById('a-today').textContent=MB.filter(m=>m.joinDate===today).length;
 }
 
-// ── 실시간 리스너 ────────────────────────────────────────
 function startListener(){
   if(unsubMem) return;
   unsubMem=onSnapshot(collection(db,'members'),snap=>{
@@ -1056,7 +1000,6 @@ function startListener(){
     snap.forEach(d=>MB.push({id:d.id,...d.data()}));
     MB.sort((a,b)=>(b.joinDate||'').localeCompare(a.joinDate||'')||(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
     updateStats();
-    // 현재 활성 섹션 자동 갱신
     const sumEl=document.getElementById('srch-summary');
     if(sumEl&&sumEl.style.display!=='none') doCurrentSearch();
     if(document.getElementById('sec-today')?.style.display==='block') renderTodaySection();
@@ -1064,7 +1007,6 @@ function startListener(){
 }
 function stopListener(){if(unsubMem){unsubMem();unsubMem=null;}}
 
-// 현재 활성 검색 재실행
 function doCurrentSearch(){
   const date=(document.getElementById('srch-date')||{}).value||'';
   const name=((document.getElementById('srch-name')||{}).value||'').trim();
@@ -1073,13 +1015,6 @@ function doCurrentSearch(){
   else if(name||phone) doNameSearch();
 }
 
-// ── 검색박스 토글 (총 알바인원 클릭) ────────────────────
-window.toggleSearch = function(){
-  const sb=document.getElementById('search-box');
-  sb.style.display = sb.style.display==='none' ? 'block' : 'none';
-};
-
-// ── 날짜 검색 ────────────────────────────────────────────
 window.doDateSearch = function(){
   const date=(document.getElementById('srch-date')||{}).value||'';
   if(!date){alert('날짜를 선택해 주세요.');return;}
@@ -1091,7 +1026,6 @@ window.resetDateSearch = function(){
   hideResult();
 };
 
-// ── 성함+연락처 검색 ──────────────────────────────────────
 window.doNameSearch = function(){
   const name=((document.getElementById('srch-name')||{}).value||'').trim();
   const phone=np((document.getElementById('srch-phone')||{}).value||'');
@@ -1122,7 +1056,6 @@ function hideResult(){
   document.getElementById('mem-list').innerHTML='<div class="ep" style="padding:20px;color:#94a3b8;font-size:14px">🔍 위에서 검색하면 알바인원 정보가 표시됩니다.</div>';
 }
 
-// ── 목록 렌더 (닉네임 인라인 입력) ─────────────────────
 function renderList(list){
   const el=document.getElementById('mem-list');
   if(!el) return;
@@ -1141,7 +1074,6 @@ function renderList(list){
         <div class="mem-row"><span class="mem-key">👤 예금주</span><span class="mem-val">${ex(m.holder||'')}</span></div>
         <div class="mem-row"><span class="mem-key">💰 주간</span><span class="mem-val" style="color:#16a34a;font-weight:800">${(m.weekPts||0).toLocaleString()}원</span></div>
         <div class="mem-row"><span class="mem-key">💎 누적</span><span class="mem-val" style="color:#1e40af;font-weight:800">${(m.points||0).toLocaleString()}원</span></div>
-        <!-- 닉네임 인라인 관리 -->
         <div class="nick-area">
           <div class="nick-title">
             <span>🏷️ 닉네임</span>
@@ -1158,7 +1090,6 @@ function renderList(list){
   }).join('');
 }
 
-// ── 정보 수정 모달 ───────────────────────────────────────
 let editTargetId = null;
 
 window.openEditModal = function(id){
@@ -1204,7 +1135,6 @@ window.saveEdit = async function(){
   try{
     const updated = { name, phone, age, os, bank, account: acct, holder, points, weekPts, monthPts };
     await updateDoc(doc(db,'members',editTargetId), updated);
-    // 로컬 MB 업데이트
     const m = MB.find(x=>x.id===editTargetId);
     if(m) Object.assign(m, updated);
     hideLoading();
@@ -1215,7 +1145,6 @@ window.saveEdit = async function(){
   }catch(e){ hideLoading(); alert('저장 오류: '+e.message); }
 };
 
-// ── 관리자 섹션 전환 ─────────────────────────────────────
 const ADM_SECTIONS = ['tot','today','excel','home'];
 window.showAdmSection = function(name){
   ADM_SECTIONS.forEach(s=>{
@@ -1226,13 +1155,10 @@ window.showAdmSection = function(name){
     const btn=document.getElementById('btn-'+s);
     if(btn) btn.style.outline = s===name?'3px solid #3b82f6':'none';
   });
-  const excelBtn=document.getElementById('btn-excel');
-  if(excelBtn) excelBtn.style.display='block';
   const sec=document.getElementById('sec-'+name);
   if(sec) sec.style.display='block';
   if(name==='today') renderTodaySection();
   if(name==='excel'){
-    // 2) 섹션 열릴 때 미리보기/파일 초기화
     const prev=document.getElementById('excel-preview');
     const msg=document.getElementById('excel-msg');
     const fi=document.getElementById('excel-file');
@@ -1244,18 +1170,11 @@ window.showAdmSection = function(name){
   }
 };
 
-// 엑셀 섹션 열릴 때 날짜 초기화 (직접 선택하도록)
-window.setTodayDate = function(){
-  // 날짜를 비워서 직접 선택하도록 유도
-  updateUploadDateLabel();
-};
 window.updateUploadDateLabel = function(){
-  const v=(document.getElementById('excel-apply-date')||{}).value||'';
   const lbl=document.getElementById('upload-date-label');
-  if(lbl) lbl.textContent = v ? v+' (이 날짜로 업로드됩니다)' : '날짜를 선택하세요';
+  if(lbl) lbl.textContent = '엑셀 A열의 날짜가 사용됩니다';
 };
 
-// ── 날짜별 업로드 내역 조회 ──────────────────────────────
 window.searchExcelHistory = async function(){
   const date=(document.getElementById('excel-srch-date')||{}).value||'';
   if(!date){alert('날짜를 선택해 주세요.');return;}
@@ -1276,12 +1195,10 @@ window.searchExcelHistory = async function(){
     return;
   }
   const grandTotal=records.reduce((s,r)=>s+r.dayTotal,0);
-  // 요약 + 전체보기 버튼
   let html=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid #dbeafe">
     <div style="font-size:13px;font-weight:700;color:#1e40af">📅 ${date} — ${records.length}명 / ${grandTotal.toLocaleString()}원</div>
     <button onclick="openHistFullModal('${date}')" style="font-size:11px;padding:5px 10px;border:none;border-radius:8px;background:#3b82f6;color:#fff;cursor:pointer;font-weight:700;font-family:inherit">전체보기</button>
   </div>`;
-  // 최대 5명만 요약 표시
   html+=records.slice(0,5).map(r=>{
     const nick=r.nicknames.length?`[${ex(r.nicknames[0])}] `:'';
     const apps=r.hist.map(h=>`${ex(h.appName||'미션')} ${(h.amt||0).toLocaleString()}원`).join(' · ');
@@ -1295,7 +1212,6 @@ window.searchExcelHistory = async function(){
   resultEl.innerHTML=html;
 };
 
-// 날짜별 내역 전체보기 모달
 window.openHistFullModal = function(date){
   const records=[];
   MB.forEach(m=>{
@@ -1320,6 +1236,7 @@ window.openHistFullModal = function(date){
   }).join('');
   document.getElementById('hist-full-modal').style.display='block';
 };
+
 window.resetExcelHistory = function(){
   const d=document.getElementById('excel-srch-date'); if(d) d.value='';
   const r=document.getElementById('excel-history-result'); if(r) r.style.display='none';
@@ -1362,9 +1279,8 @@ function renderTodaySection(){
   }
 }
 
-// ── 5) 엑셀 업로드 (A=날짜, B=성함, C=연락처, D=닉네임, E=앱명, F=금액) ──
 let pendingExcelData = null;
-let lastFailList = [];  // 실패 리스트 전역 저장
+let lastFailList = [];
 
 window.uploadExcel = async function(){
   const fileInput=document.getElementById('excel-file');
@@ -1376,7 +1292,7 @@ window.uploadExcel = async function(){
   const reader=new FileReader();
   reader.onload=async function(e){
     try{
-      await loadMB(); // 최신 MB 먼저 로드
+      await loadMB();
       const data=new Uint8Array(e.target.result);
       const wb=XLSX.read(data,{type:'array'});
       const ws=wb.Sheets[wb.SheetNames[0]];
@@ -1384,35 +1300,30 @@ window.uploadExcel = async function(){
       hideLoading();
       if(rows.length<2){alert('데이터가 없습니다. (2행부터 데이터)');return;}
 
-      // A=날짜, B=성함, C=연락처, D=닉네임, E=앱명, F=금액
       const items=[], failList=[];
       for(let i=1;i<rows.length;i++){
         const row=rows[i];
         if(!row||!row[0]) continue;
-        const rowDate  = String(row[0]||'').trim();  // A: 날짜 (YYYY-MM-DD)
-        const name     = String(row[1]||'').trim();  // B: 성함
-        const phone    = np(String(row[2]||''));      // C: 연락처
-        const nick     = String(row[3]||'').trim();  // D: 닉네임
-        const appName  = String(row[4]||'미션').trim(); // E: 앱명
-        const amt      = parseInt(row[5])||0;         // F: 금액
+        const rowDate  = String(row[0]||'').trim();
+        const name     = String(row[1]||'').trim();
+        const phone    = np(String(row[2]||''));
+        const nick     = String(row[3]||'').trim();
+        const appName  = String(row[4]||'미션').trim();
+        const amt      = parseInt(row[5])||0;
 
-        // 필수값 확인
         if(!rowDate||!name||!phone||!appName||!amt){
           failList.push({row:i+1, reason:'필수값 누락', name, phone, rowDate, appName, amt});
           continue;
         }
-        // 연락처로 회원 매칭
         const member=MB.find(m=>np(m.phone||'')===phone);
         if(!member){
           failList.push({row:i+1, reason:'연락처 불일치 (미등록)', name, phone, rowDate, appName, amt});
           continue;
         }
-        // 성함 일치 확인
         if(member.name!==name){
           failList.push({row:i+1, reason:`성함 불일치 (등록: ${member.name})`, name, phone, rowDate, appName, amt});
           continue;
         }
-        // 날짜 형식 확인 (YYYY-MM-DD)
         if(!/^\d{4}-\d{2}-\d{2}$/.test(rowDate)){
           failList.push({row:i+1, reason:'날짜 형식 오류 (YYYY-MM-DD)', name, phone, rowDate, appName, amt});
           continue;
@@ -1420,7 +1331,6 @@ window.uploadExcel = async function(){
         items.push({id:member.id, name:member.name, phone, nick, appName, amt, date:rowDate});
       }
 
-      // 알바+날짜별 그룹핑
       const grouped={};
       items.forEach(it=>{
         const key=it.id+'__'+it.date;
@@ -1431,10 +1341,8 @@ window.uploadExcel = async function(){
       lastFailList=failList;
       pendingExcelData={groupList};
 
-      // 날짜 그룹별로 적용 날짜 표시
       const dates=[...new Set(groupList.map(g=>g.date))].sort();
 
-      // 미리보기
       let previewHtml=`<div style="font-size:13px;font-weight:700;color:#1a1a2e;margin-bottom:4px">📋 업로드 미리보기 (${groupList.length}건 / ${dates.length}개 날짜)</div>`;
       if(failList.length){
         previewHtml+=`<div style="font-size:12px;color:#b91c1c;background:#fef2f2;border-radius:8px;padding:7px 10px;margin-bottom:8px;cursor:pointer" onclick="openFailModal()">
@@ -1464,13 +1372,13 @@ window.uploadExcel = async function(){
     }catch(err){
       hideLoading();
       msgEl.textContent='❌ 파일 읽기 오류: '+err.message;
-      msgEl.style.color='#ef4444'; msgEl.style.display='block';
+      msgEl.style.color='#ef4444';
+      msgEl.style.display='block';
     }
   };
   reader.readAsArrayBuffer(file);
 };
 
-// ── 실패 리스트 모달 ────────────────────────────────────
 window.openFailModal = function(){
   const el=document.getElementById('fail-list');
   if(!el) return;
@@ -1489,8 +1397,7 @@ window.openFailModal = function(){
   }
   document.getElementById('fail-modal').style.display='block';
 };
-      msgEl.textContent='❌ 파일 읽기 오류: '+err.message;
-      msgEl.style.color='#ef4444'; msgEl.style.display='block';
+
 window.confirmExcel = async function(){
   if(!pendingExcelData){alert('업로드 데이터가 없습니다. 다시 파일을 선택해주세요.');return;}
   const {groupList} = pendingExcelData;
@@ -1503,7 +1410,7 @@ window.confirmExcel = async function(){
   const errors=[];
   let done=0;
   for(const g of groupList){
-    const targetDate=g.date; // 엑셀에서 가져온 날짜
+    const targetDate=g.date;
     try{
       const m=MB.find(x=>x.id===g.id);
       if(!m){ errors.push(g.name+': 회원 없음'); continue; }
@@ -1552,19 +1459,17 @@ window.confirmExcel = async function(){
   }
   msgEl.style.display='block';
   setTimeout(()=>{ msgEl.style.display='none'; }, 5000);
-  // 마지막 날짜로 조회창 자동 조회
   const srchDate=document.getElementById('excel-srch-date');
   if(srchDate){ srchDate.value=dates[dates.length-1]; await searchExcelHistory(); }
 };
-// ── 삭제 ─────────────────────────────────────────────────
+
 window.delMem = async function(id){
   if(!confirm('삭제하시겠습니까?')) return;
   showLoading('삭제 중...');
-  try{ await deleteDoc(doc(db,'members',id)); MB=MB.filter(m=>m.id!==id); hideLoading(); updateStats(); doSearch(); }
+  try{ await deleteDoc(doc(db,'members',id)); MB=MB.filter(m=>m.id!==id); hideLoading(); updateStats(); doCurrentSearch(); }
   catch(e){ hideLoading(); alert('삭제 오류: '+e.message); }
 };
 
-// ── 닉네임 모달 ──────────────────────────────────────────
 window.openNickModal = function(id){
   const m=MB.find(x=>x.id===id); if(!m) return;
   nickTargetId=id; nickTags=Array.from(m.nicknames||[]);
@@ -1601,14 +1506,11 @@ window.saveNickTags = async function(){
     const m=MB.find(x=>x.id===nickTargetId); if(m) m.nicknames=[...nickTags];
     hideLoading();
     document.getElementById('nick-msg').style.display='block';
-    doSearch();
+    doCurrentSearch();
     setTimeout(()=>closeNickModal(),900);
   }catch(e){hideLoading();alert('저장 오류: '+e.message);}
 };
 
-// ════════════════════════════════════════════════════════
-// 신청서
-// ════════════════════════════════════════════════════════
 function showSl(id){document.querySelectorAll('#sc-apply .slide').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on');const sp=id==='sl-ok'||id==='sl-del';document.querySelector('.pg-wrap').style.display=sp?'none':'block';}
 function updPg(s){document.getElementById('pg-lbl').textContent=s+' / 6단계';document.getElementById('pg-fill').style.width=(s/6*100)+'%';}
 
@@ -1673,7 +1575,6 @@ window.restart=function(){
   updPg(1);showSl('sl1');document.querySelector('.pg-wrap').style.display='block';
 };
 
-// 시작
 init();
 </script>
 </body>
