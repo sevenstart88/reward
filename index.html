@@ -735,11 +735,7 @@ window.openTotalModal = function(){
     yearSel.innerHTML += `<option value="${y}">${y}년</option>`;
   });
   document.getElementById('tot-month').value='';
-  // ✅ [수정] 모달 열 때 전체 일자 목록 미리 채우기
-  const daySel = document.getElementById('tot-day');
-  daySel.innerHTML='<option value="">전체 일</option>';
-  const allDays=[...new Set(hist.map(h=>h.date.split('-')[2]))].sort();
-  allDays.forEach(d=>{ daySel.innerHTML+=`<option value="${d}">${parseInt(d)}일</option>`; });
+  fillDayDropdown();
   document.getElementById('total-modal').style.display='block';
   renderTotalModal();
 };
@@ -747,51 +743,23 @@ window.closeTotalModal = function(){document.getElementById('total-modal').style
 window.resetTotalFilter = function(){
   document.getElementById('tot-year').value='';
   document.getElementById('tot-month').value='';
-  // ✅ [수정] 초기화 시에도 전체 일자 다시 채우기
-  const daySel = document.getElementById('tot-day');
-  const hist = me.weekHistory||[];
-  daySel.innerHTML='<option value="">전체 일</option>';
-  const allDays=[...new Set(hist.map(h=>h.date.split('-')[2]))].sort();
-  allDays.forEach(d=>{ daySel.innerHTML+=`<option value="${d}">${parseInt(d)}일</option>`; });
+  fillDayDropdown();
   renderTotalModal();
 };
-window.onTotYearChange = function(){
-  document.getElementById('tot-month').value='';
-  // ✅ [수정] 연도 변경 시 해당 연도의 일자 채우기
-  const year=document.getElementById('tot-year').value;
+function fillDayDropdown(){
   const daySel=document.getElementById('tot-day');
   const hist=me.weekHistory||[];
+  const allDays=[...new Set(hist.map(h=>h.date.split('-')[2]))].sort((a,b)=>parseInt(a)-parseInt(b));
   daySel.innerHTML='<option value="">전체 일</option>';
-  if(year){
-    const days=[...new Set(hist.filter(h=>h.date.startsWith(year+'-')).map(h=>h.date.split('-')[2]))].sort();
-    days.forEach(d=>{ daySel.innerHTML+=`<option value="${d}">${parseInt(d)}일</option>`; });
-  } else {
-    const allDays=[...new Set(hist.map(h=>h.date.split('-')[2]))].sort();
-    allDays.forEach(d=>{ daySel.innerHTML+=`<option value="${d}">${parseInt(d)}일</option>`; });
-  }
+  allDays.forEach(d=>{ daySel.innerHTML+=`<option value="${d}">${parseInt(d)}일</option>`; });
+}
+window.onTotYearChange = function(){
+  document.getElementById('tot-month').value='';
+  fillDayDropdown();
   renderTotalModal();
 };
 window.onTotMonthChange = function(){
-  // ✅ [수정] 연도+월, 연도만, 전체 — 세 가지 경우 모두 일자를 올바르게 채우기
-  const year=document.getElementById('tot-year').value;
-  const month=document.getElementById('tot-month').value;
-  const daySel=document.getElementById('tot-day');
-  daySel.innerHTML='<option value="">전체 일</option>';
-  const hist=me.weekHistory||[];
-  if(year&&month){
-    const prefix=`${year}-${month}-`;
-    const days=[...new Set(hist.filter(h=>h.date.startsWith(prefix)).map(h=>h.date.split('-')[2]))].sort();
-    days.forEach(d=>{ daySel.innerHTML+=`<option value="${d}">${parseInt(d)}일</option>`; });
-  } else if(year){
-    const days=[...new Set(hist.filter(h=>h.date.startsWith(year+'-')).map(h=>h.date.split('-')[2]))].sort();
-    days.forEach(d=>{ daySel.innerHTML+=`<option value="${d}">${parseInt(d)}일</option>`; });
-  } else if(month){
-    const days=[...new Set(hist.filter(h=>h.date.split('-')[1]===month).map(h=>h.date.split('-')[2]))].sort();
-    days.forEach(d=>{ daySel.innerHTML+=`<option value="${d}">${parseInt(d)}일</option>`; });
-  } else {
-    const allDays=[...new Set(hist.map(h=>h.date.split('-')[2]))].sort();
-    allDays.forEach(d=>{ daySel.innerHTML+=`<option value="${d}">${parseInt(d)}일</option>`; });
-  }
+  fillDayDropdown();
   renderTotalModal();
 };
 window.renderTotalModal = function(){
@@ -1410,7 +1378,7 @@ window.uploadExcel = async function(){
       const data=new Uint8Array(e.target.result);
       const wb=XLSX.read(data,{type:'array',cellDates:true});
       const ws=wb.Sheets[wb.SheetNames[0]];
-      const rows=XLSX.utils.sheet_to_json(ws,{header:1,raw:false,dateNF:'yyyy-mm-dd'});
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1});
       hideLoading();
       if(rows.length<2){alert('데이터가 없습니다. (2행부터 데이터)');return;}
 
