@@ -116,8 +116,11 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 
 /* 주간 리워드 카드 */
 .week-card{background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-.week-card-title{font-size:15px;font-weight:800;color:#1a1a2e;margin-bottom:4px}
-.week-card-sub{font-size:11px;color:#94a3b8;margin-bottom:12px}
+.week-card-title{font-size:15px;font-weight:800;color:#1a1a2e;margin-bottom:8px}
+.week-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;background:#f1f5f9;border-radius:12px;padding:6px 8px}
+.week-nav-btn{background:#fff;border:1.5px solid #dde1e7;border-radius:8px;padding:5px 10px;font-size:12px;font-weight:700;cursor:pointer;color:#374151;font-family:inherit;white-space:nowrap}
+.week-nav-btn:active{background:#eff6ff;border-color:#3b82f6;color:#1d4ed8}
+.week-nav-lbl{font-size:12px;font-weight:700;color:#1e40af;text-align:center;flex:1;padding:0 6px}
 .week-days{display:flex;gap:4px;margin-bottom:12px}
 .wday{flex:1;text-align:center;padding:8px 2px;border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;color:#64748b;background:#f8fafc;border:1px solid #e2e8f0}
 .wday.on{background:#3b82f6;color:#fff;border-color:#3b82f6}
@@ -158,12 +161,6 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 @keyframes spin{to{transform:rotate(360deg)}}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e293b;color:#fff;font-size:13px;font-weight:600;padding:10px 20px;border-radius:20px;z-index:9998;opacity:0;transition:all .4s;white-space:nowrap}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
-
-/* OS 필터 버튼 */
-.os-filter-wrap{display:flex;gap:8px;margin-bottom:12px}
-.os-filter-btn{flex:1;padding:10px 6px;font-size:13px;font-weight:700;border-radius:12px;cursor:pointer;font-family:inherit;transition:all .2s}
-.os-filter-btn.active{background:#3b82f6;color:#fff;border:2px solid #3b82f6}
-.os-filter-btn.inactive{background:#fff;color:#374151;border:2px solid #dde1e7}
 </style>
 </head>
 <body>
@@ -314,7 +311,11 @@ textarea{resize:none;min-height:80px;line-height:1.6}
   <div class="dash-wrap">
     <div class="week-card">
       <div class="week-card-title">📅 주간 리워드 금액</div>
-      <div class="week-card-sub">(매주 월요일~일요일 까지, 일주일 합산 금액)</div>
+      <div class="week-nav">
+        <button class="week-nav-btn" onclick="prevWeek()">◀ 이전주</button>
+        <span class="week-nav-lbl" id="week-nav-label"></span>
+        <button class="week-nav-btn" id="week-nav-next" onclick="nextWeek()">다음주 ▶</button>
+      </div>
       <div class="week-days" id="week-days"></div>
       <div class="week-total" id="week-total"></div>
       <div id="week-list"></div>
@@ -377,18 +378,6 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 
     <!-- 섹션1: 총 알바인원 검색 -->
     <div id="sec-tot" style="display:none">
-
-      <!-- ✅ [수정] OS 필터 버튼 -->
-      <div class="search-box" style="margin-bottom:14px">
-        <div class="search-title">📱 기기 종류별 인원 확인</div>
-        <div class="os-filter-wrap">
-          <button id="os-btn-all" class="os-filter-btn active" onclick="filterByOs('all')">전체</button>
-          <button id="os-btn-android" class="os-filter-btn inactive" onclick="filterByOs('android')">🤖 안드로이드</button>
-          <button id="os-btn-ios" class="os-filter-btn inactive" onclick="filterByOs('ios')">🍎 애플 (iOS)</button>
-        </div>
-        <div id="os-count-label" style="font-size:13px;color:#64748b;font-weight:600;text-align:center;padding:6px 0"></div>
-      </div>
-
       <div class="search-box">
         <div class="search-title">🔍 알바인원 검색</div>
         <div style="background:#f8fafc;border-radius:12px;padding:12px;margin-bottom:10px">
@@ -612,12 +601,10 @@ let MB = [];
 let me = null;
 let rkMode = 'week';
 let selWeekDay = null;
+let weekOffset = 0;
 let unsubMem = null;
 let ageVal='', osVal='', ag1='', ag2='', aCur=1;
 let nickTargetId=null, nickTags=[];
-
-// ✅ [추가] OS 필터 상태
-let currentOsFilter = 'all';
 
 function showLoading(txt='처리 중...'){document.getElementById('loading-txt').textContent=txt;document.getElementById('loading-overlay').style.display='flex';}
 function hideLoading(){document.getElementById('loading-overlay').style.display='none';}
@@ -711,13 +698,16 @@ window.doUserLogout = function(){
   goSc('sc-login');
 };
 
-function getWeekRange(){
+function getWeekRange(offset){
+  const off = (offset !== undefined) ? offset : weekOffset;
   const now=new Date(), day=now.getDay();
   const diffToMon=day===0?-6:1-day;
-  const mon=new Date(now); mon.setDate(now.getDate()+diffToMon); mon.setHours(0,0,0,0);
+  const mon=new Date(now); mon.setDate(now.getDate()+diffToMon + off*7); mon.setHours(0,0,0,0);
   const sun=new Date(mon); sun.setDate(mon.getDate()+6); sun.setHours(23,59,59,999);
   return {from:mon,to:sun};
 }
+window.prevWeek = function(){ weekOffset--; selWeekDay=null; renderWeekCard(); };
+window.nextWeek = function(){ if(weekOffset<0){ weekOffset++; selWeekDay=null; renderWeekCard(); } };
 function displayName(m){ return m.nicknames&&m.nicknames.length?m.nicknames[0]:'*****'; }
 const AVATAR_COLORS=['#3b82f6','#6366f1','#8b5cf6','#ec4899','#f59e0b','#10b981'];
 function avatarColor(name){let s=0;for(let c of name)s+=c.charCodeAt(0);return AVATAR_COLORS[s%AVATAR_COLORS.length];}
@@ -735,7 +725,7 @@ window.openTotalModal = function(){
     yearSel.innerHTML += `<option value="${y}">${y}년</option>`;
   });
   document.getElementById('tot-month').value='';
-  fillDayDropdown();
+  document.getElementById('tot-day').innerHTML='<option value="">전체 일</option>';
   document.getElementById('total-modal').style.display='block';
   renderTotalModal();
 };
@@ -743,23 +733,25 @@ window.closeTotalModal = function(){document.getElementById('total-modal').style
 window.resetTotalFilter = function(){
   document.getElementById('tot-year').value='';
   document.getElementById('tot-month').value='';
-  fillDayDropdown();
+  document.getElementById('tot-day').innerHTML='<option value="">전체 일</option>';
   renderTotalModal();
 };
-function fillDayDropdown(){
-  const daySel=document.getElementById('tot-day');
-  const hist=me.weekHistory||[];
-  const allDays=[...new Set(hist.map(h=>h.date.split('-')[2]))].sort((a,b)=>parseInt(a)-parseInt(b));
-  daySel.innerHTML='<option value="">전체 일</option>';
-  allDays.forEach(d=>{ daySel.innerHTML+=`<option value="${d}">${parseInt(d)}일</option>`; });
-}
 window.onTotYearChange = function(){
   document.getElementById('tot-month').value='';
-  fillDayDropdown();
+  document.getElementById('tot-day').innerHTML='<option value="">전체 일</option>';
   renderTotalModal();
 };
 window.onTotMonthChange = function(){
-  fillDayDropdown();
+  const year=document.getElementById('tot-year').value;
+  const month=document.getElementById('tot-month').value;
+  const daySel=document.getElementById('tot-day');
+  daySel.innerHTML='<option value="">전체 일</option>';
+  if(year&&month){
+    const hist=me.weekHistory||[];
+    const prefix=`${year}-${month}-`;
+    const days=[...new Set(hist.filter(h=>h.date.startsWith(prefix)).map(h=>h.date.split('-')[2]))].sort();
+    days.forEach(d=>{ daySel.innerHTML+=`<option value="${d}">${parseInt(d)}일</option>`; });
+  }
   renderTotalModal();
 };
 window.renderTotalModal = function(){
@@ -769,23 +761,10 @@ window.renderTotalModal = function(){
   const day   = document.getElementById('tot-day').value;
   const hist  = me.weekHistory||[];
 
-  // ✅ [수정] 일(day)만 선택해도, 연도만 선택해도 올바르게 필터링
   let filtered=hist.slice();
-  if(year&&month&&day){
-    filtered=hist.filter(h=>h.date===`${year}-${month}-${day}`);
-  } else if(year&&month){
-    filtered=hist.filter(h=>h.date.startsWith(`${year}-${month}-`));
-  } else if(year&&day){
-    filtered=hist.filter(h=>h.date.startsWith(year+'-')&&h.date.split('-')[2]===day);
-  } else if(year){
-    filtered=hist.filter(h=>h.date.startsWith(year+'-'));
-  } else if(month&&day){
-    filtered=hist.filter(h=>h.date.split('-')[1]===month&&h.date.split('-')[2]===day);
-  } else if(month){
-    filtered=hist.filter(h=>h.date.split('-')[1]===month);
-  } else if(day){
-    filtered=hist.filter(h=>h.date.split('-')[2]===day);
-  }
+  if(year&&month&&day) filtered=hist.filter(h=>h.date===`${year}-${month}-${day}`);
+  else if(year&&month) filtered=hist.filter(h=>h.date.startsWith(`${year}-${month}-`));
+  else if(year) filtered=hist.filter(h=>h.date.startsWith(year+'-'));
 
   const total=filtered.reduce((s,h)=>s+(h.amt||0),0);
 
@@ -816,17 +795,7 @@ window.renderTotalModal = function(){
       </div>`;
     }).join('');
   }
-
-  // ✅ [수정] label도 모든 경우 올바르게 표시
-  let label='전체';
-  if(year&&month&&day) label=`${year}년 ${parseInt(month)}월 ${parseInt(day)}일`;
-  else if(year&&month) label=`${year}년 ${parseInt(month)}월`;
-  else if(year&&day) label=`${year}년 ${parseInt(day)}일`;
-  else if(year) label=`${year}년`;
-  else if(month&&day) label=`${parseInt(month)}월 ${parseInt(day)}일`;
-  else if(month) label=`${parseInt(month)}월`;
-  else if(day) label=`매월 ${parseInt(day)}일`;
-
+  const label=year?(month?(day?`${year}년 ${parseInt(month)}월 ${parseInt(day)}일`:`${year}년 ${parseInt(month)}월`):year+'년'):'전체';
   document.getElementById('tot-summary').textContent=`${label} 합계: ${total.toLocaleString()}원`;
   document.getElementById('tot-list').innerHTML=html;
 };
@@ -862,18 +831,18 @@ function updateUserUI(){
   if(!me) return;
   document.getElementById('u-nm').textContent = me.name+'님';
   document.getElementById('u-total-pts').textContent = (me.points||0).toLocaleString()+'원';
-  const weekAmt = calcMyWeekTotal();
+  const weekAmt = calcMyWeekTotal(0);
   document.getElementById('u-week-pts').textContent = weekAmt.toLocaleString()+'원';
   renderWeekCard();
   renderRk();
 }
 
-function calcMyWeekTotal(){
+function calcMyWeekTotal(offset){
   if(!me) return 0;
-  const wr=getWeekRange();
+  const wr=getWeekRange(offset!==undefined?offset:weekOffset);
   const hist=me.weekHistory||[];
   return hist.filter(h=>{
-    const t=new Date(h.date); return t>=wr.from&&t<=wr.to;
+    const t=new Date(h.date+'T12:00:00'); return t>=wr.from&&t<=wr.to;
   }).reduce((s,h)=>s+(h.amt||0),0);
 }
 
@@ -888,19 +857,32 @@ window.selectWeekDay = function(idx){
   renderWeekCard();
 };
 
+function fmtDate(d){ return `${d.getMonth()+1}/${d.getDate()}`; }
+function dateStr(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+
 function renderWeekCard(){
   const wr=getWeekRange();
   const dayNames=['월','화','수','목','금','토','일'];
   const hist = me.weekHistory||[];
+  const isCurrentWeek = weekOffset===0;
 
+  // 주간 네비게이션 헤더
+  const weekLabel=`${fmtDate(wr.from)} ~ ${fmtDate(wr.to)}`;
+  const weekTitle = isCurrentWeek ? `이번주 (${weekLabel})` :
+    weekOffset===-1 ? `지난주 (${weekLabel})` : `${Math.abs(weekOffset)}주 전 (${weekLabel})`;
+  document.getElementById('week-nav-label').textContent = weekTitle;
+  document.getElementById('week-nav-next').style.opacity = isCurrentWeek ? '0.3' : '1';
+  document.getElementById('week-nav-next').style.pointerEvents = isCurrentWeek ? 'none' : 'auto';
+
+  // 요일 탭
   let daysHtml='';
   for(let i=0;i<7;i++){
     const d=new Date(wr.from); d.setDate(wr.from.getDate()+i);
-    const dateStr=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    const dayAmt=hist.filter(h=>h.date===dateStr).reduce((s,h)=>s+(h.amt||0),0);
+    const ds=dateStr(d);
+    const dayAmt=hist.filter(h=>h.date===ds).reduce((s,h)=>s+(h.amt||0),0);
     const on=selWeekDay===i;
     daysHtml+=`<div class="wday${on?' on':''}" onclick="selectWeekDay(${i})">
-      ${dayNames[i]}<div style="font-size:10px;margin-top:2px">${d.getMonth()+1}/${d.getDate()}</div>
+      ${dayNames[i]}<div style="font-size:10px;margin-top:2px">${fmtDate(d)}</div>
       ${dayAmt>0?`<div style="font-size:10px;color:${on?'#fff':'#16a34a'};font-weight:800;margin-top:1px">${dayAmt.toLocaleString()}</div>`:''}
     </div>`;
   }
@@ -908,10 +890,14 @@ function renderWeekCard(){
 
   let html='', total=0;
   if(selWeekDay===null){
-    total = calcMyWeekTotal();
+    // 이번(선택) 주 전체 내역
+    const weekItems=hist.filter(h=>{
+      const t=new Date(h.date+'T12:00:00'); return t>=wr.from&&t<=wr.to;
+    });
+    total=weekItems.reduce((s,h)=>s+(h.amt||0),0);
     if(total>0){
       const byDate={};
-      hist.forEach(h=>{if(!byDate[h.date])byDate[h.date]=[];byDate[h.date].push(h);});
+      weekItems.forEach(h=>{if(!byDate[h.date])byDate[h.date]=[];byDate[h.date].push(h);});
       html=Object.keys(byDate).sort().map(date=>{
         const items=byDate[date];
         const dayTotal=items.reduce((s,h)=>s+(h.amt||0),0);
@@ -924,12 +910,13 @@ function renderWeekCard(){
         </div>`;
       }).join('');
     } else {
-      html='<div style="text-align:center;padding:16px;color:#94a3b8;font-size:13px">이번주 승인된 리워드가 없습니다. (0원)</div>';
+      const weekWord = isCurrentWeek?'이번주':weekOffset===-1?'지난주':`${Math.abs(weekOffset)}주 전`;
+      html=`<div style="text-align:center;padding:16px;color:#94a3b8;font-size:13px">${weekWord} 승인된 리워드가 없습니다. (0원)</div>`;
     }
   } else {
     const d=new Date(wr.from); d.setDate(wr.from.getDate()+selWeekDay);
-    const dateStr=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    const dayItems=hist.filter(h=>h.date===dateStr);
+    const ds=dateStr(d);
+    const dayItems=hist.filter(h=>h.date===ds);
     total=dayItems.reduce((s,h)=>s+(h.amt||0),0);
     if(total>0){
       html=dayItems.map(h=>`<div class="week-list-item">
@@ -940,7 +927,7 @@ function renderWeekCard(){
       html=`<div style="text-align:center;padding:16px;color:#94a3b8;font-size:13px">${dayNames[selWeekDay]}요일 승인된 리워드가 없습니다. (0원)</div>`;
     }
   }
-  document.getElementById('week-total').textContent=`${selWeekDay===null?'이번주 전체':dayNames[selWeekDay]+'요일'}: ${total.toLocaleString()}원`;
+  document.getElementById('week-total').textContent=`${selWeekDay===null?'주간 합계':dayNames[selWeekDay]+'요일'}: ${total.toLocaleString()}원`;
   document.getElementById('week-list').innerHTML=html;
 }
 
@@ -1060,9 +1047,7 @@ function doCurrentSearch(){
 window.doDateSearch = function(){
   const date=(document.getElementById('srch-date')||{}).value||'';
   if(!date){alert('날짜를 선택해 주세요.');return;}
-  let list=MB.filter(m=>(m.joinDate||'')===date);
-  if(currentOsFilter==='android') list=list.filter(m=>(m.os||'').includes('안드로이드'));
-  else if(currentOsFilter==='ios') list=list.filter(m=>(m.os||'').includes('iOS')||(m.os||'').includes('애플'));
+  const list=MB.filter(m=>(m.joinDate||'')===date);
   showResult(list, `📅 ${date} 가입: ${list.length}명`);
 };
 window.resetDateSearch = function(){
@@ -1076,13 +1061,11 @@ window.doNameSearch = function(){
   if(!name&&!phone){alert('성함과 연락처를 입력해 주세요.');return;}
   if(!name){alert('성함을 입력해 주세요.');return;}
   if(!phone){alert('연락처를 입력해 주세요.');return;}
-  let list=MB.filter(m=>{
+  const list=MB.filter(m=>{
     const nameMatch=(m.name||'').includes(name);
     const phoneMatch=np(m.phone||'').includes(phone);
     return nameMatch&&phoneMatch;
   });
-  if(currentOsFilter==='android') list=list.filter(m=>(m.os||'').includes('안드로이드'));
-  else if(currentOsFilter==='ios') list=list.filter(m=>(m.os||'').includes('iOS')||(m.os||'').includes('애플'));
   showResult(list, `👤 "${name}" / ${phone} 검색: ${list.length}명`);
 };
 window.resetNameSearch = function(){
@@ -1101,31 +1084,6 @@ function hideResult(){
   sumEl.style.display='none';
   document.getElementById('mem-list').innerHTML='<div class="ep" style="padding:20px;color:#94a3b8;font-size:14px">🔍 위에서 검색하면 알바인원 정보가 표시됩니다.</div>';
 }
-
-// ✅ [추가] OS 필터 함수
-window.filterByOs = function(os){
-  currentOsFilter = os;
-  ['all','android','ios'].forEach(k=>{
-    const btn=document.getElementById('os-btn-'+k);
-    if(btn){
-      btn.className = 'os-filter-btn ' + (k===os ? 'active' : 'inactive');
-    }
-  });
-  const androidCount = MB.filter(m=>(m.os||'').includes('안드로이드')).length;
-  const iosCount = MB.filter(m=>(m.os||'').includes('iOS')||(m.os||'').includes('애플')).length;
-  const lbl=document.getElementById('os-count-label');
-  if(lbl){
-    if(os==='all') lbl.textContent=`전체 ${MB.length}명 (안드로이드 ${androidCount}명 / 애플 ${iosCount}명)`;
-    else if(os==='android') lbl.textContent=`🤖 안드로이드 ${androidCount}명`;
-    else lbl.textContent=`🍎 애플 (iOS) ${iosCount}명`;
-  }
-  const filtered = os==='all' ? MB :
-    os==='android' ? MB.filter(m=>(m.os||'').includes('안드로이드')) :
-    MB.filter(m=>(m.os||'').includes('iOS')||(m.os||'').includes('애플'));
-  const sumEl=document.getElementById('srch-summary');
-  if(sumEl) sumEl.style.display='none';
-  renderList(filtered);
-};
 
 function renderList(list){
   const el=document.getElementById('mem-list');
@@ -1238,17 +1196,6 @@ window.showAdmSection = function(name){
     if(fi) fi.value='';
     pendingExcelData=null;
     updateUploadDateLabel();
-  }
-  // ✅ [추가] 총 알바인원 섹션 열 때 OS 필터 초기화
-  if(name==='tot'){
-    currentOsFilter='all';
-    ['all','android','ios'].forEach(k=>{
-      const btn=document.getElementById('os-btn-'+k);
-      if(btn) btn.className='os-filter-btn '+(k==='all'?'active':'inactive');
-    });
-    const lbl=document.getElementById('os-count-label');
-    if(lbl) lbl.textContent='';
-    hideResult();
   }
 };
 
@@ -1376,27 +1323,38 @@ window.uploadExcel = async function(){
     try{
       await loadMB();
       const data=new Uint8Array(e.target.result);
-      const wb=XLSX.read(data,{type:'array',cellDates:true});
+      const wb=XLSX.read(data,{type:'array', cellDates:true});
       const ws=wb.Sheets[wb.SheetNames[0]];
-      const rows=XLSX.utils.sheet_to_json(ws,{header:1});
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1, raw:true});
       hideLoading();
       if(rows.length<2){alert('데이터가 없습니다. (2행부터 데이터)');return;}
+
+      // 엑셀 날짜 셀 → YYYY-MM-DD 변환 (한국 로컬 시간 기준)
+      function excelToDateStr(val){
+        if(!val) return '';
+        if(val instanceof Date){
+          // 로컬 시간 기준으로 변환 (UTC 변환 시 날짜가 하루 밀리는 버그 방지)
+          const y=val.getFullYear();
+          const m=String(val.getMonth()+1).padStart(2,'0');
+          const d=String(val.getDate()).padStart(2,'0');
+          return `${y}-${m}-${d}`;
+        }
+        if(typeof val==='number'){
+          // 엑셀 시리얼 번호 → 날짜 변환
+          const d=new Date(Math.round((val-25569)*86400*1000));
+          const y=d.getUTCFullYear();
+          const mo=String(d.getUTCMonth()+1).padStart(2,'0');
+          const day=String(d.getUTCDate()).padStart(2,'0');
+          return `${y}-${mo}-${day}`;
+        }
+        return String(val).trim();
+      }
 
       const items=[], failList=[];
       for(let i=1;i<rows.length;i++){
         const row=rows[i];
         if(!row||!row[0]) continue;
-        let rowDate = '';
-        const rawDate = row[0];
-        if(rawDate instanceof Date){
-          rowDate=`${rawDate.getFullYear()}-${String(rawDate.getMonth()+1).padStart(2,'0')}-${String(rawDate.getDate()).padStart(2,'0')}`;
-        } else if(typeof rawDate==='number'){
-          const d=XLSX.SSF.parse_date_code(rawDate);
-          rowDate=d?`${d.y}-${String(d.m).padStart(2,'0')}-${String(d.d).padStart(2,'0')}`:String(rawDate).trim();
-        } else {
-          rowDate=String(rawDate||'').trim();
-        }
-        rowDate=rowDate.replace(/\./g,'-').replace(/\//g,'-');
+        const rowDate  = excelToDateStr(row[0]);
         const name     = String(row[1]||'').trim();
         const phone    = np(String(row[2]||''));
         const nick     = String(row[3]||'').trim();
@@ -1669,5 +1627,5 @@ window.restart=function(){
 
 init();
 </script>
-<script src="https://replit-cdn.com/replit-pill/replit-pill.global.js" data-repl-id="90a61148-29fa-4b9e-af69-e9df83db54a7"></script></body>
+</body>
 </html>
