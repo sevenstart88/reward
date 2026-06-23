@@ -1333,29 +1333,51 @@ window.uploadExcel = async function(){
       // 엑셀 날짜 → YYYY-MM-DD 변환 (모든 형식 지원)
       function excelToDateStr(val){
         if(val===null||val===undefined||val==='') return '';
+
         // ① 숫자형 시리얼 (엑셀 날짜 셀) → UTC 기준 변환 (시간대 오류 없음)
         if(typeof val==='number'){
           const n=Math.floor(val);
           const d=new Date((n-25569)*86400*1000);
           return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
         }
-        const s=String(val).trim();
+
+        // 문자열 처리 (공백·특수문자 제거)
+        const s=String(val).replace(/\s+/g,' ').trim();
+
         // ② 이미 YYYY-MM-DD 형식
         if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+
         // ③ YYYY/MM/DD 형식
         if(/^\d{4}\/\d{2}\/\d{2}$/.test(s)) return s.replace(/\//g,'-');
-        // ④ 한국식 "6월 22일" 또는 "06월22일" 형식 → 올해 연도 적용
-        const kor=s.match(/^(\d{1,2})월\s*(\d{1,2})일$/);
-        if(kor){
-          const y=new Date().getFullYear();
-          return `${y}-${String(kor[1]).padStart(2,'0')}-${String(kor[2]).padStart(2,'0')}`;
+
+        // ④ 한국식 "월" / "일" 키워드 방식 (정규식 없이 위치로 파싱 → 어떤 공백·인코딩도 처리)
+        const wi=s.indexOf('월'), di=s.indexOf('일');
+        if(wi>0 && di>wi){
+          // "2025년 6월 22일" 또는 "6월 22일" 모두 처리
+          const ni=s.indexOf('년');
+          let year=new Date().getFullYear(), monthStr, dayStr;
+          if(ni>0 && ni<wi){
+            year=parseInt(s.substring(0,ni));
+            monthStr=s.substring(ni+1,wi);
+          } else {
+            monthStr=s.substring(0,wi);
+          }
+          dayStr=s.substring(wi+1,di);
+          const m=parseInt(monthStr), d=parseInt(dayStr);
+          if(!isNaN(m)&&!isNaN(d)&&m>=1&&m<=12&&d>=1&&d<=31){
+            return `${year}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+          }
         }
-        // ⑤ "2025년 6월 22일" 형식
-        const kor2=s.match(/(\d{4})년\s*(\d{1,2})월\s*(\d{1,2})일/);
-        if(kor2) return `${kor2[1]}-${String(kor2[2]).padStart(2,'0')}-${String(kor2[3]).padStart(2,'0')}`;
-        // ⑥ MM/DD 형식
-        const mdd=s.match(/^(\d{1,2})\/(\d{1,2})$/);
-        if(mdd){const y=new Date().getFullYear();return `${y}-${String(mdd[1]).padStart(2,'0')}-${String(mdd[2]).padStart(2,'0')}`;}
+
+        // ⑤ MM/DD 형식 (슬래시 구분)
+        const slash=s.split('/');
+        if(slash.length===2){
+          const m=parseInt(slash[0]),d=parseInt(slash[1]);
+          if(!isNaN(m)&&!isNaN(d)&&m>=1&&m<=12&&d>=1&&d<=31){
+            return `${new Date().getFullYear()}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+          }
+        }
+
         return s;
       }
 
@@ -1363,7 +1385,8 @@ window.uploadExcel = async function(){
       for(let i=1;i<rows.length;i++){
         const row=rows[i];
         if(!row||!row[0]) continue;
-        const rowDate  = excelToDateStr(row[0]);
+        const rawVal0  = row[0];  // 엑셀에서 읽은 원본값 (진단용)
+        const rowDate  = excelToDateStr(rawVal0);
         const name     = String(row[1]||'').trim();
         const phone    = np(String(row[2]||''));
         const nick     = String(row[3]||'').trim();
@@ -1371,12 +1394,12 @@ window.uploadExcel = async function(){
         const amt      = parseInt(row[5])||0;
 
         if(!rowDate||!name||!phone||!appName||!amt){
-          failList.push({row:i+1, reason:'필수값 누락', name, phone, rowDate, appName, amt});
+          failList.push({row:i+1, reason:'필수값 누락', name, phone, rowDate, appName, amt, rawVal:String(rawVal0), rawType:typeof rawVal0});
           continue;
         }
         const member=MB.find(m=>np(m.phone||'')===phone);
         if(!member){
-          failList.push({row:i+1, reason:'연락처 불일치 (미등록)', name, phone, rowDate, appName, amt});
+          failList.push({row:i+1, reason:'연락처 불일치 (미등록)', name, phone, rowDate, appName, amt, rawVal:String(rawVal0), rawType:typeof rawVal0});
           continue;
         }
         if(member.name!==name){
@@ -1384,7 +1407,7 @@ window.uploadExcel = async function(){
           continue;
         }
         if(!/^\d{4}-\d{2}-\d{2}$/.test(rowDate)){
-          failList.push({row:i+1, reason:'날짜 형식 오류 (YYYY-MM-DD)', name, phone, rowDate, appName, amt});
+          failList.push({row:i+1, reason:'날짜 형식 오류 (YYYY-MM-DD)', name, phone, rowDate, appName, amt, rawVal:String(rawVal0), rawType:typeof rawVal0});
           continue;
         }
         items.push({id:member.id, name:member.name, phone, nick, appName, amt, date:rowDate});
@@ -1450,6 +1473,7 @@ window.openFailModal = function(){
             <div style="font-weight:700;color:#1a1a2e">${i+1}. ${ex(f.name)} (${f.phone})</div>
             <div style="font-size:11px;color:#ef4444;margin-top:2px">❌ ${ex(f.reason)}</div>
             <div style="font-size:11px;color:#94a3b8;margin-top:1px">날짜: ${f.rowDate} / 앱: ${ex(f.appName)} / 금액: ${f.amt.toLocaleString()}원</div>
+            ${f.rawVal!==undefined?`<div style="font-size:10px;color:#6366f1;background:#eef2ff;border-radius:4px;padding:2px 6px;margin-top:3px">📎 원본값(타입:${f.rawType}): "${ex(f.rawVal)}"</div>`:''}
           </div>
         </div>
       </div>`).join('');
