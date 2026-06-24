@@ -160,9 +160,60 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 @keyframes spin{to{transform:rotate(360deg)}}
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e293b;color:#fff;font-size:13px;font-weight:600;padding:10px 20px;border-radius:20px;z-index:9998;opacity:0;transition:all .4s;white-space:nowrap}
 .toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.notice-banner{background:linear-gradient(135deg,#f59e0b,#ef4444);border-radius:14px;padding:14px 16px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;box-shadow:0 2px 8px rgba(239,68,68,.2)}
+.notice-banner-left{display:flex;align-items:center;gap:10px}
+.notice-banner-icon{font-size:22px;flex-shrink:0}
+.notice-banner-text{color:#fff}
+.notice-banner-title{font-size:14px;font-weight:800;margin-bottom:2px}
+.notice-banner-sub{font-size:12px;opacity:.9}
+.notice-banner-arrow{color:#fff;font-size:18px;font-weight:700;flex-shrink:0}
+.notice-modal-item{display:flex;gap:10px;padding:14px 0;border-bottom:1px solid #f1f5f9;align-items:flex-start}
+.notice-modal-item:last-child{border-bottom:none}
+.notice-modal-icon{font-size:20px;flex-shrink:0;margin-top:2px}
+.notice-modal-text{font-size:14px;color:#374151;line-height:1.7}
+.notice-modal-text b{color:#1a1a2e}
+.os-filter-row{display:flex;gap:8px;margin-bottom:12px}
+.os-btn{flex:1;padding:10px;font-size:13px;font-weight:700;border:2px solid #e2e8f0;border-radius:12px;background:#fff;cursor:pointer;font-family:inherit;color:#374151;text-align:center}
+.os-btn.on{border-color:#3b82f6;background:#eff6ff;color:#1e40af}
+.mem-simple{background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,.06);display:flex;align-items:center;justify-content:space-between;cursor:pointer;border:1.5px solid transparent;transition:border-color .15s}
+.mem-simple:hover{border-color:#3b82f6}
+.mem-simple-name{font-size:14px;font-weight:700;color:#1a1a2e}
+.mem-simple-phone{font-size:12px;color:#64748b;margin-top:2px}
+.mem-simple-arrow{color:#94a3b8;font-size:16px}
 </style>
 </head>
 <body>
+
+<!-- 공지사항 모달 -->
+<div id="notice-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9100;overflow-y:auto">
+  <div style="background:#fff;max-width:460px;margin:40px auto 20px;border-radius:20px;overflow:hidden">
+    <div style="background:linear-gradient(135deg,#f59e0b,#ef4444);padding:16px 18px;display:flex;align-items:center;justify-content:space-between">
+      <div style="font-size:16px;font-weight:800;color:#fff">📢 안내사항</div>
+      <div onclick="document.getElementById('notice-modal').style.display='none'" style="color:#fff;font-size:22px;cursor:pointer;font-weight:700;line-height:1">✕</div>
+    </div>
+    <div style="padding:16px 18px">
+      <div style="font-size:13px;font-weight:700;color:#f59e0b;background:#fef9c3;border-radius:10px;padding:8px 12px;margin-bottom:14px;text-align:center">
+        ⚠️ 아래 사항을 반드시 확인하고 참여해 주세요
+      </div>
+      <!-- 5단계: 안내사항 -->
+      <div style="font-size:13px;font-weight:800;color:#1a1a2e;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #f1f5f9">📋 참여 안내</div>
+      <div class="notice-modal-item"><div class="notice-modal-icon">💎</div><div class="notice-modal-text"><b>리워드 체험단</b>은 어플, 구글지도, 유튜브 등을 간접 체험하고 리뷰를 달아주는 신개념 리워드 부업입니다.</div></div>
+      <div class="notice-modal-item"><div class="notice-modal-icon">📅</div><div class="notice-modal-text">일주일 기준 <b>2~5회 이내</b> 참여(랜덤), 건당 <b>1,500원</b>, <b>10분 이내</b> 소액 알바입니다.</div></div>
+      <div class="notice-modal-item"><div class="notice-modal-icon">⚠️</div><div class="notice-modal-text"><b>당일 안에 참여</b>하셔야 리워드 지급이 가능합니다. 날짜가 지나면 <b>미지급</b>됩니다.</div></div>
+      <div class="notice-modal-item"><div class="notice-modal-icon">💬</div><div class="notice-modal-text">당일 참여 불가 시 <b>리워드 매니저</b>에게 미리 말씀해 주세요.</div></div>
+      <div class="notice-modal-item"><div class="notice-modal-icon">📱</div><div class="notice-modal-text"><b>사용 중인 개통된 휴대폰만</b> 가능. 공기계·태블릿·PC 불가.</div></div>
+      <div class="notice-modal-item"><div class="notice-modal-icon">📶</div><div class="notice-modal-text">와이파이 가능하나 가끔 <b>모바일 데이터</b> 사용을 권장합니다.</div></div>
+      <div class="notice-modal-item"><div class="notice-modal-icon">💰</div><div class="notice-modal-text">월~일 참여 취합 후 <b>다음 주 화요일</b>에 계좌로 현금 입금합니다.</div></div>
+      <div class="notice-modal-item"><div class="notice-modal-icon">⭐</div><div class="notice-modal-text">성실하게 참여하시는 분들께는 <b>별도 추가 지급</b>도 있습니다.</div></div>
+      <!-- 6단계: 개인정보 -->
+      <div style="font-size:13px;font-weight:800;color:#1a1a2e;margin:14px 0 10px;padding-bottom:6px;border-bottom:2px solid #f1f5f9">🔒 개인정보 수집 및 이용 동의</div>
+      <div class="notice-modal-item"><div class="notice-modal-icon">🗄️</div><div class="notice-modal-text"><b>수집 항목:</b> 성함 / 연락처 / 계좌정보만 수집합니다.</div></div>
+      <div class="notice-modal-item"><div class="notice-modal-icon">🎯</div><div class="notice-modal-text"><b>수집 목적:</b> 참여자 확인 및 리워드 입금 시 계좌 정보 확인</div></div>
+      <div class="notice-modal-item"><div class="notice-modal-icon">⏰</div><div class="notice-modal-text"><b>보유 기간:</b> 탈퇴일로부터 <b>14일 보유</b> 후 완전 파기</div></div>
+      <button onclick="document.getElementById('notice-modal').style.display='none'" class="btn btnP" style="margin-top:16px">확인했습니다 ✓</button>
+    </div>
+  </div>
+</div>
 
 <script>
 // 페이지 로드 즉시 로그인 화면 표시 (Firebase 로딩과 무관)
@@ -329,6 +380,18 @@ textarea{resize:none;min-height:80px;line-height:1.6}
       <div class="week-total" id="week-total"></div>
       <div id="week-list"></div>
     </div>
+    <!-- 공지사항 배너 -->
+    <div class="notice-banner" onclick="openNoticeModal()">
+      <div class="notice-banner-left">
+        <div class="notice-banner-icon">📢</div>
+        <div class="notice-banner-text">
+          <div class="notice-banner-title">안내사항</div>
+          <div class="notice-banner-sub">참여 전 꼭 확인해 주세요!</div>
+        </div>
+      </div>
+      <div class="notice-banner-arrow">›</div>
+    </div>
+
     <div class="rk-card">
       <div class="rk-card-head">
         <div class="rk-card-title">🏆 알바 랭킹</div>
@@ -394,6 +457,16 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 
     <!-- 섹션1: 총 알바인원 검색 -->
     <div id="sec-tot" style="display:none">
+      <!-- OS 필터 버튼 -->
+      <div class="search-box" style="margin-bottom:10px">
+        <div class="search-title">📱 기기별 조회</div>
+        <div class="os-filter-row">
+          <div class="os-btn" id="os-btn-all" onclick="filterByOs('all')">전체<br><span style="font-size:11px;font-weight:500" id="os-cnt-all">0명</span></div>
+          <div class="os-btn" id="os-btn-android" onclick="filterByOs('android')">🤖 안드로이드<br><span style="font-size:11px;font-weight:500" id="os-cnt-android">0명</span></div>
+          <div class="os-btn" id="os-btn-ios" onclick="filterByOs('ios')">🍎 애플(iOS)<br><span style="font-size:11px;font-weight:500" id="os-cnt-ios">0명</span></div>
+        </div>
+        <div id="os-list" style="margin-top:4px"></div>
+      </div>
       <div class="search-box">
         <div class="search-title">🔍 알바인원 검색</div>
         <div style="background:#f8fafc;border-radius:12px;padding:12px;margin-bottom:10px">
@@ -652,6 +725,10 @@ let nickTargetId=null, nickTags=[];
 function showLoading(txt='처리 중...'){document.getElementById('loading-txt').textContent=txt;document.getElementById('loading-overlay').style.display='flex';}
 function hideLoading(){document.getElementById('loading-overlay').style.display='none';}
 function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2500);}
+
+window.openNoticeModal = function(){
+  document.getElementById('notice-modal').style.display='block';
+};
 
 window.goSc = id => {
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
@@ -1093,6 +1170,7 @@ function startListener(){
     if(sumEl&&sumEl.style.display!=='none') doCurrentSearch();
     if(document.getElementById('sec-today')?.style.display==='block') renderTodaySection();
     if(document.getElementById('sec-ranking')?.style.display==='block') rkReset();
+    if(document.getElementById('sec-tot')?.style.display==='block') renderOsList();
   });
 }
 function stopListener(){if(unsubMem){unsubMem();unsubMem=null;}}
@@ -1209,6 +1287,81 @@ function renderRkManageList(list){
   }).join('');
 }
 
+let currentOsFilter = 'all';
+let expandedMemId = null;
+
+window.filterByOs = function(os){
+  currentOsFilter = os;
+  // 버튼 활성화
+  ['all','android','ios'].forEach(k=>{
+    const btn = document.getElementById('os-btn-'+k);
+    if(btn) btn.className = 'os-btn' + (k===os?' on':'');
+  });
+  renderOsList();
+};
+
+function renderOsList(){
+  const el = document.getElementById('os-list');
+  if(!el) return;
+
+  // OS 카운트 업데이트
+  const andCount = MB.filter(m=>(m.os||'').includes('안드로이드')).length;
+  const iosCount = MB.filter(m=>(m.os||'').includes('iOS')).length;
+  const cntAll = document.getElementById('os-cnt-all');
+  const cntAnd = document.getElementById('os-cnt-android');
+  const cntIos = document.getElementById('os-cnt-ios');
+  if(cntAll) cntAll.textContent = MB.length+'명';
+  if(cntAnd) cntAnd.textContent = andCount+'명';
+  if(cntIos) cntIos.textContent = iosCount+'명';
+
+  let list = MB.slice();
+  if(currentOsFilter==='android') list = MB.filter(m=>(m.os||'').includes('안드로이드'));
+  else if(currentOsFilter==='ios') list = MB.filter(m=>(m.os||'').includes('iOS'));
+
+  if(!list.length){
+    el.innerHTML='<div class="ep" style="padding:16px">해당하는 인원이 없습니다.</div>';
+    return;
+  }
+
+  el.innerHTML = list.map(m=>{
+    const isExpanded = expandedMemId === m.id;
+    const tags=(m.nicknames||[]).map(n=>`<span class="nick-tag">${ex(n)}</span>`).join('');
+    const detail = isExpanded ? `
+      <div style="padding:12px 14px;border-top:1px solid #f1f5f9;background:#fff">
+        <div class="mem-row"><span class="mem-key">📲 폰 종류</span><span class="mem-val">${ex(m.os||'')}</span></div>
+        <div class="mem-row"><span class="mem-key">🏦 은행</span><span class="mem-val">${ex(m.bank||'')} ${ex(m.account||'')}</span></div>
+        <div class="mem-row"><span class="mem-key">👤 예금주</span><span class="mem-val">${ex(m.holder||'')}</span></div>
+        <div class="mem-row"><span class="mem-key">💰 주간</span><span class="mem-val" style="color:#16a34a;font-weight:800">${(m.weekPts||0).toLocaleString()}원</span></div>
+        <div class="mem-row"><span class="mem-key">💎 누적</span><span class="mem-val" style="color:#1e40af;font-weight:800">${(m.points||0).toLocaleString()}원</span></div>
+        <div class="nick-area">
+          <div class="nick-title"><span>🏷️ 닉네임</span>
+          <button class="bsm bbl" style="font-size:11px;padding:4px 10px" onclick="openNickModal('${m.id}')">+ 관리</button></div>
+          <div class="nick-list">${tags||'<span style="font-size:12px;color:#94a3b8">등록된 닉네임 없음</span>'}</div>
+        </div>
+        <div style="margin-top:10px;display:flex;justify-content:flex-end;gap:8px">
+          <button class="bsm" style="background:#f1f5f9;color:#374151" onclick="openEditModal('${m.id}')">✏️ 정보 수정</button>
+          <button class="bsm bng" onclick="delMem('${m.id}')">삭제</button>
+        </div>
+      </div>` : '';
+
+    return `<div style="background:#fff;border-radius:12px;margin-bottom:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06)">
+      <div class="mem-simple" onclick="toggleMemDetail('${m.id}')">
+        <div>
+          <div class="mem-simple-name">${ex(m.name)} <span style="font-size:11px;color:#94a3b8;font-weight:500">📅 ${m.joinDate||'-'}</span></div>
+          <div class="mem-simple-phone">${ex(m.phone)} · ${ex(m.os||'')}</div>
+        </div>
+        <div class="mem-simple-arrow">${isExpanded?'∨':'›'}</div>
+      </div>
+      ${detail}
+    </div>`;
+  }).join('');
+};
+
+window.toggleMemDetail = function(id){
+  expandedMemId = expandedMemId===id ? null : id;
+  renderOsList();
+};
+
 window.rkSearch = function(){
   const q=(document.getElementById('rk-srch')||{}).value||'';
   const sorted=MB.slice().sort((a,b)=>(b.points||0)-(a.points||0));
@@ -1285,6 +1438,7 @@ window.showAdmSection = function(name){
   const sec=document.getElementById('sec-'+name);
   if(sec) sec.style.display='block';
   if(name==='today') renderTodaySection();
+  if(name==='tot'){ currentOsFilter='all'; ['all','android','ios'].forEach(k=>{ const b=document.getElementById('os-btn-'+k); if(b) b.className='os-btn'+(k==='all'?' on':''); }); renderOsList(); }
   if(name==='ranking') rkReset();
   if(name==='excel'){
     const prev=document.getElementById('excel-preview');
@@ -1662,6 +1816,7 @@ window.saveNickTags = async function(){
     document.getElementById('nick-msg').style.display='block';
     doCurrentSearch();
     if(document.getElementById('sec-ranking')?.style.display==='block') rkReset();
+    if(document.getElementById('sec-tot')?.style.display==='block') renderOsList();
     setTimeout(()=>closeNickModal(),900);
   }catch(e){hideLoading();alert('저장 오류: '+e.message);}
 };
