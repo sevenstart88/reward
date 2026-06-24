@@ -1,0 +1,1712 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>리워드 체험단</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Noto Sans KR',sans-serif;background:#f4f6f9;max-width:480px;margin:0 auto;min-height:100vh}
+.screen{display:none;min-height:100vh}.screen.on{display:block}
+input,select,textarea{width:100%;font-family:inherit;font-size:16px;padding:13px 14px;border:1.5px solid #dde1e7;border-radius:12px;background:#fff;color:#1a1a2e;outline:none;-webkit-appearance:none;appearance:none}
+input[type="checkbox"]{width:20px;height:20px;padding:0;-webkit-appearance:checkbox;appearance:checkbox;accent-color:#3b82f6;border:none;cursor:pointer}
+input:focus,select:focus,textarea:focus{border-color:#3b82f6}
+textarea{resize:none;min-height:80px;line-height:1.6}
+.fl{margin-bottom:16px}
+.lbl{display:block;font-size:14px;color:#64748b;margin-bottom:6px;font-weight:500}
+.er{font-size:13px;color:#ef4444;margin-top:6px;padding:8px 12px;background:#fef2f2;border-radius:8px;display:none}
+.er.on{display:block}
+.btn{display:block;width:100%;padding:15px;font-size:16px;font-weight:700;cursor:pointer;border-radius:14px;border:none;margin-top:12px;font-family:inherit}
+.btnP{background:#3b82f6;color:#fff}
+.btnS{background:#fff;border:1.5px solid #dde1e7;color:#374151}
+.bsm{display:inline-block;width:auto;padding:8px 14px;margin-top:0;font-size:13px;border-radius:10px;cursor:pointer;border:none;font-weight:600;font-family:inherit}
+.bok{background:#16a34a;color:#fff}.bng{background:#ef4444;color:#fff}.bbl{background:#3b82f6;color:#fff}
+.card{background:#fff;border-radius:16px;padding:20px;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.wp{padding:20px 16px 60px}
+
+/* 신청서 */
+.ap-top{background:linear-gradient(135deg,#3b82f6,#6366f1);padding:28px 20px 20px;text-align:center;color:#fff}
+.ap-title{font-size:22px;font-weight:800;margin-bottom:4px}
+.ap-sub{font-size:14px;opacity:.85}
+.pg-wrap{padding:14px 20px 0}
+.pg-lbl{font-size:13px;color:#64748b;margin-bottom:6px;font-weight:500}
+.pg-bg{height:5px;background:#e2e8f0;border-radius:3px;overflow:hidden}
+.pg-fill{height:5px;background:#3b82f6;border-radius:3px;transition:width .4s}
+.slide{display:none;padding:0 0 20px}.slide.on{display:block}
+.st{font-size:20px;font-weight:800;color:#1a1a2e;margin-bottom:5px}
+.ss{font-size:14px;color:#64748b;margin-bottom:22px;line-height:1.6}
+.cg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.cb{border:2px solid #e2e8f0;border-radius:16px;padding:18px 10px;text-align:center;cursor:pointer;background:#fff}
+.cb.on{border-color:#3b82f6;background:#eff6ff}
+.cb-ic{font-size:28px;margin-bottom:8px}
+.cb-nm{font-size:14px;font-weight:700;color:#1a1a2e}
+.cb-dc{font-size:12px;color:#94a3b8;margin-top:2px}
+.aw{background:#f8fafc;border-radius:14px;padding:14px}
+.aw .fl{margin-bottom:11px}.aw .fl:last-child{margin-bottom:0}
+.hb{font-size:13px;color:#1d4ed8;padding:9px 13px;background:#eff6ff;border-radius:10px;margin-top:9px;line-height:1.5}
+.ns{background:#f8fafc;border-radius:14px;padding:14px;margin-bottom:12px;max-height:260px;overflow-y:auto}
+.ni{display:flex;gap:9px;margin-bottom:11px;align-items:flex-start}.ni:last-child{margin-bottom:0}
+.ni-t{font-size:13px;color:#475569;line-height:1.6}.ni-t b{color:#1a1a2e;font-weight:700}
+.ab{border:2px solid #e2e8f0;border-radius:14px;padding:13px;display:flex;align-items:flex-start;gap:11px;cursor:pointer;margin-bottom:9px;background:#fff}
+.ab.y{border-color:#3b82f6;background:#eff6ff}.ab.n{border-color:#ef4444;background:#fef2f2}
+.ck{width:22px;height:22px;border-radius:50%;border:2px solid #e2e8f0;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;color:#fff;font-weight:700}
+.ab.y .ck{background:#3b82f6;border-color:#3b82f6}.ab.n .ck{background:#ef4444;border-color:#ef4444}
+.at{font-size:13px;line-height:1.5;color:#1a1a2e}
+.al{font-size:13px;font-weight:700;color:#1a1a2e;margin-bottom:8px}
+.br2{display:flex;gap:9px;margin-top:20px}.br2 .btn{margin-top:0}
+.dw{text-align:center;padding:28px 12px}
+.di{width:68px;height:68px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 16px;font-size:28px}
+.di-ok{background:#eff6ff}.di-no{background:#fef2f2}
+.scard{background:#f8fafc;border-radius:14px;padding:14px;text-align:left;margin-bottom:16px}
+.srow{display:flex;gap:8px;margin-bottom:7px;font-size:13px}.srow:last-child{margin-bottom:0}
+.sk{color:#64748b;width:68px;flex-shrink:0;font-weight:500}.sv{color:#1a1a2e;font-weight:700}
+
+/* 관리자 */
+.adm-top{background:linear-gradient(135deg,#1e40af,#4f46e5);padding:16px;display:flex;align-items:center;justify-content:space-between}
+.adm-title{font-size:18px;font-weight:800;color:#fff}
+.adm-wrap{padding:14px 14px 60px}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:16px}
+.stat-card{background:#fff;border-radius:14px;padding:14px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.stat-n{font-size:24px;font-weight:800;color:#1a1a2e}
+.stat-l{font-size:12px;color:#64748b;margin-top:3px;font-weight:500}
+.search-box{background:#fff;border-radius:14px;padding:14px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.search-title{font-size:13px;font-weight:700;color:#374151;margin-bottom:10px}
+.search-row{display:flex;gap:8px;margin-bottom:8px;align-items:center}
+.search-row:last-child{margin-bottom:0}
+.search-lbl{font-size:12px;color:#64748b;white-space:nowrap;min-width:52px;font-weight:500}
+.srch-btn{padding:10px 14px;font-size:13px;border:none;border-radius:10px;background:#3b82f6;color:#fff;font-weight:700;cursor:pointer;white-space:nowrap;font-family:inherit}
+.reset-btn{padding:10px 14px;font-size:13px;border:1px solid #dde1e7;border-radius:10px;background:#fff;color:#64748b;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit}
+.mem-card{background:#fff;border-radius:14px;margin-bottom:10px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.mem-head{padding:12px 14px;background:#f8fafc;border-bottom:1px solid #f1f5f9;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.mem-name{font-size:15px;font-weight:800;color:#1a1a2e}
+.mem-date{font-size:11px;color:#94a3b8}
+.mem-body{padding:12px 14px}
+.mem-row{display:flex;gap:6px;font-size:13px;margin-bottom:6px;align-items:flex-start}
+.mem-row:last-child{margin-bottom:0}
+.mem-key{color:#64748b;min-width:52px;flex-shrink:0;font-weight:500}
+.mem-val{color:#1a1a2e;font-weight:600;word-break:break-all}
+.nick-area{background:#eff6ff;border-radius:10px;padding:10px 12px;margin-top:10px}
+.nick-title{font-size:12px;font-weight:700;color:#1d4ed8;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between}
+.nick-list{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px;min-height:24px}
+.nick-tag{display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid #bfdbfe;border-radius:20px;padding:4px 10px;font-size:12px;font-weight:700;color:#1e40af}
+.nick-del{color:#94a3b8;cursor:pointer;font-size:15px;font-weight:800;line-height:1}
+.ep{text-align:center;padding:30px;color:#94a3b8;font-size:14px}
+.lhero{background:linear-gradient(135deg,#3b82f6,#6366f1);padding:44px 24px 32px;text-align:center;color:#fff}
+
+/* 알바 로그인 */
+.login-hero{background:linear-gradient(135deg,#3b82f6,#6366f1);padding:52px 24px 36px;text-align:center;color:#fff}
+.login-hero-ic{font-size:52px;margin-bottom:14px}
+.login-hero-t{font-size:26px;font-weight:800;margin-bottom:6px}
+.login-hero-s{font-size:15px;opacity:.85}
+
+/* 알바 대시보드 헤더 */
+.uh{background:linear-gradient(135deg,#1e40af,#4f46e5);padding:16px}
+.uh-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.uh-name{font-size:17px;font-weight:800;color:#fff}
+.lo{font-size:11px;color:rgba(255,255,255,.9);cursor:pointer;font-weight:700;padding:6px 11px;background:rgba(255,255,255,.18);border-radius:10px}
+.uh-stats{display:flex;gap:10px}
+.uh-stat{flex:1;background:#fff;border-radius:14px;padding:12px 10px;text-align:center;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.1);transition:transform .15s}
+.uh-stat:active{transform:scale(.97)}
+.uh-stat-lbl{font-size:14px;color:#64748b;font-weight:700;display:block;margin-bottom:5px}
+.uh-stat-val{font-size:17px;font-weight:800;color:#1e40af;display:block}
+
+/* 대시보드 본문 */
+.dash-wrap{padding:14px 14px 60px}
+
+/* 주간 리워드 카드 */
+.week-card{background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.week-card-title{font-size:15px;font-weight:800;color:#1a1a2e;margin-bottom:8px}
+.week-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;background:#f1f5f9;border-radius:12px;padding:6px 8px}
+.week-nav-btn{background:#fff;border:1.5px solid #dde1e7;border-radius:8px;padding:5px 10px;font-size:12px;font-weight:700;cursor:pointer;color:#374151;font-family:inherit;white-space:nowrap}
+.week-nav-btn:active{background:#eff6ff;border-color:#3b82f6;color:#1d4ed8}
+.week-nav-lbl{font-size:12px;font-weight:700;color:#1e40af;text-align:center;flex:1;padding:0 6px}
+.week-days{display:flex;gap:4px;margin-bottom:12px}
+.wday{flex:1;text-align:center;padding:8px 2px;border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;color:#64748b;background:#f8fafc;border:1px solid #e2e8f0}
+.wday.on{background:#3b82f6;color:#fff;border-color:#3b82f6}
+.week-total{font-size:13px;font-weight:700;color:#dc2626;margin-bottom:8px}
+.week-list-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #f1f5f9;font-size:13px}
+.week-list-item:last-child{border-bottom:none}
+.week-item-name{color:#1a1a2e;font-weight:600}
+.week-item-date{font-size:11px;color:#94a3b8;margin-top:2px}
+.week-item-amt{color:#16a34a;font-weight:800}
+
+/* 랭킹 카드 */
+.rk-card{background:#fff;border-radius:16px;padding:16px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.rk-card-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.rk-card-title{font-size:15px;font-weight:800;color:#1a1a2e}
+.rk-tabs{display:flex;background:#f1f5f9;border-radius:20px;padding:3px;gap:2px}
+.rk-tab{padding:6px 14px;font-size:12px;font-weight:700;border-radius:18px;cursor:pointer;color:#64748b;border:none;background:transparent;font-family:inherit}
+.rk-tab.on{background:#3b82f6;color:#fff}
+.podium{display:flex;justify-content:center;align-items:flex-end;gap:16px;margin-bottom:16px;padding-top:6px}
+.pod-card{display:flex;flex-direction:column;align-items:center;width:80px}
+.pod-avatar{border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;position:relative;flex-shrink:0}
+.pod-avatar.first{width:68px;height:68px;font-size:26px}
+.pod-avatar.second,.pod-avatar.third{width:52px;height:52px}
+.pod-badge{position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);width:20px;height:20px;border-radius:50%;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;border:2px solid #fff}
+.b1{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#78350f}
+.b2{background:linear-gradient(135deg,#94a3b8,#64748b);color:#fff}
+.b3{background:linear-gradient(135deg,#f97316,#ea580c);color:#fff}
+.pod-name{font-size:12px;font-weight:700;color:#1a1a2e;margin-top:9px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:80px}
+.pod-pts{font-size:12px;color:#3b82f6;font-weight:800;text-align:center;margin-top:1px}
+.rk-row{display:flex;justify-content:space-between;align-items:center;padding:9px 2px;border-top:1px solid #f1f5f9;font-size:13px}
+.rk-rank{width:24px;color:#94a3b8;font-weight:700;font-size:12px}
+.rk-name{flex:1;color:#1a1a2e;font-weight:600}
+.rk-pts{color:#3b82f6;font-weight:800}
+.rk-note{font-size:11px;color:#94a3b8;text-align:right;margin-top:6px}
+.loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,.92);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px}
+.loading-spinner{width:42px;height:42px;border:4px solid #e2e8f0;border-top-color:#3b82f6;border-radius:50%;animation:spin .8s linear infinite}
+.loading-txt{font-size:14px;color:#64748b;font-weight:500}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:#1e293b;color:#fff;font-size:13px;font-weight:600;padding:10px 20px;border-radius:20px;z-index:9998;opacity:0;transition:all .4s;white-space:nowrap}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loading-overlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-txt" id="loading-txt">연결 중...</div>
+</div>
+<div class="toast" id="toast"></div>
+
+<!-- 신청서 -->
+<div id="sc-apply" class="screen">
+  <div class="ap-top"><div class="ap-title">🏆 리워드 체험단</div><div class="ap-sub">신청서 작성</div></div>
+  <div class="pg-wrap">
+    <div class="pg-lbl" id="pg-lbl">1 / 6단계</div>
+    <div class="pg-bg"><div class="pg-fill" id="pg-fill" style="width:16.6%"></div></div>
+  </div>
+  <div class="wp" style="padding-top:18px">
+    <div class="slide on" id="sl1">
+      <div class="st">기본 정보 입력</div><div class="ss">성함과 연락처를 정확히 입력해 주세요</div>
+      <div class="fl"><span class="lbl">성함 *</span><input type="text" id="a-name" placeholder="실명 입력" autocomplete="off"></div>
+      <div class="fl"><span class="lbl">연락처 * (숫자만)</span><input type="tel" id="a-phone" placeholder="01012345678" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'')"></div>
+      <div id="e1" class="er"></div>
+      <button class="btn btnP" onclick="anext(1)">다음 →</button>
+    </div>
+    <div class="slide" id="sl2">
+      <div class="st">나이 확인</div><div class="ss">해당하는 항목을 선택해 주세요</div>
+      <div class="cg">
+        <div class="cb" id="cb-minor" onclick="pickAge('minor')"><div class="cb-ic">🧑</div><div class="cb-nm">미성년자</div><div class="cb-dc">만 18세 미만</div></div>
+        <div class="cb" id="cb-adult" onclick="pickAge('adult')"><div class="cb-ic">👤</div><div class="cb-nm">성인</div><div class="cb-dc">만 18세 이상</div></div>
+      </div>
+      <div id="e2" class="er"></div>
+      <div class="br2"><button class="btn btnS" onclick="aback(2)">← 이전</button><button class="btn btnP" onclick="anext(2)">다음 →</button></div>
+    </div>
+    <div class="slide" id="sl3">
+      <div class="st">휴대폰 종류</div><div class="ss">사용 중인 스마트폰을 선택해 주세요</div>
+      <div class="cg">
+        <div class="cb" id="cb-android" onclick="pickOs('android')"><div class="cb-ic">🤖</div><div class="cb-nm">안드로이드</div><div class="cb-dc">갤럭시, LG 등</div></div>
+        <div class="cb" id="cb-ios" onclick="pickOs('ios')"><div class="cb-ic">🍎</div><div class="cb-nm">애플 (iOS)</div><div class="cb-dc">아이폰</div></div>
+      </div>
+      <div id="e3" class="er"></div>
+      <div class="br2"><button class="btn btnS" onclick="aback(3)">← 이전</button><button class="btn btnP" onclick="anext(3)">다음 →</button></div>
+    </div>
+    <div class="slide" id="sl4">
+      <div class="st">입금 계좌 정보</div><div class="ss">본인 명의 계좌를 입력해 주세요</div>
+      <div class="aw">
+        <div class="fl"><span class="lbl">은행명 *</span>
+          <select id="a-bank"><option value="">은행 선택</option><option>카카오뱅크</option><option>토스뱅크</option><option>케이뱅크</option><option>국민은행</option><option>신한은행</option><option>우리은행</option><option>하나은행</option><option>농협은행</option><option>기업은행</option><option>SC제일은행</option><option>대구은행</option><option>부산은행</option><option>광주은행</option><option>전북은행</option><option>경남은행</option><option>새마을금고</option><option>신협</option><option>우체국</option></select>
+        </div>
+        <div class="fl"><span class="lbl">계좌번호 * (숫자만)</span><input type="text" id="a-acct" inputmode="numeric" placeholder="숫자만 입력" oninput="this.value=this.value.replace(/\D/g,'')"></div>
+        <div class="fl"><span class="lbl">예금주 *</span><input type="text" id="a-holder" placeholder="본인 명의와 동일해야 합니다"></div>
+      </div>
+      <div class="hb">⚠️ 예금주는 신청자 성함 <b id="hh">-</b>과(와) 동일해야 합니다</div>
+      <div id="e4" class="er"></div>
+      <div class="br2"><button class="btn btnS" onclick="aback(4)">← 이전</button><button class="btn btnP" onclick="anext(4)">다음 →</button></div>
+    </div>
+    <div class="slide" id="sl5">
+      <div class="st">안내사항 확인</div><div class="ss">꼼꼼히 읽고 동의 여부를 선택해 주세요</div>
+      <div class="ns" style="max-height:none;overflow-y:visible">
+        <div class="ni"><span>💎</span><div class="ni-t"><b>리워드 체험단</b>은 어플, 구글지도, 유튜브 등을 간접 체험하고 리뷰를 달아주는 신개념 리워드 부업입니다.</div></div>
+        <div class="ni"><span>📅</span><div class="ni-t">일주일 기준 <b>2~5회 이내</b> 참여(랜덤), 건당 <b>1,500원</b>, <b>10분 이내</b> 소액 알바입니다.</div></div>
+        <div class="ni"><span>⚠️</span><div class="ni-t"><b>당일 안에 참여</b>하셔야 리워드 지급이 가능합니다. 날짜가 지나면 <b>미지급</b>됩니다.</div></div>
+        <div class="ni"><span>💬</span><div class="ni-t">당일 참여 불가 시 <b>리워드 매니저</b>에게 미리 말씀해 주세요.</div></div>
+        <div class="ni"><span>📱</span><div class="ni-t"><b>사용 중인 개통된 휴대폰만</b> 가능. 공기계·태블릿·PC 불가.</div></div>
+        <div class="ni"><span>📶</span><div class="ni-t">와이파이 가능하나 가끔 <b>모바일 데이터</b> 사용을 권장합니다.</div></div>
+        <div class="ni"><span>💰</span><div class="ni-t">월~일 참여 취합 후 <b>다음 주 화요일</b>에 계좌로 현금 입금합니다.</div></div>
+        <div class="ni"><span>⭐</span><div class="ni-t">성실하게 참여하시는 분들께는 <b>별도 추가 지급</b>도 있습니다.</div></div>
+      </div>
+      <div class="al">위 안내사항을 이해하셨나요? *</div>
+      <div class="ab" id="ag1y" onclick="selAg(1,'y')"><div class="ck" id="ck1y"></div><div class="at"><b>동의합니다</b></div></div>
+      <div class="ab" id="ag1n" onclick="selAg(1,'n')"><div class="ck" id="ck1n"></div><div class="at"><b>미동의</b> — 신청서가 삭제됩니다</div></div>
+      <div id="e5" class="er"></div>
+      <div class="br2"><button class="btn btnS" onclick="aback(5)">← 이전</button><button class="btn btnP" onclick="anext(5)">다음 →</button></div>
+    </div>
+    <div class="slide" id="sl6">
+      <div class="st">개인정보 수집 및 이용 동의</div><div class="ss">아래 내용을 확인 후 동의 여부를 선택해 주세요</div>
+      <div class="ns" style="max-height:160px">
+        <div class="ni"><span>🗄️</span><div class="ni-t"><b>수집 항목:</b> 성함 / 연락처 / 계좌정보만 수집합니다.</div></div>
+        <div class="ni"><span>🎯</span><div class="ni-t"><b>수집 목적:</b> 참여자 확인 및 리워드 입금 시 계좌 정보 확인</div></div>
+        <div class="ni"><span>⏰</span><div class="ni-t"><b>보유 기간:</b> 탈퇴일로부터 <b>14일 보유</b> 후 완전 파기</div></div>
+      </div>
+      <div class="al">개인정보 수집 및 이용에 동의하시겠습니까? *</div>
+      <div class="ab" id="ag2y" onclick="selAg(2,'y')"><div class="ck" id="ck2y"></div><div class="at"><b>동의합니다</b></div></div>
+      <div class="ab" id="ag2n" onclick="selAg(2,'n')"><div class="ck" id="ck2n"></div><div class="at"><b>미동의</b> — 신청서가 삭제됩니다</div></div>
+      <div id="e6" class="er"></div>
+      <div class="br2"><button class="btn btnS" onclick="aback(6)">← 이전</button><button class="btn btnP" onclick="doSubmit()">제출하기 ✓</button></div>
+    </div>
+    <div class="slide" id="sl-ok">
+      <div class="dw">
+        <div class="di di-ok">✅</div>
+        <div style="font-size:20px;font-weight:800;margin-bottom:8px;color:#1a1a2e">신청 완료!</div>
+        <div style="font-size:14px;color:#64748b;line-height:1.7;margin-bottom:18px">신청서가 성공적으로 접수되었습니다.<br>카카오톡으로 안내드리겠습니다.</div>
+        <div class="scard" id="sum-box"></div>
+      </div>
+    </div>
+    <div class="slide" id="sl-del">
+      <div class="dw">
+        <div class="di di-no">🗑️</div>
+        <div style="font-size:20px;font-weight:800;margin-bottom:8px;color:#1a1a2e">신청서가 삭제되었습니다</div>
+        <button class="btn btnP" onclick="restart()">처음부터 다시 시작</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 알바 로그인 -->
+<div id="sc-login" class="screen">
+  <div class="login-hero">
+    <div class="login-hero-ic">🏆</div>
+    <div class="login-hero-t">리워드 체험단</div>
+    <div class="login-hero-s">성함과 연락처로 로그인하세요</div>
+  </div>
+  <div class="wp">
+    <div class="card">
+      <div class="fl"><span class="lbl">성함</span><input type="text" id="l-name" placeholder="신청 시 입력한 성함" autocomplete="off"></div>
+      <div class="fl"><span class="lbl">연락처 (숫자만)</span><input type="tel" id="l-phone" placeholder="01012345678" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'')"></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <input type="checkbox" id="l-auto" checked>
+        <label for="l-auto" style="font-size:14px;color:#374151;cursor:pointer;font-weight:500">자동 로그인</label>
+      </div>
+      <div id="l-er" class="er"></div>
+      <button class="btn btnP" onclick="doLogin()">로그인</button>
+    </div>
+    <div style="text-align:center;margin-top:18px;font-size:15px;color:#64748b">
+      처음이신가요? <span style="color:#3b82f6;font-weight:700;cursor:pointer" onclick="goSc('sc-apply')">신청서 작성 →</span>
+    </div>
+  </div>
+</div>
+
+<!-- 알바 대시보드 -->
+<div id="sc-user" class="screen">
+  <div class="uh">
+    <div class="uh-top">
+      <div class="uh-name" id="u-nm">이름님</div>
+      <div class="lo" onclick="doUserLogout()">로그아웃</div>
+    </div>
+    <div class="uh-stats">
+      <div class="uh-stat" onclick="openTotalModal()">
+        <span class="uh-stat-lbl">💰 총 누적 리워드</span>
+        <span class="uh-stat-val" id="u-total-pts">0원</span>
+      </div>
+      <div class="uh-stat">
+        <span class="uh-stat-lbl">📅 주간 리워드</span>
+        <span class="uh-stat-val" id="u-week-pts">0원</span>
+      </div>
+    </div>
+  </div>
+  <div class="dash-wrap">
+    <div class="week-card">
+      <div class="week-card-title">📅 주간 리워드 금액</div>
+      <div class="week-nav">
+        <button class="week-nav-btn" onclick="prevWeek()">◀ 이전주</button>
+        <span class="week-nav-lbl" id="week-nav-label"></span>
+        <button class="week-nav-btn" id="week-nav-next" onclick="nextWeek()">다음주 ▶</button>
+      </div>
+      <div class="week-days" id="week-days"></div>
+      <div class="week-total" id="week-total"></div>
+      <div id="week-list"></div>
+    </div>
+    <div class="rk-card">
+      <div class="rk-card-head">
+        <div class="rk-card-title">🏆 알바 랭킹</div>
+        <div class="rk-tabs">
+          <button class="rk-tab on" onclick="setRk('week',this)">주간</button>
+          <button class="rk-tab" onclick="setRk('month',this)">월간</button>
+        </div>
+      </div>
+      <div id="rk-podium"></div>
+      <div id="rk-rest"></div>
+      <div class="rk-note" id="rk-note"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 관리자 로그인 -->
+<div id="sc-adm-login" class="screen">
+  <div class="lhero">
+    <div style="font-size:52px;margin-bottom:14px">🔐</div>
+    <div style="font-size:22px;font-weight:800;margin-bottom:6px">관리자 로그인</div>
+  </div>
+  <div class="wp">
+    <div class="card">
+      <div class="fl"><span class="lbl">비밀번호</span><input type="password" id="adm-pw" placeholder="관리자 비밀번호" onkeydown="if(event.key==='Enter')doAdmLogin()"></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+        <input type="checkbox" id="adm-auto" checked>
+        <label for="adm-auto" style="font-size:14px;color:#374151;cursor:pointer;font-weight:500">자동 로그인</label>
+      </div>
+      <div id="adm-er" class="er"></div>
+      <button class="btn btnP" onclick="doAdmLogin()">로그인</button>
+    </div>
+  </div>
+</div>
+
+<!-- 관리자 대시보드 -->
+<div id="sc-adm" class="screen">
+  <div class="adm-top">
+    <div class="adm-title">👥 알바인원 관리</div>
+    <span onclick="doLogout()" style="font-size:13px;color:rgba(255,255,255,.9);cursor:pointer;font-weight:700;background:rgba(255,255,255,.2);padding:7px 13px;border-radius:10px">로그아웃 ↩</span>
+  </div>
+  <div class="adm-wrap">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px">
+      <div class="stat-card" style="cursor:pointer" id="btn-tot" onclick="showAdmSection('tot')">
+        <div class="stat-n" id="a-tot">0</div>
+        <div class="stat-l">총 알바인원 🔍</div>
+      </div>
+      <div class="stat-card" style="cursor:pointer" id="btn-today" onclick="showAdmSection('today')">
+        <div class="stat-n" id="a-today">0</div>
+        <div class="stat-l">오늘 가입 👁️</div>
+      </div>
+    </div>
+
+    <!-- ★ 추가: 랭킹 닉네임 관리 버튼 -->
+    <div class="stat-card" style="cursor:pointer;margin-bottom:10px;text-align:center;padding:13px" id="btn-ranking" onclick="showAdmSection('ranking')">
+      <div style="font-size:16px;font-weight:800;color:#1a1a2e">🏆 알바 랭킹 닉네임 관리</div>
+      <div style="font-size:12px;color:#64748b;margin-top:3px">닉네임 등록 · 랭킹 표시 이름 설정</div>
+    </div>
+
+    <div class="stat-card" style="cursor:pointer;margin-bottom:14px;text-align:center;padding:13px" id="btn-excel" onclick="showAdmSection('excel')">
+      <div style="font-size:16px;font-weight:800;color:#1a1a2e">📊 주간 리워드 일괄 설정</div>
+      <div style="font-size:12px;color:#64748b;margin-top:3px">엑셀 업로드로 리워드 적용</div>
+    </div>
+
+    <!-- 섹션1: 총 알바인원 검색 -->
+    <div id="sec-tot" style="display:none">
+      <div class="search-box">
+        <div class="search-title">🔍 알바인원 검색</div>
+        <div style="background:#f8fafc;border-radius:12px;padding:12px;margin-bottom:10px">
+          <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px">📅 가입 날짜로 검색</div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input type="date" id="srch-date" style="font-size:13px;padding:9px 12px;flex:1">
+            <button class="srch-btn" onclick="doDateSearch()">검색</button>
+            <button class="reset-btn" onclick="resetDateSearch()">초기화</button>
+          </div>
+        </div>
+        <div style="background:#f8fafc;border-radius:12px;padding:12px">
+          <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px">👤 성함 + 연락처로 검색 (둘 다 입력 필요)</div>
+          <div style="display:flex;flex-direction:column;gap:7px">
+            <input type="text" id="srch-name" placeholder="성함 입력" style="font-size:13px;padding:9px 12px">
+            <input type="tel" id="srch-phone" placeholder="연락처 입력 (숫자만)" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'')" style="font-size:13px;padding:9px 12px">
+            <div style="display:flex;gap:8px">
+              <button class="srch-btn" style="flex:1" onclick="doNameSearch()">검색</button>
+              <button class="reset-btn" style="flex:1" onclick="resetNameSearch()">초기화</button>
+            </div>
+          </div>
+        </div>
+        <div id="srch-summary" style="font-size:12px;color:#3b82f6;margin-top:8px;font-weight:600;display:none"></div>
+      </div>
+      <div id="mem-list"></div>
+    </div>
+
+    <!-- 섹션2: 오늘 가입 -->
+    <div id="sec-today" style="display:none">
+      <div class="search-box">
+        <div class="search-title">👁️ 오늘 가입한 알바인원</div>
+        <div id="today-summary" style="font-size:12px;color:#3b82f6;margin-bottom:8px;font-weight:600"></div>
+      </div>
+      <div id="today-list"></div>
+    </div>
+
+    <!-- ★ 추가: 섹션3: 랭킹 닉네임 관리 -->
+    <div id="sec-ranking" style="display:none">
+      <div class="search-box">
+        <div class="search-title">🏆 알바 랭킹 닉네임 관리</div>
+        <div style="font-size:12px;color:#64748b;margin-bottom:12px;line-height:1.7;background:#f8fafc;border-radius:10px;padding:10px">
+          ✅ <b>닉네임 있음</b> → 랭킹에 닉네임으로 표시<br>
+          ⭐ <b>닉네임 없음</b> → 이름 첫글자+별표로 표시 (예: 홍*동)
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <input type="text" id="rk-srch" placeholder="이름으로 검색" style="font-size:13px;padding:9px 12px;flex:1">
+          <button class="srch-btn" onclick="rkSearch()">검색</button>
+          <button class="reset-btn" onclick="rkReset()">전체보기</button>
+        </div>
+        <div id="rk-manage-list"></div>
+      </div>
+    </div>
+
+    <!-- 섹션4: 엑셀 업로드 -->
+    <div id="sec-excel" style="display:none">
+      <div class="search-box" style="margin-bottom:12px">
+        <div class="search-title">📅 날짜별 업로드 내역 조회</div>
+        <div style="font-size:12px;color:#64748b;margin-bottom:10px">날짜를 선택하면 해당 날 업로드된 리워드 내역을 확인할 수 있습니다.</div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="date" id="excel-srch-date" style="font-size:13px;padding:9px 12px;flex:1">
+          <button class="srch-btn" onclick="searchExcelHistory()">조회</button>
+          <button class="reset-btn" onclick="resetExcelHistory()">초기화</button>
+        </div>
+        <div id="excel-history-result" style="margin-top:12px;display:none"></div>
+      </div>
+      <div class="search-box">
+        <div class="search-title">📊 주간 리워드 일괄 설정 (엑셀 업로드)</div>
+        <div style="background:#eff6ff;border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:12px;color:#1d4ed8;line-height:1.7">
+          📌 <b>업로드 날짜:</b> <span id="upload-date-label" style="font-weight:800"></span><br>
+          📋 <b>엑셀 형식:</b> A열=날짜, B열=성함, C열=연락처, D열=닉네임, E열=앱명, F열=리워드금액<br>
+          (1행은 제목행, 2행부터 데이터 / 한 명 여러 앱 참여 시 여러 행 입력)<br>
+          ⚠️ <b>A~F열 중 1개라도 불일치하면 해당 인원 리워드 미적립</b>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input type="file" id="excel-file" accept=".xlsx,.xls,.csv" style="font-size:12px;padding:8px;flex:1">
+          <button class="srch-btn" onclick="uploadExcel()">업로드</button>
+        </div>
+        <div id="excel-msg" style="margin-top:8px;font-size:12px;display:none"></div>
+        <div id="excel-preview" style="margin-top:10px;display:none"></div>
+      </div>
+    </div>
+
+    <div id="sec-home" style="text-align:center;padding:30px 20px;color:#94a3b8;font-size:14px">
+      위 버튼을 눌러 원하는 기능을 선택하세요.
+    </div>
+  </div>
+</div>
+
+<!-- 총 누적 리워드 조회 모달 -->
+<div id="total-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9200;overflow-y:auto">
+  <div style="background:#fff;max-width:460px;margin:40px auto 20px;border-radius:20px;overflow:hidden">
+    <div style="background:linear-gradient(135deg,#1e40af,#4f46e5);padding:16px 18px;display:flex;align-items:center;justify-content:space-between">
+      <div style="font-size:16px;font-weight:800;color:#fff">💰 총 누적 리워드 내역</div>
+      <div onclick="closeTotalModal()" style="color:#fff;font-size:22px;cursor:pointer;font-weight:700;line-height:1">✕</div>
+    </div>
+    <div style="padding:12px 16px;background:#f8fafc;border-bottom:1px solid #e2e8f0">
+      <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+        <select id="tot-year" style="flex:1;min-width:80px;font-size:13px;padding:9px 8px" onchange="onTotYearChange()"></select>
+        <select id="tot-month" style="flex:1;min-width:70px;font-size:13px;padding:9px 8px" onchange="onTotMonthChange()">
+          <option value="">전체 월</option>
+          <option value="01">1월</option><option value="02">2월</option><option value="03">3월</option>
+          <option value="04">4월</option><option value="05">5월</option><option value="06">6월</option>
+          <option value="07">7월</option><option value="08">8월</option><option value="09">9월</option>
+          <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
+        </select>
+        <select id="tot-day" style="flex:1;min-width:70px;font-size:13px;padding:9px 8px" onchange="renderTotalModal()">
+          <option value="">전체 일</option>
+        </select>
+        <button onclick="resetTotalFilter()" style="padding:9px 12px;font-size:12px;border:1px solid #dde1e7;border-radius:10px;background:#fff;cursor:pointer;color:#64748b;font-weight:600;font-family:inherit;white-space:nowrap">초기화</button>
+      </div>
+    </div>
+    <div id="tot-summary" style="padding:10px 16px;font-size:13px;font-weight:700;color:#1e40af;background:#eff6ff;border-bottom:1px solid #dbeafe"></div>
+    <div id="tot-list" style="padding:12px 16px;max-height:55vh;overflow-y:auto"></div>
+  </div>
+</div>
+
+<!-- 정보 수정 모달 -->
+<div id="edit-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9150;overflow-y:auto">
+  <div style="background:#fff;max-width:460px;margin:30px auto 20px;border-radius:20px;overflow:hidden">
+    <div style="background:linear-gradient(135deg,#1e40af,#4f46e5);padding:15px 18px;display:flex;align-items:center;justify-content:space-between">
+      <div style="font-size:16px;font-weight:800;color:#fff" id="edit-modal-title">✏️ 정보 수정</div>
+      <div onclick="closeEditModal()" style="color:#fff;font-size:22px;cursor:pointer;font-weight:700;line-height:1">✕</div>
+    </div>
+    <div style="padding:18px">
+      <div style="font-size:13px;font-weight:700;color:#374151;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #f1f5f9">👤 기본 정보</div>
+      <div class="fl"><span class="lbl">성함 *</span><input type="text" id="edit-name" placeholder="실명 입력"></div>
+      <div class="fl"><span class="lbl">연락처 * (숫자만)</span><input type="tel" id="edit-phone" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'')"></div>
+      <div class="fl"><span class="lbl">나이</span>
+        <select id="edit-age"><option value="성인">성인</option><option value="미성년자">미성년자</option></select>
+      </div>
+      <div class="fl"><span class="lbl">휴대폰 종류</span>
+        <select id="edit-os"><option value="안드로이드">안드로이드</option><option value="애플 (iOS)">애플 (iOS)</option></select>
+      </div>
+      <div style="font-size:13px;font-weight:700;color:#374151;margin:14px 0 10px;padding-bottom:6px;border-bottom:2px solid #f1f5f9">🏦 계좌 정보</div>
+      <div class="fl"><span class="lbl">은행명</span>
+        <select id="edit-bank">
+          <option value="">은행 선택</option>
+          <option>카카오뱅크</option><option>토스뱅크</option><option>케이뱅크</option>
+          <option>국민은행</option><option>신한은행</option><option>우리은행</option>
+          <option>하나은행</option><option>농협은행</option><option>기업은행</option>
+          <option>SC제일은행</option><option>대구은행</option><option>부산은행</option>
+          <option>광주은행</option><option>전북은행</option><option>경남은행</option>
+          <option>새마을금고</option><option>신협</option><option>우체국</option>
+        </select>
+      </div>
+      <div class="fl"><span class="lbl">계좌번호 (숫자만)</span><input type="text" id="edit-acct" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'')"></div>
+      <div class="fl"><span class="lbl">예금주</span><input type="text" id="edit-holder" placeholder="예금주명"></div>
+      <div style="font-size:13px;font-weight:700;color:#374151;margin:14px 0 10px;padding-bottom:6px;border-bottom:2px solid #f1f5f9">💰 리워드 금액 수동 수정</div>
+      <div class="fl"><span class="lbl">누적 리워드 (원)</span><input type="number" id="edit-points" min="0" step="100"></div>
+      <div class="fl"><span class="lbl">주간 리워드 (원)</span><input type="number" id="edit-weekpts" min="0" step="100"></div>
+      <div class="fl"><span class="lbl">월간 리워드 (원)</span><input type="number" id="edit-monthpts" min="0" step="100"></div>
+      <div id="edit-msg" style="font-size:12px;color:#16a34a;margin-bottom:8px;display:none">✅ 저장되었습니다!</div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn btnS" onclick="closeEditModal()" style="margin-top:0">취소</button>
+        <button class="btn btnP" onclick="saveEdit()" style="margin-top:0">💾 저장하기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 날짜별 내역 전체보기 모달 -->
+<div id="hist-full-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9200;overflow-y:auto">
+  <div style="background:#fff;max-width:460px;margin:30px auto 20px;border-radius:20px;overflow:hidden">
+    <div style="background:linear-gradient(135deg,#1e40af,#4f46e5);padding:15px 18px;display:flex;align-items:center;justify-content:space-between">
+      <div style="font-size:15px;font-weight:800;color:#fff" id="hist-full-title">📅 내역 전체보기</div>
+      <div onclick="document.getElementById('hist-full-modal').style.display='none'" style="color:#fff;font-size:22px;cursor:pointer;font-weight:700">✕</div>
+    </div>
+    <div id="hist-full-list" style="padding:14px 16px;max-height:70vh;overflow-y:auto"></div>
+  </div>
+</div>
+
+<!-- 실패 리스트 모달 -->
+<div id="fail-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9200;overflow-y:auto">
+  <div style="background:#fff;max-width:460px;margin:30px auto 20px;border-radius:20px;overflow:hidden">
+    <div style="background:linear-gradient(135deg,#dc2626,#ef4444);padding:15px 18px;display:flex;align-items:center;justify-content:space-between">
+      <div style="font-size:15px;font-weight:800;color:#fff">❌ 미적립 실패 리스트</div>
+      <div onclick="document.getElementById('fail-modal').style.display='none'" style="color:#fff;font-size:22px;cursor:pointer;font-weight:700">✕</div>
+    </div>
+    <div style="padding:10px 16px;background:#fef2f2;border-bottom:1px solid #fecaca;font-size:12px;color:#b91c1c;line-height:1.6">
+      ⚠️ 아래 인원은 정보 불일치로 리워드가 적립되지 않았습니다.<br>엑셀 정보를 확인 후 재업로드 해주세요.
+    </div>
+    <div id="fail-list" style="padding:14px 16px;max-height:65vh;overflow-y:auto"></div>
+  </div>
+</div>
+
+<!-- 닉네임 관리 모달 -->
+<div id="nick-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9100;align-items:center;justify-content:center;padding:16px">
+  <div style="background:#fff;max-width:420px;width:100%;border-radius:18px;overflow:hidden">
+    <div style="background:linear-gradient(135deg,#1e40af,#4f46e5);padding:14px 16px;display:flex;align-items:center;justify-content:space-between">
+      <div style="font-size:15px;font-weight:800;color:#fff" id="nick-modal-name">닉네임 관리</div>
+      <div onclick="closeNickModal()" style="color:#fff;font-size:22px;cursor:pointer;font-weight:700;line-height:1">✕</div>
+    </div>
+    <div style="padding:16px">
+      <div style="font-size:12px;color:#64748b;margin-bottom:12px">닉네임은 여러 개 등록 가능합니다. <b>+</b> 버튼으로 추가하세요.</div>
+      <div id="nick-tags" style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px;min-height:30px"></div>
+      <div style="display:flex;gap:8px;margin-bottom:10px">
+        <input type="text" id="nick-new-input" placeholder="닉네임 입력 후 + 클릭" maxlength="20" style="flex:1;padding:10px 12px;font-size:14px" onkeydown="if(event.key==='Enter')addNickTag()">
+        <button onclick="addNickTag()" style="padding:10px 18px;font-size:20px;font-weight:800;border:none;border-radius:10px;background:#3b82f6;color:#fff;cursor:pointer;font-family:inherit">+</button>
+      </div>
+      <div id="nick-msg" style="font-size:12px;color:#16a34a;margin-bottom:8px;display:none">✓ 저장되었습니다!</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btnS" onclick="closeNickModal()" style="margin-top:0">닫기</button>
+        <button class="btn btnP" onclick="saveNickTags()" style="margin-top:0">💾 저장하기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js';
+import {
+  getFirestore, collection, doc, getDocs, addDoc, updateDoc, deleteDoc,
+  onSnapshot, serverTimestamp
+} from 'https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js';
+
+const firebaseConfig = {
+  apiKey: "AIzaSyD10MfkNyfWvSRVDIX-CruZF6QCpqKG9mE",
+  authDomain: "reward-alba.firebaseapp.com",
+  projectId: "reward-alba",
+  messagingSenderId: "168342460091",
+  appId: "1:168342460091:web:e288fb4fdab92a1af7bb9e"
+};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const ADM_PW = 'admin1234';
+const ADM_KEY = 'rw_adm_session';
+const USER_KEY = 'rw_user_id';
+const np = v => String(v||'').replace(/\D/g,'');
+const ex = s => s ? String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') : '';
+
+let MB = [];
+let me = null;
+let rkMode = 'week';
+let selWeekDay = null;
+let weekOffset = 0;
+let unsubMem = null;
+let ageVal='', osVal='', ag1='', ag2='', aCur=1;
+let nickTargetId=null, nickTags=[];
+
+function showLoading(txt='처리 중...'){document.getElementById('loading-txt').textContent=txt;document.getElementById('loading-overlay').style.display='flex';}
+function hideLoading(){document.getElementById('loading-overlay').style.display='none';}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2500);}
+
+window.goSc = id => {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  window.scrollTo(0,0);
+};
+
+const saveAdm=()=>{try{localStorage.setItem(ADM_KEY,'1');}catch(e){}};
+const loadAdm=()=>{try{return localStorage.getItem(ADM_KEY);}catch(e){return null;}};
+const clearAdm=()=>{try{localStorage.removeItem(ADM_KEY);}catch(e){}};
+const saveUser=id=>{try{localStorage.setItem(USER_KEY,id);}catch(e){}};
+const loadUser=()=>{try{return localStorage.getItem(USER_KEY);}catch(e){return null;}};
+const clearUser=()=>{try{localStorage.removeItem(USER_KEY);}catch(e){}};
+
+function withTimeout(promise, ms){
+  return Promise.race([
+    promise,
+    new Promise((_,reject)=>setTimeout(()=>reject(new Error('timeout')),ms))
+  ]);
+}
+
+async function init(){
+  const isAdmin = location.search.includes('admin');
+
+  // 최대 20초 대기, 실패해도 반드시 화면 전환
+  const safeLoad = async () => {
+    try { await withTimeout(loadMB(), 20000); return true; }
+    catch(e) { console.warn('loadMB 실패:', e.message); return false; }
+  };
+
+  if(isAdmin){
+    if(loadAdm()){
+      document.getElementById('loading-txt').textContent='데이터 로딩 중...';
+      const ok = await safeLoad();
+      hideLoading();
+      if(ok){ showAdmDash(); showToast('✅ 자동로그인'); }
+      else { goSc('sc-adm-login'); }
+    } else {
+      hideLoading(); goSc('sc-adm-login');
+    }
+    return;
+  }
+
+  const savedId = loadUser();
+  if(savedId){
+    document.getElementById('loading-txt').textContent='로딩 중...';
+    const ok = await safeLoad();
+    if(ok){
+      const found = MB.find(m=>m.id===savedId);
+      if(found){ me=found; hideLoading(); showUserDash(); showToast('✅ '+me.name+'님 자동로그인'); return; }
+      else { clearUser(); }
+    }
+  }
+  hideLoading();
+  goSc('sc-login');
+}
+
+async function loadMB(){
+  const snap=await getDocs(collection(db,'members'));
+  MB=[];
+  snap.forEach(d=>MB.push({id:d.id,...d.data()}));
+  MB.sort((a,b)=>(b.joinDate||'').localeCompare(a.joinDate||'')||(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+}
+
+window.doLogin = async function(){
+  const nameIn = document.getElementById('l-name').value.trim();
+  const phoneIn = np(document.getElementById('l-phone').value);
+  const er = document.getElementById('l-er'); er.classList.remove('on');
+  if(!nameIn||!phoneIn){er.textContent='성함과 연락처를 모두 입력하세요.';er.classList.add('on');return;}
+  showLoading('로그인 중...');
+  try{
+    await loadMB();
+    const found = MB.find(m=>m.name===nameIn && np(m.phone)===phoneIn);
+    hideLoading();
+    if(!found){
+      er.textContent = MB.length===0?'신청서를 먼저 작성해 주세요.':'성함 또는 연락처가 일치하지 않습니다.';
+      er.classList.add('on'); return;
+    }
+    me = found;
+    if(document.getElementById('l-auto').checked) saveUser(me.id);
+    showUserDash();
+  }catch(e){hideLoading();er.textContent='오류: '+e.message;er.classList.add('on');}
+};
+
+window.doUserLogout = function(){
+  clearUser(); me=null;
+  if(userRefreshTimer){ clearInterval(userRefreshTimer); userRefreshTimer=null; }
+  if(unsubUser){ unsubUser(); unsubUser=null; }
+  document.getElementById('l-name').value='';
+  document.getElementById('l-phone').value='';
+  goSc('sc-login');
+};
+
+function getWeekRange(offset){
+  const off = (offset !== undefined) ? offset : weekOffset;
+  const now=new Date(), day=now.getDay();
+  const diffToMon=day===0?-6:1-day;
+  const mon=new Date(now); mon.setDate(now.getDate()+diffToMon + off*7); mon.setHours(0,0,0,0);
+  const sun=new Date(mon); sun.setDate(mon.getDate()+6); sun.setHours(23,59,59,999);
+  return {from:mon,to:sun};
+}
+window.prevWeek = function(){ weekOffset--; selWeekDay=null; renderWeekCard(); };
+window.nextWeek = function(){ if(weekOffset<0){ weekOffset++; selWeekDay=null; renderWeekCard(); } };
+
+// ★ 핵심 수정: 닉네임 있으면 닉네임, 없으면 이름 별표처리
+function displayName(m){
+  const nicks = m.nicknames || [];
+  if(nicks.length > 0 && nicks[0].trim()) return nicks[0].trim();
+  const name = m.name || '';
+  if(!name) return '*****';
+  if(name.length === 1) return '*';
+  if(name.length === 2) return name[0] + '*';
+  return name[0] + '*'.repeat(name.length - 2) + name[name.length - 1];
+}
+
+const AVATAR_COLORS=['#3b82f6','#6366f1','#8b5cf6','#ec4899','#f59e0b','#10b981'];
+function avatarColor(name){let s=0;for(let c of name)s+=c.charCodeAt(0);return AVATAR_COLORS[s%AVATAR_COLORS.length];}
+
+window.openTotalModal = function(){
+  const yearSel = document.getElementById('tot-year');
+  const curYear = new Date().getFullYear();
+  const hist = me.weekHistory||[];
+  const years=[...new Set(hist.map(h=>h.date.split('-')[0]))].sort().reverse();
+  const joinYear = me.joinDate ? parseInt(me.joinDate.split('-')[0]) : curYear;
+  yearSel.innerHTML = '<option value="">전체 연도</option>';
+  const allYears = new Set([...years.map(Number)]);
+  for(let y=curYear; y>=joinYear; y--) allYears.add(y);
+  [...allYears].sort((a,b)=>b-a).forEach(y=>{ yearSel.innerHTML += `<option value="${y}">${y}년</option>`; });
+  document.getElementById('tot-month').value='';
+  document.getElementById('tot-day').innerHTML='<option value="">전체 일</option>';
+  document.getElementById('total-modal').style.display='block';
+  renderTotalModal();
+};
+window.closeTotalModal = function(){document.getElementById('total-modal').style.display='none';};
+window.resetTotalFilter = function(){
+  document.getElementById('tot-year').value='';
+  document.getElementById('tot-month').value='';
+  document.getElementById('tot-day').innerHTML='<option value="">전체 일</option>';
+  renderTotalModal();
+};
+window.onTotYearChange = function(){
+  document.getElementById('tot-month').value='';
+  document.getElementById('tot-day').innerHTML='<option value="">전체 일</option>';
+  renderTotalModal();
+};
+window.onTotMonthChange = function(){
+  const year=document.getElementById('tot-year').value;
+  const month=document.getElementById('tot-month').value;
+  const daySel=document.getElementById('tot-day');
+  daySel.innerHTML='<option value="">전체 일</option>';
+  if(year&&month){
+    const hist=me.weekHistory||[];
+    const prefix=`${year}-${month}-`;
+    const days=[...new Set(hist.filter(h=>h.date.startsWith(prefix)).map(h=>h.date.split('-')[2]))].sort();
+    days.forEach(d=>{ daySel.innerHTML+=`<option value="${d}">${parseInt(d)}일</option>`; });
+  }
+  renderTotalModal();
+};
+window.renderTotalModal = function(){
+  if(!me) return;
+  const year=document.getElementById('tot-year').value;
+  const month=document.getElementById('tot-month').value;
+  const day=document.getElementById('tot-day').value;
+  const hist=me.weekHistory||[];
+  let filtered=hist.slice();
+  if(year&&month&&day) filtered=hist.filter(h=>h.date===`${year}-${month}-${day}`);
+  else if(year&&month) filtered=hist.filter(h=>h.date.startsWith(`${year}-${month}-`));
+  else if(year) filtered=hist.filter(h=>h.date.startsWith(year+'-'));
+  const total=filtered.reduce((s,h)=>s+(h.amt||0),0);
+  let html='';
+  if(!filtered.length){
+    html='<div style="text-align:center;padding:30px;color:#94a3b8;font-size:13px">해당 기간 내역이 없습니다.</div>';
+  } else {
+    const byDate={};
+    filtered.forEach(h=>{if(!byDate[h.date])byDate[h.date]=[];byDate[h.date].push(h);});
+    if(!year&&!month&&!day){
+      const total2=me.points||0;
+      html=`<div style="padding:12px 0;border-bottom:2px solid #dbeafe;margin-bottom:4px">
+        <div style="display:flex;justify-content:space-between"><span style="font-size:13px;font-weight:700">총 누적 리워드</span>
+        <span style="font-size:15px;font-weight:800;color:#1e40af">${total2.toLocaleString()}원</span></div>
+      </div>`;
+    }
+    html+=Object.keys(byDate).sort().reverse().map(date=>{
+      const items=byDate[date];
+      const dayTotal=items.reduce((s,h)=>s+(h.amt||0),0);
+      return `<div style="border-bottom:1px solid #f1f5f9;padding:12px 0">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="font-size:13px;font-weight:700;color:#1a1a2e">📅 ${date}</div>
+          <div style="font-size:14px;font-weight:800;color:#16a34a">+${dayTotal.toLocaleString()}원</div>
+        </div>
+        ${items.map(h=>`<div style="display:flex;justify-content:space-between;font-size:12px;color:#64748b;margin-top:4px">
+          <span>${ex(h.appName||'미션')}</span><span>+${(h.amt||0).toLocaleString()}원</span>
+        </div>`).join('')}
+      </div>`;
+    }).join('');
+  }
+  const label=year?(month?(day?`${year}년 ${parseInt(month)}월 ${parseInt(day)}일`:`${year}년 ${parseInt(month)}월`):year+'년'):'전체';
+  document.getElementById('tot-summary').textContent=`${label} 합계: ${total.toLocaleString()}원`;
+  document.getElementById('tot-list').innerHTML=html;
+};
+
+let userRefreshTimer = null;
+let unsubUser = null;
+
+async function showUserDash(){
+  showLoading('데이터 로딩 중...');
+  try{
+    await loadMB();
+    const fresh=MB.find(m=>m.id===me.id); if(fresh) me=fresh;
+    hideLoading();
+    updateUserUI();
+    goSc('sc-user');
+    startUserListener();
+  }catch(e){hideLoading();alert('오류: '+e.message);}
+}
+
+function startUserListener(){
+  if(unsubUser){ unsubUser(); unsubUser=null; }
+  if(!me) return;
+  unsubUser = onSnapshot(doc(db,'members',me.id), snap=>{
+    if(!snap.exists()) return;
+    me = {id:snap.id,...snap.data()};
+    const idx=MB.findIndex(m=>m.id===me.id);
+    if(idx>=0) MB[idx]=me; else MB.push(me);
+    updateUserUI();
+  });
+}
+
+function updateUserUI(){
+  if(!me) return;
+  document.getElementById('u-nm').textContent = me.name+'님';
+  document.getElementById('u-total-pts').textContent = (me.points||0).toLocaleString()+'원';
+  const weekAmt = calcMyWeekTotal(0);
+  document.getElementById('u-week-pts').textContent = weekAmt.toLocaleString()+'원';
+  renderWeekCard();
+  renderRk();
+}
+
+function calcMyWeekTotal(offset){
+  if(!me) return 0;
+  const wr=getWeekRange(offset!==undefined?offset:weekOffset);
+  const hist=me.weekHistory||[];
+  return hist.filter(h=>{
+    const t=new Date(h.date+'T12:00:00'); return t>=wr.from&&t<=wr.to;
+  }).reduce((s,h)=>s+(h.amt||0),0);
+}
+
+window.setRk = function(mode,el){
+  rkMode=mode;
+  el.closest('.rk-tabs').querySelectorAll('.rk-tab').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on'); renderRk();
+};
+
+window.selectWeekDay = function(idx){
+  selWeekDay = selWeekDay===idx?null:idx;
+  renderWeekCard();
+};
+
+function fmtDate(d){ return `${d.getMonth()+1}/${d.getDate()}`; }
+function dateStr(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+
+function renderWeekCard(){
+  const wr=getWeekRange();
+  const dayNames=['월','화','수','목','금','토','일'];
+  const hist = me.weekHistory||[];
+  const isCurrentWeek = weekOffset===0;
+  const weekLabel=`${fmtDate(wr.from)} ~ ${fmtDate(wr.to)}`;
+  const weekTitle = isCurrentWeek ? `이번주 (${weekLabel})` :
+    weekOffset===-1 ? `지난주 (${weekLabel})` : `${Math.abs(weekOffset)}주 전 (${weekLabel})`;
+  document.getElementById('week-nav-label').textContent = weekTitle;
+  document.getElementById('week-nav-next').style.opacity = isCurrentWeek ? '0.3' : '1';
+  document.getElementById('week-nav-next').style.pointerEvents = isCurrentWeek ? 'none' : 'auto';
+  let daysHtml='';
+  for(let i=0;i<7;i++){
+    const d=new Date(wr.from); d.setDate(wr.from.getDate()+i);
+    const ds=dateStr(d);
+    const dayAmt=hist.filter(h=>h.date===ds).reduce((s,h)=>s+(h.amt||0),0);
+    const on=selWeekDay===i;
+    daysHtml+=`<div class="wday${on?' on':''}" onclick="selectWeekDay(${i})">
+      ${dayNames[i]}<div style="font-size:10px;margin-top:2px">${fmtDate(d)}</div>
+      ${dayAmt>0?`<div style="font-size:10px;color:${on?'#fff':'#16a34a'};font-weight:800;margin-top:1px">${dayAmt.toLocaleString()}</div>`:''}
+    </div>`;
+  }
+  document.getElementById('week-days').innerHTML=daysHtml;
+  let html='', total=0;
+  if(selWeekDay===null){
+    const weekItems=hist.filter(h=>{
+      const t=new Date(h.date+'T12:00:00'); return t>=wr.from&&t<=wr.to;
+    });
+    total=weekItems.reduce((s,h)=>s+(h.amt||0),0);
+    if(total>0){
+      const byDate={};
+      weekItems.forEach(h=>{if(!byDate[h.date])byDate[h.date]=[];byDate[h.date].push(h);});
+      html=Object.keys(byDate).sort().map(date=>{
+        const items=byDate[date];
+        const dayTotal=items.reduce((s,h)=>s+(h.amt||0),0);
+        return `<div class="week-list-item">
+          <div>
+            <div class="week-item-name">${date} (${items.map(h=>ex(h.appName||'미션')).join(', ')})</div>
+            <div class="week-item-date">승인 완료</div>
+          </div>
+          <div class="week-item-amt">+${dayTotal.toLocaleString()}원</div>
+        </div>`;
+      }).join('');
+    } else {
+      const weekWord = isCurrentWeek?'이번주':weekOffset===-1?'지난주':`${Math.abs(weekOffset)}주 전`;
+      html=`<div style="text-align:center;padding:16px;color:#94a3b8;font-size:13px">${weekWord} 승인된 리워드가 없습니다. (0원)</div>`;
+    }
+  } else {
+    const d=new Date(wr.from); d.setDate(wr.from.getDate()+selWeekDay);
+    const ds=dateStr(d);
+    const dayItems=hist.filter(h=>h.date===ds);
+    total=dayItems.reduce((s,h)=>s+(h.amt||0),0);
+    if(total>0){
+      html=dayItems.map(h=>`<div class="week-list-item">
+        <div><div class="week-item-name">${ex(h.appName||'미션')}</div><div class="week-item-date">승인 완료</div></div>
+        <div class="week-item-amt">+${(h.amt||0).toLocaleString()}원</div>
+      </div>`).join('');
+    } else {
+      html=`<div style="text-align:center;padding:16px;color:#94a3b8;font-size:13px">${dayNames[selWeekDay]}요일 승인된 리워드가 없습니다. (0원)</div>`;
+    }
+  }
+  document.getElementById('week-total').textContent=`${selWeekDay===null?'주간 합계':dayNames[selWeekDay]+'요일'}: ${total.toLocaleString()}원`;
+  document.getElementById('week-list').innerHTML=html;
+}
+
+function calcRkPts(m, isWeek){
+  const base = m.points||0;
+  const extra = isWeek ? (m.weekPts||0) : (m.monthPts||0);
+  return base + extra;
+}
+function renderRk(){
+  const isW=rkMode==='week';
+  const sorted=MB.slice().sort((a,b)=>calcRkPts(b,isW)-calcRkPts(a,isW));
+  const top=sorted.slice(0,5);
+  const myIdx=sorted.findIndex(m=>me&&m.id===me.id);
+  const podEl=document.getElementById('rk-podium');
+  const restEl=document.getElementById('rk-rest');
+  if(!podEl||!restEl) return;
+  if(!top.length){
+    podEl.innerHTML='<div style="text-align:center;padding:20px;color:#94a3b8;font-size:13px">아직 데이터가 없습니다</div>';
+    restEl.innerHTML=''; return;
+  }
+  const top3=top.slice(0,3);
+  const order=[1,0,2];
+  let podHtml='<div class="podium">';
+  order.forEach(idx=>{
+    if(idx>=top3.length){podHtml+='<div style="width:80px"></div>';return;}
+    const m=top3[idx]; const pts=calcRkPts(m,isW);
+    const rank=idx+1; const isFirst=rank===1;
+    const bc=['b1','b2','b3'][idx];
+    const isMe=me&&m.id===me.id;
+    const initial=(displayName(m)||'?').charAt(0);
+    podHtml+=`<div class="pod-card">
+      <div class="pod-avatar ${isFirst?'first':'second'}" style="background:${avatarColor(m.name||'')}">
+        ${ex(initial)}<span class="pod-badge ${bc}">${rank}</span>
+      </div>
+      <div class="pod-name">${ex(displayName(m))}${isMe?' ★':''}</div>
+      <div class="pod-pts">${pts.toLocaleString()}P</div>
+    </div>`;
+  });
+  podHtml+='</div>';
+  podEl.innerHTML=podHtml;
+  let restHtml='';
+  for(let i=3;i<top.length;i++){
+    const m=top[i]; const pts=calcRkPts(m,isW);
+    const isMe=me&&m.id===me.id;
+    restHtml+=`<div class="rk-row"><div class="rk-rank">${i+1}</div><div class="rk-name">${ex(displayName(m))}${isMe?' ★':''}</div><div class="rk-pts">${pts.toLocaleString()}P</div></div>`;
+  }
+  restEl.innerHTML=restHtml;
+  const noteEl=document.getElementById('rk-note');
+  if(noteEl&&me) noteEl.textContent=myIdx>=5?'내 순위: '+(myIdx+1)+'위':'';
+}
+
+window.doAdmLogin = async function(){
+  const pw=document.getElementById('adm-pw').value;
+  const er=document.getElementById('adm-er'); er.classList.remove('on');
+  if(pw!==ADM_PW){er.textContent='비밀번호가 틀렸습니다.';er.classList.add('on');return;}
+  if(document.getElementById('adm-auto').checked) saveAdm();
+  showLoading('데이터 로딩 중...');
+  try{ await loadMB(); hideLoading(); showAdmDash(); }
+  catch(e){ hideLoading(); alert('오류: '+e.message); }
+};
+
+window.doLogout = function(){
+  clearAdm(); stopListener();
+  document.getElementById('adm-pw').value='';
+  goSc('sc-adm-login');
+};
+
+function showAdmDash(){
+  updateStats();
+  ADM_SECTIONS.forEach(s=>{
+    const el=document.getElementById('sec-'+s);
+    if(el) el.style.display='none';
+  });
+  ['tot','today','ranking','excel'].forEach(s=>{
+    const btn=document.getElementById('btn-'+s);
+    if(btn) btn.style.outline='none';
+  });
+  const home=document.getElementById('sec-home');
+  if(home) home.style.display='block';
+  goSc('sc-adm');
+  startListener();
+}
+
+function updateStats(){
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('a-tot').textContent=MB.length;
+  document.getElementById('a-today').textContent=MB.filter(m=>m.joinDate===today).length;
+}
+
+function startListener(){
+  if(unsubMem) return;
+  unsubMem=onSnapshot(collection(db,'members'),snap=>{
+    MB=[];
+    snap.forEach(d=>MB.push({id:d.id,...d.data()}));
+    MB.sort((a,b)=>(b.joinDate||'').localeCompare(a.joinDate||'')||(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+    updateStats();
+    const sumEl=document.getElementById('srch-summary');
+    if(sumEl&&sumEl.style.display!=='none') doCurrentSearch();
+    if(document.getElementById('sec-today')?.style.display==='block') renderTodaySection();
+    if(document.getElementById('sec-ranking')?.style.display==='block') rkReset();
+  });
+}
+function stopListener(){if(unsubMem){unsubMem();unsubMem=null;}}
+
+function doCurrentSearch(){
+  const date=(document.getElementById('srch-date')||{}).value||'';
+  const name=((document.getElementById('srch-name')||{}).value||'').trim();
+  const phone=np((document.getElementById('srch-phone')||{}).value||'');
+  if(date) doDateSearch();
+  else if(name||phone) doNameSearch();
+}
+
+window.doDateSearch = function(){
+  const date=(document.getElementById('srch-date')||{}).value||'';
+  if(!date){alert('날짜를 선택해 주세요.');return;}
+  const list=MB.filter(m=>(m.joinDate||'')===date);
+  showResult(list, `📅 ${date} 가입: ${list.length}명`);
+};
+window.resetDateSearch = function(){
+  document.getElementById('srch-date').value='';
+  hideResult();
+};
+window.doNameSearch = function(){
+  const name=((document.getElementById('srch-name')||{}).value||'').trim();
+  const phone=np((document.getElementById('srch-phone')||{}).value||'');
+  if(!name&&!phone){alert('성함과 연락처를 입력해 주세요.');return;}
+  if(!name){alert('성함을 입력해 주세요.');return;}
+  if(!phone){alert('연락처를 입력해 주세요.');return;}
+  const list=MB.filter(m=>{
+    const nameMatch=(m.name||'').includes(name);
+    const phoneMatch=np(m.phone||'').includes(phone);
+    return nameMatch&&phoneMatch;
+  });
+  showResult(list, `👤 "${name}" / ${phone} 검색: ${list.length}명`);
+};
+window.resetNameSearch = function(){
+  document.getElementById('srch-name').value='';
+  document.getElementById('srch-phone').value='';
+  hideResult();
+};
+
+function showResult(list, summary){
+  const sumEl=document.getElementById('srch-summary');
+  sumEl.textContent=summary; sumEl.style.display='block';
+  renderList(list);
+}
+function hideResult(){
+  const sumEl=document.getElementById('srch-summary');
+  sumEl.style.display='none';
+  document.getElementById('mem-list').innerHTML='<div class="ep" style="padding:20px;color:#94a3b8;font-size:14px">🔍 위에서 검색하면 알바인원 정보가 표시됩니다.</div>';
+}
+
+function renderList(list){
+  const el=document.getElementById('mem-list');
+  if(!el) return;
+  if(!list.length){el.innerHTML='<div class="ep">검색 결과가 없습니다.</div>';return;}
+  el.innerHTML=list.map(m=>{
+    const tags=(m.nicknames||[]).map(n=>`<span class="nick-tag">${ex(n)}</span>`).join('');
+    return `<div class="mem-card">
+      <div class="mem-head">
+        <div class="mem-name">${ex(m.name)} <span style="font-size:12px;color:#64748b;font-weight:500">(${ex(m.age||'')})</span></div>
+        <div class="mem-date">📅 ${m.joinDate||'-'}</div>
+      </div>
+      <div class="mem-body">
+        <div class="mem-row"><span class="mem-key">📱 연락처</span><span class="mem-val">${ex(m.phone)}</span></div>
+        <div class="mem-row"><span class="mem-key">📲 폰 종류</span><span class="mem-val">${ex(m.os||'')}</span></div>
+        <div class="mem-row"><span class="mem-key">🏦 은행</span><span class="mem-val">${ex(m.bank||'')} ${ex(m.account||'')}</span></div>
+        <div class="mem-row"><span class="mem-key">👤 예금주</span><span class="mem-val">${ex(m.holder||'')}</span></div>
+        <div class="mem-row"><span class="mem-key">💰 주간</span><span class="mem-val" style="color:#16a34a;font-weight:800">${(m.weekPts||0).toLocaleString()}원</span></div>
+        <div class="mem-row"><span class="mem-key">💎 누적</span><span class="mem-val" style="color:#1e40af;font-weight:800">${(m.points||0).toLocaleString()}원</span></div>
+        <div class="nick-area">
+          <div class="nick-title">
+            <span>🏷️ 닉네임</span>
+            <button class="bsm bbl" style="font-size:11px;padding:4px 10px" onclick="openNickModal('${m.id}')">+ 관리</button>
+          </div>
+          <div class="nick-list" id="nick-list-${m.id}">${tags||'<span style="font-size:12px;color:#94a3b8">등록된 닉네임 없음</span>'}</div>
+        </div>
+        <div style="margin-top:10px;display:flex;justify-content:flex-end;gap:8px">
+          <button class="bsm" style="background:#f1f5f9;color:#374151" onclick="openEditModal('${m.id}')">✏️ 정보 수정</button>
+          <button class="bsm bng" onclick="delMem('${m.id}')">삭제</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ★ 추가: 랭킹 닉네임 관리 목록 렌더링
+function renderRkManageList(list){
+  const el=document.getElementById('rk-manage-list');
+  if(!el) return;
+  if(!list.length){el.innerHTML='<div class="ep">검색 결과가 없습니다.</div>';return;}
+  el.innerHTML=list.map((m,i)=>{
+    const tags=(m.nicknames||[]).map(n=>`<span class="nick-tag">${ex(n)}</span>`).join('');
+    const display=displayName(m);
+    return `<div class="mem-card">
+      <div class="mem-head">
+        <div class="mem-name">${i+1}위 ${ex(m.name)}</div>
+        <div class="mem-date">💰 ${(m.points||0).toLocaleString()}P</div>
+      </div>
+      <div class="mem-body">
+        <div class="mem-row">
+          <span class="mem-key">랭킹표시</span>
+          <span class="mem-val" style="color:#3b82f6;font-size:15px;font-weight:800">${ex(display)}</span>
+        </div>
+        <div class="nick-area">
+          <div class="nick-title">
+            <span>🏷️ 닉네임</span>
+            <button class="bsm bbl" style="font-size:11px;padding:4px 10px" onclick="openNickModal('${m.id}')">+ 관리</button>
+          </div>
+          <div class="nick-list">${tags||'<span style="font-size:12px;color:#94a3b8">없음 — 이름 별표처리됨 (예: ${ex(m.name?m.name[0]+'*'.repeat(Math.max(0,m.name.length-2))+(m.name.length>2?m.name[m.name.length-1]:''):'***')})</span>'}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.rkSearch = function(){
+  const q=(document.getElementById('rk-srch')||{}).value||'';
+  const sorted=MB.slice().sort((a,b)=>(b.points||0)-(a.points||0));
+  const list=q?sorted.filter(m=>(m.name||'').includes(q)):sorted.slice(0,30);
+  renderRkManageList(list);
+};
+window.rkReset = function(){
+  const inp=document.getElementById('rk-srch'); if(inp) inp.value='';
+  const sorted=MB.slice().sort((a,b)=>(b.points||0)-(a.points||0));
+  renderRkManageList(sorted.slice(0,30));
+};
+
+let editTargetId = null;
+
+window.openEditModal = function(id){
+  const m = MB.find(x=>x.id===id); if(!m) return;
+  editTargetId = id;
+  document.getElementById('edit-modal-title').textContent = '✏️ ' + m.name + '님 정보 수정';
+  document.getElementById('edit-name').value    = m.name||'';
+  document.getElementById('edit-phone').value   = m.phone||'';
+  document.getElementById('edit-age').value     = m.age||'성인';
+  document.getElementById('edit-os').value      = m.os||'안드로이드';
+  document.getElementById('edit-bank').value    = m.bank||'';
+  document.getElementById('edit-acct').value    = m.account||'';
+  document.getElementById('edit-holder').value  = m.holder||'';
+  document.getElementById('edit-points').value  = m.points||0;
+  document.getElementById('edit-weekpts').value = m.weekPts||0;
+  document.getElementById('edit-monthpts').value= m.monthPts||0;
+  document.getElementById('edit-msg').style.display = 'none';
+  document.getElementById('edit-modal').style.display = 'block';
+};
+window.closeEditModal = function(){
+  document.getElementById('edit-modal').style.display = 'none';
+  editTargetId = null;
+};
+window.saveEdit = async function(){
+  if(!editTargetId) return;
+  const name   = document.getElementById('edit-name').value.trim();
+  const phone  = np(document.getElementById('edit-phone').value);
+  const age    = document.getElementById('edit-age').value;
+  const os     = document.getElementById('edit-os').value;
+  const bank   = document.getElementById('edit-bank').value;
+  const acct   = document.getElementById('edit-acct').value.trim();
+  const holder = document.getElementById('edit-holder').value.trim();
+  const points = parseInt(document.getElementById('edit-points').value)||0;
+  const weekPts= parseInt(document.getElementById('edit-weekpts').value)||0;
+  const monthPts=parseInt(document.getElementById('edit-monthpts').value)||0;
+  if(!name){ alert('성함을 입력해 주세요.'); return; }
+  if(phone.length<10){ alert('연락처를 정확히 입력해 주세요.'); return; }
+  showLoading('저장 중...');
+  try{
+    const updated = { name, phone, age, os, bank, account: acct, holder, points, weekPts, monthPts };
+    await updateDoc(doc(db,'members',editTargetId), updated);
+    const m = MB.find(x=>x.id===editTargetId);
+    if(m) Object.assign(m, updated);
+    hideLoading();
+    document.getElementById('edit-msg').style.display = 'block';
+    updateStats();
+    doCurrentSearch();
+    setTimeout(()=>closeEditModal(), 900);
+  }catch(e){ hideLoading(); alert('저장 오류: '+e.message); }
+};
+
+const ADM_SECTIONS = ['tot','today','ranking','excel','home'];
+window.showAdmSection = function(name){
+  ADM_SECTIONS.forEach(s=>{
+    const el=document.getElementById('sec-'+s);
+    if(el) el.style.display='none';
+  });
+  ['tot','today','ranking','excel'].forEach(s=>{
+    const btn=document.getElementById('btn-'+s);
+    if(btn) btn.style.outline = s===name?'3px solid #3b82f6':'none';
+  });
+  const sec=document.getElementById('sec-'+name);
+  if(sec) sec.style.display='block';
+  if(name==='today') renderTodaySection();
+  if(name==='ranking') rkReset();
+  if(name==='excel'){
+    const prev=document.getElementById('excel-preview');
+    const msg=document.getElementById('excel-msg');
+    const fi=document.getElementById('excel-file');
+    if(prev){ prev.style.display='none'; prev.innerHTML=''; }
+    if(msg) msg.style.display='none';
+    if(fi) fi.value='';
+    pendingExcelData=null;
+    updateUploadDateLabel();
+  }
+};
+
+window.updateUploadDateLabel = function(){
+  const lbl=document.getElementById('upload-date-label');
+  if(lbl) lbl.textContent = '엑셀 A열의 날짜가 사용됩니다';
+};
+
+window.searchExcelHistory = async function(){
+  const date=(document.getElementById('excel-srch-date')||{}).value||'';
+  if(!date){alert('날짜를 선택해 주세요.');return;}
+  const resultEl=document.getElementById('excel-history-result');
+  resultEl.innerHTML='<div style="text-align:center;padding:12px;color:#64748b;font-size:13px">⏳ 조회 중...</div>';
+  resultEl.style.display='block';
+  try{ await loadMB(); }catch(e){}
+  const records=[];
+  MB.forEach(m=>{
+    const hist=(m.weekHistory||[]).filter(h=>h.date===date);
+    if(hist.length>0){
+      const dayTotal=hist.reduce((s,h)=>s+(h.amt||0),0);
+      records.push({name:m.name,phone:m.phone,hist,dayTotal,nicknames:m.nicknames||[]});
+    }
+  });
+  if(!records.length){
+    resultEl.innerHTML=`<div style="text-align:center;padding:16px;color:#94a3b8;font-size:13px">📭 ${date} 업로드된 리워드 내역이 없습니다.</div>`;
+    return;
+  }
+  const grandTotal=records.reduce((s,r)=>s+r.dayTotal,0);
+  let html=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;padding-bottom:6px;border-bottom:2px solid #dbeafe">
+    <div style="font-size:13px;font-weight:700;color:#1e40af">📅 ${date} — ${records.length}명 / ${grandTotal.toLocaleString()}원</div>
+    <button onclick="openHistFullModal('${date}')" style="font-size:11px;padding:5px 10px;border:none;border-radius:8px;background:#3b82f6;color:#fff;cursor:pointer;font-weight:700;font-family:inherit">전체보기</button>
+  </div>`;
+  html+=records.slice(0,5).map(r=>{
+    const nick=r.nicknames.length?`[${ex(r.nicknames[0])}] `:'';
+    const apps=r.hist.map(h=>`${ex(h.appName||'미션')} ${(h.amt||0).toLocaleString()}원`).join(' · ');
+    return `<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:7px 0;border-bottom:1px solid #f1f5f9;font-size:12px">
+      <div><div style="font-weight:700">${nick}${ex(r.name)} <span style="color:#94a3b8">(${r.phone})</span></div>
+      <div style="color:#64748b;margin-top:1px">${apps}</div></div>
+      <div style="font-size:13px;font-weight:800;color:#16a34a;flex-shrink:0;margin-left:8px">+${r.dayTotal.toLocaleString()}원</div>
+    </div>`;
+  }).join('');
+  if(records.length>5) html+=`<div style="font-size:11px;color:#3b82f6;text-align:center;margin-top:6px;cursor:pointer" onclick="openHistFullModal('${date}')">... 외 ${records.length-5}명 더보기 →</div>`;
+  resultEl.innerHTML=html;
+};
+
+window.openHistFullModal = function(date){
+  const records=[];
+  MB.forEach(m=>{
+    const hist=(m.weekHistory||[]).filter(h=>h.date===date);
+    if(hist.length>0){
+      const dayTotal=hist.reduce((s,h)=>s+(h.amt||0),0);
+      records.push({name:m.name,phone:m.phone,hist,dayTotal,nicknames:m.nicknames||[]});
+    }
+  });
+  const grandTotal=records.reduce((s,r)=>s+r.dayTotal,0);
+  document.getElementById('hist-full-title').textContent=`📅 ${date} 전체 내역 (${records.length}명 / ${grandTotal.toLocaleString()}원)`;
+  document.getElementById('hist-full-list').innerHTML=records.map((r,i)=>{
+    const nick=r.nicknames.length?`<span style="color:#3b82f6">[${ex(r.nicknames[0])}]</span> `:'';
+    return `<div style="border-bottom:1px solid #f1f5f9;padding:10px 0">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <div><div style="font-size:13px;font-weight:700">${i+1}. ${nick}${ex(r.name)} <span style="color:#94a3b8;font-size:11px">(${r.phone})</span></div>
+        ${r.hist.map(h=>`<div style="font-size:11px;color:#64748b;margin-top:3px">${ex(h.appName||'미션')}: ${(h.amt||0).toLocaleString()}원</div>`).join('')}
+        </div>
+        <div style="font-size:14px;font-weight:800;color:#16a34a;flex-shrink:0;margin-left:8px">+${r.dayTotal.toLocaleString()}원</div>
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('hist-full-modal').style.display='block';
+};
+
+window.resetExcelHistory = function(){
+  const d=document.getElementById('excel-srch-date'); if(d) d.value='';
+  const r=document.getElementById('excel-history-result'); if(r) r.style.display='none';
+};
+
+function renderTodaySection(){
+  const today=new Date().toISOString().split('T')[0];
+  const list=MB.filter(m=>m.joinDate===today);
+  const sumEl=document.getElementById('today-summary');
+  if(sumEl) sumEl.textContent=`📅 ${today} 가입: ${list.length}명`;
+  const listEl=document.getElementById('today-list');
+  if(!listEl) return;
+  if(!list.length){
+    listEl.innerHTML='<div class="ep">오늘 가입한 알바인원이 없습니다.</div>';
+  } else {
+    listEl.innerHTML=list.map(m=>{
+      const tags=(m.nicknames||[]).map(n=>`<span class="nick-tag">${ex(n)}</span>`).join('');
+      return `<div class="mem-card">
+        <div class="mem-head">
+          <div class="mem-name">${ex(m.name)} <span style="font-size:12px;color:#64748b;font-weight:500">(${ex(m.age||'')})</span></div>
+          <div class="mem-date">📅 ${m.joinDate||'-'}</div>
+        </div>
+        <div class="mem-body">
+          <div class="mem-row"><span class="mem-key">📱 연락처</span><span class="mem-val">${ex(m.phone)}</span></div>
+          <div class="mem-row"><span class="mem-key">📲 폰 종류</span><span class="mem-val">${ex(m.os||'')}</span></div>
+          <div class="mem-row"><span class="mem-key">🏦 은행</span><span class="mem-val">${ex(m.bank||'')} ${ex(m.account||'')}</span></div>
+          <div class="mem-row"><span class="mem-key">👤 예금주</span><span class="mem-val">${ex(m.holder||'')}</span></div>
+          <div class="nick-area">
+            <div class="nick-title"><span>🏷️ 닉네임</span>
+            <button class="bsm bbl" style="font-size:11px;padding:4px 10px" onclick="openNickModal('${m.id}')">+ 관리</button></div>
+            <div class="nick-list">${tags||'<span style="font-size:12px;color:#94a3b8">등록된 닉네임 없음</span>'}</div>
+          </div>
+          <div style="margin-top:10px;display:flex;justify-content:flex-end;gap:8px">
+            <button class="bsm" style="background:#f1f5f9;color:#374151" onclick="openEditModal('${m.id}')">✏️ 정보 수정</button>
+            <button class="bsm bng" onclick="delMem('${m.id}')">삭제</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+}
+
+let pendingExcelData = null;
+let lastFailList = [];
+
+window.uploadExcel = async function(){
+  const fileInput=document.getElementById('excel-file');
+  const msgEl=document.getElementById('excel-msg');
+  const prevEl=document.getElementById('excel-preview');
+  if(!fileInput.files||!fileInput.files.length){alert('파일을 선택해 주세요.');return;}
+  const file=fileInput.files[0];
+  showLoading('파일 읽는 중...');
+  const reader=new FileReader();
+  reader.onload=async function(e){
+    try{
+      await loadMB();
+      const data=new Uint8Array(e.target.result);
+      const wb=XLSX.read(data,{type:'array', cellDates:false});
+      const ws=wb.Sheets[wb.SheetNames[0]];
+      const rows=XLSX.utils.sheet_to_json(ws,{header:1, raw:true});
+      hideLoading();
+      if(rows.length<2){alert('데이터가 없습니다. (2행부터 데이터)');return;}
+      function excelToDateStr(val){
+        if(val===null||val===undefined||val==='') return '';
+        if(typeof val==='number'){
+          const n=Math.floor(val);
+          const d=new Date((n-25569)*86400*1000);
+          return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
+        }
+        const s=String(val).replace(/\s+/g,' ').trim();
+        if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+        if(/^\d{4}\/\d{2}\/\d{2}$/.test(s)) return s.replace(/\//g,'-');
+        const wi=s.indexOf('월'), di=s.indexOf('일');
+        if(wi>0 && di>wi){
+          const ni=s.indexOf('년');
+          let year=new Date().getFullYear(), monthStr, dayStr;
+          if(ni>0 && ni<wi){ year=parseInt(s.substring(0,ni)); monthStr=s.substring(ni+1,wi); }
+          else { monthStr=s.substring(0,wi); }
+          dayStr=s.substring(wi+1,di);
+          const m=parseInt(monthStr), d=parseInt(dayStr);
+          if(!isNaN(m)&&!isNaN(d)&&m>=1&&m<=12&&d>=1&&d<=31){
+            return `${year}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+          }
+        }
+        const slash=s.split('/');
+        if(slash.length===2){
+          const m=parseInt(slash[0]),d=parseInt(slash[1]);
+          if(!isNaN(m)&&!isNaN(d)&&m>=1&&m<=12&&d>=1&&d<=31){
+            return `${new Date().getFullYear()}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+          }
+        }
+        return s;
+      }
+      const items=[], failList=[];
+      for(let i=1;i<rows.length;i++){
+        const row=rows[i];
+        if(!row||!row[0]) continue;
+        const rawVal0=row[0];
+        const rowDate=excelToDateStr(rawVal0);
+        const name=String(row[1]||'').trim();
+        const phone=np(String(row[2]||''));
+        const nick=String(row[3]||'').trim();
+        const appName=String(row[4]||'미션').trim();
+        const amt=parseInt(row[5])||0;
+        if(!rowDate||!name||!phone||!appName||!amt){
+          failList.push({row:i+1, reason:'필수값 누락', name, phone, rowDate, appName, amt, rawVal:String(rawVal0), rawType:typeof rawVal0});
+          continue;
+        }
+        const member=MB.find(m=>np(m.phone||'')===phone);
+        if(!member){
+          failList.push({row:i+1, reason:'연락처 불일치 (미등록)', name, phone, rowDate, appName, amt, rawVal:String(rawVal0), rawType:typeof rawVal0});
+          continue;
+        }
+        if(member.name!==name){
+          failList.push({row:i+1, reason:`성함 불일치 (등록: ${member.name})`, name, phone, rowDate, appName, amt});
+          continue;
+        }
+        if(!/^\d{4}-\d{2}-\d{2}$/.test(rowDate)){
+          failList.push({row:i+1, reason:'날짜 형식 오류 (YYYY-MM-DD)', name, phone, rowDate, appName, amt, rawVal:String(rawVal0), rawType:typeof rawVal0});
+          continue;
+        }
+        items.push({id:member.id, name:member.name, phone, nick, appName, amt, date:rowDate});
+      }
+      const grouped={};
+      items.forEach(it=>{
+        const key=it.id+'__'+it.date;
+        if(!grouped[key]) grouped[key]={id:it.id,name:it.name,phone:it.phone,nick:it.nick,date:it.date,entries:[]};
+        grouped[key].entries.push({appName:it.appName,amt:it.amt});
+      });
+      const groupList=Object.values(grouped);
+      lastFailList=failList;
+      pendingExcelData={groupList};
+      const dates=[...new Set(groupList.map(g=>g.date))].sort();
+      let previewHtml=`<div style="font-size:13px;font-weight:700;color:#1a1a2e;margin-bottom:4px">📋 업로드 미리보기 (${groupList.length}건 / ${dates.length}개 날짜)</div>`;
+      if(failList.length){
+        previewHtml+=`<div style="font-size:12px;color:#b91c1c;background:#fef2f2;border-radius:8px;padding:7px 10px;margin-bottom:8px;cursor:pointer" onclick="openFailModal()">
+          ❌ 불일치 ${failList.length}건 — 미적립 예정 <span style="text-decoration:underline;font-weight:700">상세보기 →</span></div>`;
+      }
+      dates.forEach(date=>{
+        const dayList=groupList.filter(g=>g.date===date);
+        const dayTotal=dayList.reduce((s,g)=>s+g.entries.reduce((ss,e)=>ss+e.amt,0),0);
+        previewHtml+=`<div style="font-size:12px;color:#1d4ed8;background:#eff6ff;border-radius:8px;padding:5px 10px;margin-bottom:4px">📅 ${date} — ${dayList.length}명 / ${dayTotal.toLocaleString()}원</div>`;
+      });
+      previewHtml+=groupList.slice(0,15).map(g=>{
+        const total=g.entries.reduce((s,e)=>s+e.amt,0);
+        const apps=g.entries.map(e=>`${ex(e.appName)} ${e.amt.toLocaleString()}원`).join(', ');
+        return `<div style="padding:6px 0;border-bottom:1px solid #f1f5f9;font-size:12px">
+          <div style="display:flex;justify-content:space-between">
+            <span style="font-weight:700">${ex(g.name)} <span style="color:#94a3b8">(${g.date})</span></span>
+            <span style="color:#16a34a;font-weight:800">+${total.toLocaleString()}원</span>
+          </div>
+          <div style="color:#94a3b8;margin-top:1px">${apps}</div>
+        </div>`;
+      }).join('');
+      if(groupList.length>15) previewHtml+=`<div style="font-size:11px;color:#94a3b8;margin-top:4px">... 외 ${groupList.length-15}건</div>`;
+      previewHtml+=`<button class="btn btnP" style="margin-top:12px" onclick="confirmExcel()">✅ ${groupList.length}건 리워드 적용하기</button>`;
+      prevEl.innerHTML=previewHtml;
+      prevEl.style.display='block';
+      msgEl.style.display='none';
+    }catch(err){
+      hideLoading();
+      msgEl.textContent='❌ 파일 읽기 오류: '+err.message;
+      msgEl.style.color='#ef4444';
+      msgEl.style.display='block';
+    }
+  };
+  reader.readAsArrayBuffer(file);
+};
+
+window.openFailModal = function(){
+  const el=document.getElementById('fail-list');
+  if(!el) return;
+  if(!lastFailList.length){ el.innerHTML='<div class="ep">실패 내역이 없습니다.</div>'; }
+  else {
+    el.innerHTML=lastFailList.map((f,i)=>`
+      <div style="padding:10px 0;border-bottom:1px solid #fecaca;font-size:13px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div>
+            <div style="font-weight:700;color:#1a1a2e">${i+1}. ${ex(f.name)} (${f.phone})</div>
+            <div style="font-size:11px;color:#ef4444;margin-top:2px">❌ ${ex(f.reason)}</div>
+            <div style="font-size:11px;color:#94a3b8;margin-top:1px">날짜: ${f.rowDate} / 앱: ${ex(f.appName)} / 금액: ${f.amt.toLocaleString()}원</div>
+            ${f.rawVal!==undefined?`<div style="font-size:10px;color:#6366f1;background:#eef2ff;border-radius:4px;padding:2px 6px;margin-top:3px">📎 원본값(타입:${f.rawType}): "${ex(f.rawVal)}"</div>`:''}
+          </div>
+        </div>
+      </div>`).join('');
+  }
+  document.getElementById('fail-modal').style.display='block';
+};
+
+window.confirmExcel = async function(){
+  if(!pendingExcelData){alert('업로드 데이터가 없습니다. 다시 파일을 선택해주세요.');return;}
+  const {groupList} = pendingExcelData;
+  if(!groupList||!groupList.length){alert('적용할 데이터가 없습니다.');return;}
+  const dates=[...new Set(groupList.map(g=>g.date))].sort();
+  if(!confirm(`${groupList.length}건 리워드를 적용하시겠습니까?\n날짜: ${dates.join(', ')}`)) return;
+  showLoading('최신 데이터 확인 중...');
+  await loadMB();
+  showLoading('적용 중... (0/'+groupList.length+')');
+  const errors=[];
+  let done=0;
+  for(const g of groupList){
+    const targetDate=g.date;
+    try{
+      const m=MB.find(x=>x.id===g.id);
+      if(!m){ errors.push(g.name+': 회원 없음'); continue; }
+      const hist=Array.from(m.weekHistory||[]);
+      const prevDayAmt=hist.filter(h=>h.date===targetDate).reduce((s,h)=>s+(h.amt||0),0);
+      g.entries.forEach(e=>{
+        const dup=hist.findIndex(h=>h.date===targetDate && h.appName===e.appName);
+        if(dup>=0) hist[dup].amt=e.amt;
+        else hist.push({date:targetDate, appName:e.appName, amt:e.amt});
+      });
+      const newDayAmt=hist.filter(h=>h.date===targetDate).reduce((s,h)=>s+(h.amt||0),0);
+      const diff=newDayAmt-prevDayAmt;
+      const wr=getWeekRange();
+      const newWeekPts=hist.filter(h=>{
+        const t=new Date(h.date+'T12:00:00');
+        return t>=wr.from&&t<=wr.to;
+      }).reduce((s,h)=>s+(h.amt||0),0);
+      const newPoints=Math.max(0,(m.points||0)+diff);
+      const newMonthPts=Math.max(0,(m.monthPts||0)+diff);
+      const nicknames=Array.from(m.nicknames||[]);
+      if(g.nick&&!nicknames.includes(g.nick)) nicknames.push(g.nick);
+      await updateDoc(doc(db,'members',g.id),{
+        weekHistory:hist, weekPts:newWeekPts,
+        points:newPoints, monthPts:newMonthPts, nicknames
+      });
+      m.weekHistory=hist; m.weekPts=newWeekPts;
+      m.points=newPoints; m.monthPts=newMonthPts; m.nicknames=nicknames;
+      done++;
+      document.getElementById('loading-txt').textContent=`적용 중... (${done}/${groupList.length})`;
+    }catch(err){ errors.push(g.name+'('+targetDate+'): '+err.message); }
+  }
+  await loadMB();
+  hideLoading();
+  pendingExcelData=null;
+  const prev=document.getElementById('excel-preview');
+  const fi=document.getElementById('excel-file');
+  if(prev){ prev.style.display='none'; prev.innerHTML=''; }
+  if(fi) fi.value='';
+  const msgEl=document.getElementById('excel-msg');
+  if(errors.length){
+    msgEl.textContent=`⚠️ ${done}건 완료, ${errors.length}건 오류`;
+    msgEl.style.color='#ef4444';
+  } else {
+    msgEl.textContent=`✅ ${done}건 리워드 적용 완료! (${dates.join(', ')})`;
+    msgEl.style.color='#16a34a';
+  }
+  msgEl.style.display='block';
+  setTimeout(()=>{ msgEl.style.display='none'; }, 5000);
+  const srchDate=document.getElementById('excel-srch-date');
+  if(srchDate){ srchDate.value=dates[dates.length-1]; await searchExcelHistory(); }
+};
+
+window.delMem = async function(id){
+  if(!confirm('삭제하시겠습니까?')) return;
+  showLoading('삭제 중...');
+  try{ await deleteDoc(doc(db,'members',id)); MB=MB.filter(m=>m.id!==id); hideLoading(); updateStats(); doCurrentSearch(); }
+  catch(e){ hideLoading(); alert('삭제 오류: '+e.message); }
+};
+
+window.openNickModal = function(id){
+  const m=MB.find(x=>x.id===id); if(!m) return;
+  nickTargetId=id; nickTags=Array.from(m.nicknames||[]);
+  document.getElementById('nick-modal-name').textContent=m.name+'님 닉네임 관리';
+  document.getElementById('nick-new-input').value='';
+  document.getElementById('nick-msg').style.display='none';
+  renderNickTags();
+  document.getElementById('nick-modal').style.display='flex';
+};
+window.closeNickModal = function(){document.getElementById('nick-modal').style.display='none';nickTargetId=null;nickTags=[];};
+
+function renderNickTags(){
+  const el=document.getElementById('nick-tags');
+  if(!nickTags.length){el.innerHTML='<span style="font-size:12px;color:#94a3b8">닉네임 없음 — 아래에서 추가하세요</span>';return;}
+  el.innerHTML=nickTags.map((n,i)=>`<span class="nick-tag">${ex(n)}<span class="nick-del" onclick="removeNickTag(${i})">×</span></span>`).join('');
+}
+
+window.addNickTag = function(){
+  const inp=document.getElementById('nick-new-input');
+  const val=inp.value.trim();
+  if(!val){inp.focus();return;}
+  if(nickTags.includes(val)){alert('이미 등록된 닉네임입니다.');return;}
+  if(nickTags.length>=10){alert('닉네임은 최대 10개까지 등록 가능합니다.');return;}
+  nickTags.push(val); inp.value=''; renderNickTags(); inp.focus();
+};
+window.removeNickTag = function(idx){nickTags.splice(idx,1);renderNickTags();};
+window.saveNickTags = async function(){
+  if(!nickTargetId) return;
+  showLoading('저장 중...');
+  try{
+    await updateDoc(doc(db,'members',nickTargetId),{nicknames:nickTags});
+    const m=MB.find(x=>x.id===nickTargetId); if(m) m.nicknames=[...nickTags];
+    hideLoading();
+    document.getElementById('nick-msg').style.display='block';
+    doCurrentSearch();
+    if(document.getElementById('sec-ranking')?.style.display==='block') rkReset();
+    setTimeout(()=>closeNickModal(),900);
+  }catch(e){hideLoading();alert('저장 오류: '+e.message);}
+};
+
+function showSl(id){document.querySelectorAll('#sc-apply .slide').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on');const sp=id==='sl-ok'||id==='sl-del';document.querySelector('.pg-wrap').style.display=sp?'none':'block';}
+function updPg(s){document.getElementById('pg-lbl').textContent=s+' / 6단계';document.getElementById('pg-fill').style.width=(s/6*100)+'%';}
+
+window.pickAge=v=>{ageVal=v;document.getElementById('cb-minor').className='cb'+(v==='minor'?' on':'');document.getElementById('cb-adult').className='cb'+(v==='adult'?' on':'');};
+window.pickOs=v=>{osVal=v;document.getElementById('cb-android').className='cb'+(v==='android'?' on':'');document.getElementById('cb-ios').className='cb'+(v==='ios'?' on':'');};
+window.selAg=(n,v)=>{if(n===1)ag1=v;else ag2=v;['y','n'].forEach(k=>{document.getElementById('ag'+n+k).className='ab'+(v===k?(k==='y'?' y':' n'):'');document.getElementById('ck'+n+k).textContent=v===k?'✓':'';});};
+
+window.anext = async function(step){
+  const e=document.getElementById('e'+step); e.textContent=''; e.classList.remove('on');
+  if(step===1){
+    const n=document.getElementById('a-name').value.trim();
+    const p=np(document.getElementById('a-phone').value);
+    if(!n){e.textContent='성함을 입력해 주세요.';e.classList.add('on');return;}
+    if(p.length<10){e.textContent='연락처를 정확히 입력해 주세요.';e.classList.add('on');return;}
+    showLoading('확인 중...');
+    try{
+      const snap=await getDocs(collection(db,'members'));
+      let dup=false;
+      snap.forEach(d=>{const m=d.data();if(m.name===n&&np(m.phone)===p)dup=true;});
+      hideLoading();
+      if(dup){e.textContent='이미 가입된 성함/연락처입니다.';e.classList.add('on');return;}
+    }catch(err){hideLoading();}
+  }
+  if(step===2&&!ageVal){e.textContent='항목을 선택해 주세요.';e.classList.add('on');return;}
+  if(step===3&&!osVal){e.textContent='휴대폰 종류를 선택해 주세요.';e.classList.add('on');return;}
+  if(step===4){const b=document.getElementById('a-bank').value,a=document.getElementById('a-acct').value.trim(),h=document.getElementById('a-holder').value.trim();if(!b||!a||!h){e.textContent='모든 계좌 정보를 입력해 주세요.';e.classList.add('on');return;}}
+  if(step===5){if(!ag1){e.textContent='동의 여부를 선택해 주세요.';e.classList.add('on');return;}if(ag1==='n'){showSl('sl-del');return;}}
+  aCur=step+1; updPg(aCur); showSl('sl'+aCur);
+  if(aCur===4) document.getElementById('hh').textContent=document.getElementById('a-name').value.trim()||'-';
+};
+
+window.aback=step=>{aCur=step-1;updPg(aCur);showSl('sl'+aCur);};
+
+window.doSubmit = async function(){
+  const e=document.getElementById('e6'); e.textContent=''; e.classList.remove('on');
+  if(!ag2){e.textContent='동의 여부를 선택해 주세요.';e.classList.add('on');return;}
+  if(ag2==='n'){showSl('sl-del');return;}
+  const name=document.getElementById('a-name').value.trim();
+  const phone=np(document.getElementById('a-phone').value);
+  const bank=document.getElementById('a-bank').value;
+  const acct=document.getElementById('a-acct').value.trim();
+  const holder=document.getElementById('a-holder').value.trim();
+  const ageL=ageVal==='minor'?'미성년자':'성인';
+  const osL=osVal==='android'?'안드로이드':'애플 (iOS)';
+  const today=new Date().toISOString().split('T')[0];
+  showLoading('신청서 저장 중...');
+  try{
+    await addDoc(collection(db,'members'),{name,phone,age:ageL,os:osL,bank,account:acct,holder,nicknames:[],joinDate:today,createdAt:serverTimestamp()});
+    hideLoading();
+    const fields=[['성함',name],['연락처',phone],['나이',ageL],['휴대폰',osL],['은행',bank],['계좌번호',acct],['예금주',holder]];
+    document.getElementById('sum-box').innerHTML=fields.map(f=>`<div class="srow"><span class="sk">${f[0]}</span><span class="sv">${ex(f[1])}</span></div>`).join('');
+    showSl('sl-ok');
+  }catch(err){hideLoading();e.textContent='저장 오류: '+err.message;e.classList.add('on');}
+};
+
+window.restart=function(){
+  ageVal='';osVal='';ag1='';ag2='';aCur=1;
+  ['a-name','a-phone','a-acct','a-holder'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('a-bank').value='';
+  ['cb-minor','cb-adult','cb-android','cb-ios'].forEach(id=>document.getElementById(id).className='cb');
+  [[1,'y'],[1,'n'],[2,'y'],[2,'n']].forEach(([n,k])=>{document.getElementById('ag'+n+k).className='ab';document.getElementById('ck'+n+k).textContent='';});
+  updPg(1);showSl('sl1');document.querySelector('.pg-wrap').style.display='block';
+};
+
+// Firebase 모듈 로딩 실패 대비 fallback
+window.addEventListener('error', function(e){
+  if(e.message && e.message.includes('firebase')){
+    hideLoading();
+    const isAdmin = location.search.includes('admin');
+    goSc(isAdmin ? 'sc-adm-login' : 'sc-login');
+  }
+});
+
+// 최대 25초 후에도 로딩중이면 강제로 화면 전환
+setTimeout(function(){
+  const overlay = document.getElementById('loading-overlay');
+  if(overlay && overlay.style.display !== 'none'){
+    hideLoading();
+    const isAdmin = location.search.includes('admin');
+    goSc(isAdmin ? 'sc-adm-login' : 'sc-login');
+    console.warn('25초 타임아웃 - 강제 화면 전환');
+  }
+}, 25000);
+
+init();
+</script>
+</body>
+</html>
