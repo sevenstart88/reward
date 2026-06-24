@@ -138,7 +138,6 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 .rk-tabs{display:flex;background:#f1f5f9;border-radius:20px;padding:3px;gap:2px}
 .rk-tab{padding:6px 14px;font-size:12px;font-weight:700;border-radius:18px;cursor:pointer;color:#64748b;border:none;background:transparent;font-family:inherit}
 .rk-tab.on{background:#3b82f6;color:#fff}
-/* 포디움 */
 .podium{display:flex;justify-content:center;align-items:flex-end;gap:16px;margin-bottom:16px;padding-top:6px}
 .pod-card{display:flex;flex-direction:column;align-items:center;width:80px}
 .pod-avatar{border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;position:relative;flex-shrink:0}
@@ -371,6 +370,13 @@ textarea{resize:none;min-height:80px;line-height:1.6}
         <div class="stat-l">오늘 가입 👁️</div>
       </div>
     </div>
+
+    <!-- ★ 추가: 랭킹 닉네임 관리 버튼 -->
+    <div class="stat-card" style="cursor:pointer;margin-bottom:10px;text-align:center;padding:13px" id="btn-ranking" onclick="showAdmSection('ranking')">
+      <div style="font-size:16px;font-weight:800;color:#1a1a2e">🏆 알바 랭킹 닉네임 관리</div>
+      <div style="font-size:12px;color:#64748b;margin-top:3px">닉네임 등록 · 랭킹 표시 이름 설정</div>
+    </div>
+
     <div class="stat-card" style="cursor:pointer;margin-bottom:14px;text-align:center;padding:13px" id="btn-excel" onclick="showAdmSection('excel')">
       <div style="font-size:16px;font-weight:800;color:#1a1a2e">📊 주간 리워드 일괄 설정</div>
       <div style="font-size:12px;color:#64748b;margin-top:3px">엑셀 업로드로 리워드 적용</div>
@@ -413,7 +419,24 @@ textarea{resize:none;min-height:80px;line-height:1.6}
       <div id="today-list"></div>
     </div>
 
-    <!-- 섹션3: 엑셀 업로드 -->
+    <!-- ★ 추가: 섹션3: 랭킹 닉네임 관리 -->
+    <div id="sec-ranking" style="display:none">
+      <div class="search-box">
+        <div class="search-title">🏆 알바 랭킹 닉네임 관리</div>
+        <div style="font-size:12px;color:#64748b;margin-bottom:12px;line-height:1.7;background:#f8fafc;border-radius:10px;padding:10px">
+          ✅ <b>닉네임 있음</b> → 랭킹에 닉네임으로 표시<br>
+          ⭐ <b>닉네임 없음</b> → 이름 첫글자+별표로 표시 (예: 홍*동)
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <input type="text" id="rk-srch" placeholder="이름으로 검색" style="font-size:13px;padding:9px 12px;flex:1">
+          <button class="srch-btn" onclick="rkSearch()">검색</button>
+          <button class="reset-btn" onclick="rkReset()">전체보기</button>
+        </div>
+        <div id="rk-manage-list"></div>
+      </div>
+    </div>
+
+    <!-- 섹션4: 엑셀 업로드 -->
     <div id="sec-excel" style="display:none">
       <div class="search-box" style="margin-bottom:12px">
         <div class="search-title">📅 날짜별 업로드 내역 조회</div>
@@ -488,16 +511,10 @@ textarea{resize:none;min-height:80px;line-height:1.6}
       <div class="fl"><span class="lbl">성함 *</span><input type="text" id="edit-name" placeholder="실명 입력"></div>
       <div class="fl"><span class="lbl">연락처 * (숫자만)</span><input type="tel" id="edit-phone" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'')"></div>
       <div class="fl"><span class="lbl">나이</span>
-        <select id="edit-age">
-          <option value="성인">성인</option>
-          <option value="미성년자">미성년자</option>
-        </select>
+        <select id="edit-age"><option value="성인">성인</option><option value="미성년자">미성년자</option></select>
       </div>
       <div class="fl"><span class="lbl">휴대폰 종류</span>
-        <select id="edit-os">
-          <option value="안드로이드">안드로이드</option>
-          <option value="애플 (iOS)">애플 (iOS)</option>
-        </select>
+        <select id="edit-os"><option value="안드로이드">안드로이드</option><option value="애플 (iOS)">애플 (iOS)</option></select>
       </div>
       <div style="font-size:13px;font-weight:700;color:#374151;margin:14px 0 10px;padding-bottom:6px;border-bottom:2px solid #f1f5f9">🏦 계좌 정보</div>
       <div class="fl"><span class="lbl">은행명</span>
@@ -632,22 +649,16 @@ function withTimeout(promise, ms){
 
 async function init(){
   const isAdmin = location.search.includes('admin');
-
   if(isAdmin){
     if(loadAdm()){
       document.getElementById('loading-txt').textContent='데이터 로딩 중...';
       try{
         await withTimeout(loadMB(), 8000);
         hideLoading(); showAdmDash(); showToast('✅ 자동로그인');
-      }catch(e){
-        hideLoading(); goSc('sc-adm-login');
-      }
-    } else {
-      hideLoading(); goSc('sc-adm-login');
-    }
+      }catch(e){ hideLoading(); goSc('sc-adm-login'); }
+    } else { hideLoading(); goSc('sc-adm-login'); }
     return;
   }
-
   const savedId = loadUser();
   if(savedId){
     document.getElementById('loading-txt').textContent='로딩 중...';
@@ -708,7 +719,18 @@ function getWeekRange(offset){
 }
 window.prevWeek = function(){ weekOffset--; selWeekDay=null; renderWeekCard(); };
 window.nextWeek = function(){ if(weekOffset<0){ weekOffset++; selWeekDay=null; renderWeekCard(); } };
-function displayName(m){ return m.nicknames&&m.nicknames.length?m.nicknames[0]:'*****'; }
+
+// ★ 핵심 수정: 닉네임 있으면 닉네임, 없으면 이름 별표처리
+function displayName(m){
+  const nicks = m.nicknames || [];
+  if(nicks.length > 0 && nicks[0].trim()) return nicks[0].trim();
+  const name = m.name || '';
+  if(!name) return '*****';
+  if(name.length === 1) return '*';
+  if(name.length === 2) return name[0] + '*';
+  return name[0] + '*'.repeat(name.length - 2) + name[name.length - 1];
+}
+
 const AVATAR_COLORS=['#3b82f6','#6366f1','#8b5cf6','#ec4899','#f59e0b','#10b981'];
 function avatarColor(name){let s=0;for(let c of name)s+=c.charCodeAt(0);return AVATAR_COLORS[s%AVATAR_COLORS.length];}
 
@@ -721,9 +743,7 @@ window.openTotalModal = function(){
   yearSel.innerHTML = '<option value="">전체 연도</option>';
   const allYears = new Set([...years.map(Number)]);
   for(let y=curYear; y>=joinYear; y--) allYears.add(y);
-  [...allYears].sort((a,b)=>b-a).forEach(y=>{
-    yearSel.innerHTML += `<option value="${y}">${y}년</option>`;
-  });
+  [...allYears].sort((a,b)=>b-a).forEach(y=>{ yearSel.innerHTML += `<option value="${y}">${y}년</option>`; });
   document.getElementById('tot-month').value='';
   document.getElementById('tot-day').innerHTML='<option value="">전체 일</option>';
   document.getElementById('total-modal').style.display='block';
@@ -756,18 +776,15 @@ window.onTotMonthChange = function(){
 };
 window.renderTotalModal = function(){
   if(!me) return;
-  const year  = document.getElementById('tot-year').value;
-  const month = document.getElementById('tot-month').value;
-  const day   = document.getElementById('tot-day').value;
-  const hist  = me.weekHistory||[];
-
+  const year=document.getElementById('tot-year').value;
+  const month=document.getElementById('tot-month').value;
+  const day=document.getElementById('tot-day').value;
+  const hist=me.weekHistory||[];
   let filtered=hist.slice();
   if(year&&month&&day) filtered=hist.filter(h=>h.date===`${year}-${month}-${day}`);
   else if(year&&month) filtered=hist.filter(h=>h.date.startsWith(`${year}-${month}-`));
   else if(year) filtered=hist.filter(h=>h.date.startsWith(year+'-'));
-
   const total=filtered.reduce((s,h)=>s+(h.amt||0),0);
-
   let html='';
   if(!filtered.length){
     html='<div style="text-align:center;padding:30px;color:#94a3b8;font-size:13px">해당 기간 내역이 없습니다.</div>';
@@ -865,16 +882,12 @@ function renderWeekCard(){
   const dayNames=['월','화','수','목','금','토','일'];
   const hist = me.weekHistory||[];
   const isCurrentWeek = weekOffset===0;
-
-  // 주간 네비게이션 헤더
   const weekLabel=`${fmtDate(wr.from)} ~ ${fmtDate(wr.to)}`;
   const weekTitle = isCurrentWeek ? `이번주 (${weekLabel})` :
     weekOffset===-1 ? `지난주 (${weekLabel})` : `${Math.abs(weekOffset)}주 전 (${weekLabel})`;
   document.getElementById('week-nav-label').textContent = weekTitle;
   document.getElementById('week-nav-next').style.opacity = isCurrentWeek ? '0.3' : '1';
   document.getElementById('week-nav-next').style.pointerEvents = isCurrentWeek ? 'none' : 'auto';
-
-  // 요일 탭
   let daysHtml='';
   for(let i=0;i<7;i++){
     const d=new Date(wr.from); d.setDate(wr.from.getDate()+i);
@@ -887,10 +900,8 @@ function renderWeekCard(){
     </div>`;
   }
   document.getElementById('week-days').innerHTML=daysHtml;
-
   let html='', total=0;
   if(selWeekDay===null){
-    // 이번(선택) 주 전체 내역
     const weekItems=hist.filter(h=>{
       const t=new Date(h.date+'T12:00:00'); return t>=wr.from&&t<=wr.to;
     });
@@ -941,16 +952,13 @@ function renderRk(){
   const sorted=MB.slice().sort((a,b)=>calcRkPts(b,isW)-calcRkPts(a,isW));
   const top=sorted.slice(0,5);
   const myIdx=sorted.findIndex(m=>me&&m.id===me.id);
-
   const podEl=document.getElementById('rk-podium');
   const restEl=document.getElementById('rk-rest');
   if(!podEl||!restEl) return;
-
   if(!top.length){
     podEl.innerHTML='<div style="text-align:center;padding:20px;color:#94a3b8;font-size:13px">아직 데이터가 없습니다</div>';
     restEl.innerHTML=''; return;
   }
-
   const top3=top.slice(0,3);
   const order=[1,0,2];
   let podHtml='<div class="podium">';
@@ -971,7 +979,6 @@ function renderRk(){
   });
   podHtml+='</div>';
   podEl.innerHTML=podHtml;
-
   let restHtml='';
   for(let i=3;i<top.length;i++){
     const m=top[i]; const pts=calcRkPts(m,isW);
@@ -979,7 +986,6 @@ function renderRk(){
     restHtml+=`<div class="rk-row"><div class="rk-rank">${i+1}</div><div class="rk-name">${ex(displayName(m))}${isMe?' ★':''}</div><div class="rk-pts">${pts.toLocaleString()}P</div></div>`;
   }
   restEl.innerHTML=restHtml;
-
   const noteEl=document.getElementById('rk-note');
   if(noteEl&&me) noteEl.textContent=myIdx>=5?'내 순위: '+(myIdx+1)+'위':'';
 }
@@ -1006,7 +1012,7 @@ function showAdmDash(){
     const el=document.getElementById('sec-'+s);
     if(el) el.style.display='none';
   });
-  ['tot','today','excel'].forEach(s=>{
+  ['tot','today','ranking','excel'].forEach(s=>{
     const btn=document.getElementById('btn-'+s);
     if(btn) btn.style.outline='none';
   });
@@ -1032,6 +1038,7 @@ function startListener(){
     const sumEl=document.getElementById('srch-summary');
     if(sumEl&&sumEl.style.display!=='none') doCurrentSearch();
     if(document.getElementById('sec-today')?.style.display==='block') renderTodaySection();
+    if(document.getElementById('sec-ranking')?.style.display==='block') rkReset();
   });
 }
 function stopListener(){if(unsubMem){unsubMem();unsubMem=null;}}
@@ -1054,7 +1061,6 @@ window.resetDateSearch = function(){
   document.getElementById('srch-date').value='';
   hideResult();
 };
-
 window.doNameSearch = function(){
   const name=((document.getElementById('srch-name')||{}).value||'').trim();
   const phone=np((document.getElementById('srch-phone')||{}).value||'');
@@ -1119,6 +1125,48 @@ function renderList(list){
   }).join('');
 }
 
+// ★ 추가: 랭킹 닉네임 관리 목록 렌더링
+function renderRkManageList(list){
+  const el=document.getElementById('rk-manage-list');
+  if(!el) return;
+  if(!list.length){el.innerHTML='<div class="ep">검색 결과가 없습니다.</div>';return;}
+  el.innerHTML=list.map((m,i)=>{
+    const tags=(m.nicknames||[]).map(n=>`<span class="nick-tag">${ex(n)}</span>`).join('');
+    const display=displayName(m);
+    return `<div class="mem-card">
+      <div class="mem-head">
+        <div class="mem-name">${i+1}위 ${ex(m.name)}</div>
+        <div class="mem-date">💰 ${(m.points||0).toLocaleString()}P</div>
+      </div>
+      <div class="mem-body">
+        <div class="mem-row">
+          <span class="mem-key">랭킹표시</span>
+          <span class="mem-val" style="color:#3b82f6;font-size:15px;font-weight:800">${ex(display)}</span>
+        </div>
+        <div class="nick-area">
+          <div class="nick-title">
+            <span>🏷️ 닉네임</span>
+            <button class="bsm bbl" style="font-size:11px;padding:4px 10px" onclick="openNickModal('${m.id}')">+ 관리</button>
+          </div>
+          <div class="nick-list">${tags||'<span style="font-size:12px;color:#94a3b8">없음 — 이름 별표처리됨 (예: ${ex(m.name?m.name[0]+'*'.repeat(Math.max(0,m.name.length-2))+(m.name.length>2?m.name[m.name.length-1]:''):'***')})</span>'}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+window.rkSearch = function(){
+  const q=(document.getElementById('rk-srch')||{}).value||'';
+  const sorted=MB.slice().sort((a,b)=>(b.points||0)-(a.points||0));
+  const list=q?sorted.filter(m=>(m.name||'').includes(q)):sorted.slice(0,30);
+  renderRkManageList(list);
+};
+window.rkReset = function(){
+  const inp=document.getElementById('rk-srch'); if(inp) inp.value='';
+  const sorted=MB.slice().sort((a,b)=>(b.points||0)-(a.points||0));
+  renderRkManageList(sorted.slice(0,30));
+};
+
 let editTargetId = null;
 
 window.openEditModal = function(id){
@@ -1138,12 +1186,10 @@ window.openEditModal = function(id){
   document.getElementById('edit-msg').style.display = 'none';
   document.getElementById('edit-modal').style.display = 'block';
 };
-
 window.closeEditModal = function(){
   document.getElementById('edit-modal').style.display = 'none';
   editTargetId = null;
 };
-
 window.saveEdit = async function(){
   if(!editTargetId) return;
   const name   = document.getElementById('edit-name').value.trim();
@@ -1156,10 +1202,8 @@ window.saveEdit = async function(){
   const points = parseInt(document.getElementById('edit-points').value)||0;
   const weekPts= parseInt(document.getElementById('edit-weekpts').value)||0;
   const monthPts=parseInt(document.getElementById('edit-monthpts').value)||0;
-
   if(!name){ alert('성함을 입력해 주세요.'); return; }
   if(phone.length<10){ alert('연락처를 정확히 입력해 주세요.'); return; }
-
   showLoading('저장 중...');
   try{
     const updated = { name, phone, age, os, bank, account: acct, holder, points, weekPts, monthPts };
@@ -1174,19 +1218,20 @@ window.saveEdit = async function(){
   }catch(e){ hideLoading(); alert('저장 오류: '+e.message); }
 };
 
-const ADM_SECTIONS = ['tot','today','excel','home'];
+const ADM_SECTIONS = ['tot','today','ranking','excel','home'];
 window.showAdmSection = function(name){
   ADM_SECTIONS.forEach(s=>{
     const el=document.getElementById('sec-'+s);
     if(el) el.style.display='none';
   });
-  ['tot','today','excel'].forEach(s=>{
+  ['tot','today','ranking','excel'].forEach(s=>{
     const btn=document.getElementById('btn-'+s);
     if(btn) btn.style.outline = s===name?'3px solid #3b82f6':'none';
   });
   const sec=document.getElementById('sec-'+name);
   if(sec) sec.style.display='block';
   if(name==='today') renderTodaySection();
+  if(name==='ranking') rkReset();
   if(name==='excel'){
     const prev=document.getElementById('excel-preview');
     const msg=document.getElementById('excel-msg');
@@ -1323,53 +1368,33 @@ window.uploadExcel = async function(){
     try{
       await loadMB();
       const data=new Uint8Array(e.target.result);
-      // raw:true 로 원시값(숫자 시리얼 or 문자열) 그대로 받아서 직접 변환
       const wb=XLSX.read(data,{type:'array', cellDates:false});
       const ws=wb.Sheets[wb.SheetNames[0]];
       const rows=XLSX.utils.sheet_to_json(ws,{header:1, raw:true});
       hideLoading();
       if(rows.length<2){alert('데이터가 없습니다. (2행부터 데이터)');return;}
-
-      // 엑셀 날짜 → YYYY-MM-DD 변환 (모든 형식 지원)
       function excelToDateStr(val){
         if(val===null||val===undefined||val==='') return '';
-
-        // ① 숫자형 시리얼 (엑셀 날짜 셀) → UTC 기준 변환 (시간대 오류 없음)
         if(typeof val==='number'){
           const n=Math.floor(val);
           const d=new Date((n-25569)*86400*1000);
           return `${d.getUTCFullYear()}-${String(d.getUTCMonth()+1).padStart(2,'0')}-${String(d.getUTCDate()).padStart(2,'0')}`;
         }
-
-        // 문자열 처리 (공백·특수문자 제거)
         const s=String(val).replace(/\s+/g,' ').trim();
-
-        // ② 이미 YYYY-MM-DD 형식
         if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
-
-        // ③ YYYY/MM/DD 형식
         if(/^\d{4}\/\d{2}\/\d{2}$/.test(s)) return s.replace(/\//g,'-');
-
-        // ④ 한국식 "월" / "일" 키워드 방식 (정규식 없이 위치로 파싱 → 어떤 공백·인코딩도 처리)
         const wi=s.indexOf('월'), di=s.indexOf('일');
         if(wi>0 && di>wi){
-          // "2025년 6월 22일" 또는 "6월 22일" 모두 처리
           const ni=s.indexOf('년');
           let year=new Date().getFullYear(), monthStr, dayStr;
-          if(ni>0 && ni<wi){
-            year=parseInt(s.substring(0,ni));
-            monthStr=s.substring(ni+1,wi);
-          } else {
-            monthStr=s.substring(0,wi);
-          }
+          if(ni>0 && ni<wi){ year=parseInt(s.substring(0,ni)); monthStr=s.substring(ni+1,wi); }
+          else { monthStr=s.substring(0,wi); }
           dayStr=s.substring(wi+1,di);
           const m=parseInt(monthStr), d=parseInt(dayStr);
           if(!isNaN(m)&&!isNaN(d)&&m>=1&&m<=12&&d>=1&&d<=31){
             return `${year}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
           }
         }
-
-        // ⑤ MM/DD 형식 (슬래시 구분)
         const slash=s.split('/');
         if(slash.length===2){
           const m=parseInt(slash[0]),d=parseInt(slash[1]);
@@ -1377,22 +1402,19 @@ window.uploadExcel = async function(){
             return `${new Date().getFullYear()}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
           }
         }
-
         return s;
       }
-
       const items=[], failList=[];
       for(let i=1;i<rows.length;i++){
         const row=rows[i];
         if(!row||!row[0]) continue;
-        const rawVal0  = row[0];  // 엑셀에서 읽은 원본값 (진단용)
-        const rowDate  = excelToDateStr(rawVal0);
-        const name     = String(row[1]||'').trim();
-        const phone    = np(String(row[2]||''));
-        const nick     = String(row[3]||'').trim();
-        const appName  = String(row[4]||'미션').trim();
-        const amt      = parseInt(row[5])||0;
-
+        const rawVal0=row[0];
+        const rowDate=excelToDateStr(rawVal0);
+        const name=String(row[1]||'').trim();
+        const phone=np(String(row[2]||''));
+        const nick=String(row[3]||'').trim();
+        const appName=String(row[4]||'미션').trim();
+        const amt=parseInt(row[5])||0;
         if(!rowDate||!name||!phone||!appName||!amt){
           failList.push({row:i+1, reason:'필수값 누락', name, phone, rowDate, appName, amt, rawVal:String(rawVal0), rawType:typeof rawVal0});
           continue;
@@ -1412,7 +1434,6 @@ window.uploadExcel = async function(){
         }
         items.push({id:member.id, name:member.name, phone, nick, appName, amt, date:rowDate});
       }
-
       const grouped={};
       items.forEach(it=>{
         const key=it.id+'__'+it.date;
@@ -1422,9 +1443,7 @@ window.uploadExcel = async function(){
       const groupList=Object.values(grouped);
       lastFailList=failList;
       pendingExcelData={groupList};
-
       const dates=[...new Set(groupList.map(g=>g.date))].sort();
-
       let previewHtml=`<div style="font-size:13px;font-weight:700;color:#1a1a2e;margin-bottom:4px">📋 업로드 미리보기 (${groupList.length}건 / ${dates.length}개 날짜)</div>`;
       if(failList.length){
         previewHtml+=`<div style="font-size:12px;color:#b91c1c;background:#fef2f2;border-radius:8px;padding:7px 10px;margin-bottom:8px;cursor:pointer" onclick="openFailModal()">
@@ -1578,9 +1597,7 @@ window.addNickTag = function(){
   if(nickTags.length>=10){alert('닉네임은 최대 10개까지 등록 가능합니다.');return;}
   nickTags.push(val); inp.value=''; renderNickTags(); inp.focus();
 };
-
 window.removeNickTag = function(idx){nickTags.splice(idx,1);renderNickTags();};
-
 window.saveNickTags = async function(){
   if(!nickTargetId) return;
   showLoading('저장 중...');
@@ -1590,6 +1607,7 @@ window.saveNickTags = async function(){
     hideLoading();
     document.getElementById('nick-msg').style.display='block';
     doCurrentSearch();
+    if(document.getElementById('sec-ranking')?.style.display==='block') rkReset();
     setTimeout(()=>closeNickModal(),900);
   }catch(e){hideLoading();alert('저장 오류: '+e.message);}
 };
