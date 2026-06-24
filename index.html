@@ -164,6 +164,16 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 </head>
 <body>
 
+<script>
+// 페이지 로드 즉시 로그인 화면 표시 (Firebase 로딩과 무관)
+(function(){
+  var isAdmin = location.search.includes('admin');
+  document.addEventListener('DOMContentLoaded', function(){
+    var target = document.getElementById(isAdmin ? 'sc-adm-login' : 'sc-login');
+    if(target) target.classList.add('on');
+  });
+})();
+</script>
 <div class="loading-overlay" id="loading-overlay" style="display:none">
   <div class="loading-spinner"></div>
   <div class="loading-txt" id="loading-txt">연결 중...</div>
