@@ -180,6 +180,13 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 .mem-simple-name{font-size:14px;font-weight:700;color:#1a1a2e}
 .mem-simple-phone{font-size:12px;color:#64748b;margin-top:2px}
 .mem-simple-arrow{color:#94a3b8;font-size:16px}
+.notice-edit-item{background:#f8fafc;border-radius:12px;padding:12px 14px;margin-bottom:8px;border:1.5px solid #e2e8f0}
+.notice-edit-item-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.notice-edit-icon-sel{width:44px;padding:7px 4px;font-size:13px;border:1.5px solid #dde1e7;border-radius:8px;text-align:center;background:#fff;cursor:pointer;font-family:inherit}
+.notice-edit-text{width:100%;font-size:13px;padding:8px 10px;border:1.5px solid #dde1e7;border-radius:8px;background:#fff;font-family:inherit;resize:vertical;min-height:54px;line-height:1.6;color:#1a1a2e}
+.notice-edit-text:focus{border-color:#3b82f6;outline:none}
+.notice-section-head{font-size:13px;font-weight:800;color:#1e40af;background:#eff6ff;border-radius:10px;padding:8px 12px;margin:10px 0 8px;display:flex;align-items:center;justify-content:space-between}
+.drag-handle{color:#94a3b8;cursor:grab;font-size:18px;padding:0 4px}
 </style>
 </head>
 <body>
@@ -444,6 +451,12 @@ textarea{resize:none;min-height:80px;line-height:1.6}
       </div>
     </div>
 
+    <!-- 공지사항 관리 버튼 -->
+    <div class="stat-card" style="cursor:pointer;margin-bottom:10px;text-align:center;padding:13px" id="btn-notice" onclick="showAdmSection('notice')">
+      <div style="font-size:16px;font-weight:800;color:#1a1a2e">📢 공지사항 관리</div>
+      <div style="font-size:12px;color:#64748b;margin-top:3px">안내사항 · 개인정보 항목 수정</div>
+    </div>
+
     <!-- ★ 추가: 랭킹 닉네임 관리 버튼 -->
     <div class="stat-card" style="cursor:pointer;margin-bottom:10px;text-align:center;padding:13px" id="btn-ranking" onclick="showAdmSection('ranking')">
       <div style="font-size:16px;font-weight:800;color:#1a1a2e">🏆 알바 랭킹 닉네임 관리</div>
@@ -516,6 +529,33 @@ textarea{resize:none;min-height:80px;line-height:1.6}
           <button class="reset-btn" onclick="rkReset()">전체보기</button>
         </div>
         <div id="rk-manage-list"></div>
+      </div>
+    </div>
+
+    <!-- 섹션: 공지사항 관리 -->
+    <div id="sec-notice" style="display:none">
+      <div class="search-box">
+        <div class="search-title">📢 공지사항 관리</div>
+        <div style="font-size:12px;color:#64748b;margin-bottom:12px;line-height:1.7;background:#f8fafc;border-radius:10px;padding:10px">
+          여기서 수정하면 <b>신청서 5·6단계</b>와 <b>안내사항 배너</b>에 동일하게 반영됩니다.
+        </div>
+
+        <!-- 5단계: 참여 안내 -->
+        <div class="notice-section-head">
+          <span>📋 5단계 — 참여 안내</span>
+          <button onclick="addNoticeItem('guide')" style="font-size:12px;padding:4px 12px;border:none;border-radius:8px;background:#3b82f6;color:#fff;cursor:pointer;font-weight:700;font-family:inherit">+ 항목 추가</button>
+        </div>
+        <div id="notice-guide-list"></div>
+
+        <!-- 6단계: 개인정보 -->
+        <div class="notice-section-head" style="margin-top:14px">
+          <span>🔒 6단계 — 개인정보 안내</span>
+          <button onclick="addNoticeItem('privacy')" style="font-size:12px;padding:4px 12px;border:none;border-radius:8px;background:#3b82f6;color:#fff;cursor:pointer;font-weight:700;font-family:inherit">+ 항목 추가</button>
+        </div>
+        <div id="notice-privacy-list"></div>
+
+        <div id="notice-save-msg" style="font-size:12px;color:#16a34a;margin-top:8px;display:none">✅ 저장되었습니다!</div>
+        <button onclick="saveNoticeItems()" class="btn btnP" style="margin-top:12px">💾 저장하기</button>
       </div>
     </div>
 
@@ -802,6 +842,7 @@ async function init(){
   }
   // 자동로그인 정보 없거나 실패 → 즉시 로그인 화면
   goSc('sc-login');
+  initNoticeOnLoad();
 }
 
 async function loadMB(){
@@ -1143,7 +1184,7 @@ function showAdmDash(){
     const el=document.getElementById('sec-'+s);
     if(el) el.style.display='none';
   });
-  ['tot','today','ranking','excel'].forEach(s=>{
+  ['tot','today','notice','ranking','excel'].forEach(s=>{
     const btn=document.getElementById('btn-'+s);
     if(btn) btn.style.outline='none';
   });
@@ -1328,7 +1369,17 @@ function renderOsList(){
     const tags=(m.nicknames||[]).map(n=>`<span class="nick-tag">${ex(n)}</span>`).join('');
     const detail = isExpanded ? `
       <div style="padding:12px 14px;border-top:1px solid #f1f5f9;background:#fff">
-        <div class="mem-row"><span class="mem-key">📲 폰 종류</span><span class="mem-val">${ex(m.os||'')}</span></div>
+        <div class="mem-row"><span class="mem-key">🎂 나이</span><span class="mem-val">${ex(m.age||'미입력')}</span></div>
+        <div class="mem-row" style="align-items:center">
+          <span class="mem-key">📲 폰 종류</span>
+          <span class="mem-val" style="display:flex;align-items:center;gap:6px">
+            ${ex(m.os||'')}
+            <button onclick="changeOsInline('${m.id}','${(m.os||'').includes('iOS')?'안드로이드':'애플 (iOS)'}')"
+              style="font-size:11px;padding:3px 8px;border:1px solid #dde1e7;border-radius:6px;background:#f8fafc;cursor:pointer;font-family:inherit;color:#374151;white-space:nowrap">
+              → ${(m.os||'').includes('iOS')?'안드로이드로 변경':'iOS로 변경'}
+            </button>
+          </span>
+        </div>
         <div class="mem-row"><span class="mem-key">🏦 은행</span><span class="mem-val">${ex(m.bank||'')} ${ex(m.account||'')}</span></div>
         <div class="mem-row"><span class="mem-key">👤 예금주</span><span class="mem-val">${ex(m.holder||'')}</span></div>
         <div class="mem-row"><span class="mem-key">💰 주간</span><span class="mem-val" style="color:#16a34a;font-weight:800">${(m.weekPts||0).toLocaleString()}원</span></div>
@@ -1361,6 +1412,172 @@ window.toggleMemDetail = function(id){
   expandedMemId = expandedMemId===id ? null : id;
   renderOsList();
 };
+
+window.changeOsInline = async function(id, newOs){
+  showLoading('저장 중...');
+  try{
+    await updateDoc(doc(db,'members',id),{os:newOs});
+    const m=MB.find(x=>x.id===id); if(m) m.os=newOs;
+    hideLoading(); showToast('✅ 기기 변경 완료');
+    renderOsList();
+  }catch(e){hideLoading();alert('오류: '+e.message);}
+};
+
+// ══════════════════════════════════════
+// 공지사항 관리
+// ══════════════════════════════════════
+const NOTICE_KEY = 'rw_notice_items';
+const DEFAULT_GUIDE = [
+  {icon:'💎', text:'리워드 체험단은 어플, 구글지도, 유튜브 등을 간접 체험하고 리뷰를 달아주는 신개념 리워드 부업입니다.'},
+  {icon:'📅', text:'일주일 기준 2~5회 이내 참여(랜덤), 건당 1,500원, 10분 이내 소액 알바입니다.'},
+  {icon:'⚠️', text:'당일 안에 참여하셔야 리워드 지급이 가능합니다. 날짜가 지나면 미지급됩니다.'},
+  {icon:'💬', text:'당일 참여 불가 시 리워드 매니저에게 미리 말씀해 주세요.'},
+  {icon:'📱', text:'사용 중인 개통된 휴대폰만 가능. 공기계·태블릿·PC 불가.'},
+  {icon:'📶', text:'와이파이 가능하나 가끔 모바일 데이터 사용을 권장합니다.'},
+  {icon:'💰', text:'월~일 참여 취합 후 다음 주 화요일에 계좌로 현금 입금합니다.'},
+  {icon:'⭐', text:'성실하게 참여하시는 분들께는 별도 추가 지급도 있습니다.'},
+];
+const DEFAULT_PRIVACY = [
+  {icon:'🗄️', text:'수집 항목: 성함 / 연락처 / 계좌정보만 수집합니다.'},
+  {icon:'🎯', text:'수집 목적: 참여자 확인 및 리워드 입금 시 계좌 정보 확인'},
+  {icon:'⏰', text:'보유 기간: 탈퇴일로부터 14일 보유 후 완전 파기'},
+];
+const ICONS = ['💎','📅','⚠️','💬','📱','📶','💰','⭐','🗄️','🎯','⏰','📌','✅','❌','🔒','📋','👥','💳','🏦','📞'];
+
+function loadNoticeData(){
+  try{
+    const raw = localStorage.getItem(NOTICE_KEY);
+    if(raw){ const d=JSON.parse(raw); return d; }
+  }catch(e){}
+  return {guide:[...DEFAULT_GUIDE], privacy:[...DEFAULT_PRIVACY]};
+}
+function saveNoticeData(data){
+  try{ localStorage.setItem(NOTICE_KEY, JSON.stringify(data)); }catch(e){}
+}
+function getNoticeData(){ return loadNoticeData(); }
+
+let noticeEditData = null;
+
+function initNoticeEditor(){
+  noticeEditData = loadNoticeData();
+  renderNoticeEditor();
+}
+
+function renderNoticeEditor(){
+  renderNoticeSection('notice-guide-list', 'guide');
+  renderNoticeSection('notice-privacy-list', 'privacy');
+}
+
+function renderNoticeSection(elId, type){
+  const el = document.getElementById(elId);
+  if(!el) return;
+  const items = noticeEditData[type] || [];
+  el.innerHTML = items.map((item, i) => `
+    <div class="notice-edit-item" id="nei-${type}-${i}">
+      <div class="notice-edit-item-head">
+        <select class="notice-edit-icon-sel" onchange="updateNoticeIcon('${type}',${i},this.value)">
+          ${ICONS.map(ic=>`<option value="${ic}" ${ic===item.icon?'selected':''}>${ic}</option>`).join('')}
+        </select>
+        <div style="display:flex;gap:6px">
+          ${i>0?`<button onclick="moveNoticeItem('${type}',${i},-1)" style="padding:4px 8px;border:1px solid #dde1e7;border-radius:6px;background:#fff;cursor:pointer;font-size:12px">▲</button>`:''}
+          ${i<items.length-1?`<button onclick="moveNoticeItem('${type}',${i},1)" style="padding:4px 8px;border:1px solid #dde1e7;border-radius:6px;background:#fff;cursor:pointer;font-size:12px">▼</button>`:''}
+          <button onclick="deleteNoticeItem('${type}',${i})" style="padding:4px 8px;border:none;border-radius:6px;background:#fef2f2;color:#ef4444;cursor:pointer;font-size:12px;font-weight:700">✕</button>
+        </div>
+      </div>
+      <textarea class="notice-edit-text" onchange="updateNoticeText('${type}',${i},this.value)">${ex(item.text)}</textarea>
+    </div>
+  `).join('');
+}
+
+window.updateNoticeIcon = function(type, idx, val){
+  if(!noticeEditData[type]) return;
+  noticeEditData[type][idx].icon = val;
+};
+window.updateNoticeText = function(type, idx, val){
+  if(!noticeEditData[type]) return;
+  noticeEditData[type][idx].text = val;
+};
+window.addNoticeItem = function(type){
+  if(!noticeEditData[type]) noticeEditData[type]=[];
+  noticeEditData[type].push({icon:'📌', text:'새 항목을 입력하세요.'});
+  renderNoticeEditor();
+};
+window.deleteNoticeItem = function(type, idx){
+  if(!noticeEditData[type]) return;
+  noticeEditData[type].splice(idx, 1);
+  renderNoticeEditor();
+};
+window.moveNoticeItem = function(type, idx, dir){
+  const arr = noticeEditData[type];
+  if(!arr) return;
+  const newIdx = idx+dir;
+  if(newIdx<0||newIdx>=arr.length) return;
+  [arr[idx], arr[newIdx]] = [arr[newIdx], arr[idx]];
+  renderNoticeEditor();
+};
+window.saveNoticeItems = function(){
+  // textarea 값 현재 상태로 동기화
+  ['guide','privacy'].forEach(type=>{
+    const items = noticeEditData[type]||[];
+    items.forEach((item,i)=>{
+      const ta = document.querySelector(`#nei-${type}-${i} textarea`);
+      if(ta) item.text = ta.value;
+      const sel = document.querySelector(`#nei-${type}-${i} select`);
+      if(sel) item.icon = sel.value;
+    });
+  });
+  saveNoticeData(noticeEditData);
+  // 신청서 5단계 동기화
+  syncNoticeToApply();
+  // 공지사항 배너 팝업 동기화
+  syncNoticeToBanner();
+  const msg = document.getElementById('notice-save-msg');
+  if(msg){ msg.style.display='block'; setTimeout(()=>msg.style.display='none',2000); }
+  showToast('✅ 공지사항 저장 완료!');
+};
+
+function syncNoticeToApply(){
+  const data = loadNoticeData();
+  // 5단계 NS 업데이트
+  const ns5 = document.querySelector('#sl5 .ns');
+  if(ns5){
+    ns5.innerHTML = data.guide.map(item=>`
+      <div class="ni"><span>${item.icon}</span><div class="ni-t">${item.text}</div></div>
+    `).join('');
+  }
+  // 6단계 NS 업데이트
+  const ns6 = document.querySelector('#sl6 .ns');
+  if(ns6){
+    ns6.innerHTML = data.privacy.map(item=>`
+      <div class="ni"><span>${item.icon}</span><div class="ni-t">${item.text}</div></div>
+    `).join('');
+  }
+}
+
+function syncNoticeToBanner(){
+  const data = loadNoticeData();
+  const modal = document.getElementById('notice-modal');
+  if(!modal) return;
+  const body = modal.querySelector('div[style*="padding:16px 18px"]');
+  if(!body) return;
+  body.innerHTML = `
+    <div style="font-size:13px;font-weight:700;color:#f59e0b;background:#fef9c3;border-radius:10px;padding:8px 12px;margin-bottom:14px;text-align:center">
+      ⚠️ 아래 사항을 반드시 확인하고 참여해 주세요
+    </div>
+    <div style="font-size:13px;font-weight:800;color:#1a1a2e;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #f1f5f9">📋 참여 안내</div>
+    ${data.guide.map(item=>`<div class="notice-modal-item"><div class="notice-modal-icon">${item.icon}</div><div class="notice-modal-text">${item.text}</div></div>`).join('')}
+    <div style="font-size:13px;font-weight:800;color:#1a1a2e;margin:14px 0 10px;padding-bottom:6px;border-bottom:2px solid #f1f5f9">🔒 개인정보 수집 및 이용 동의</div>
+    ${data.privacy.map(item=>`<div class="notice-modal-item"><div class="notice-modal-icon">${item.icon}</div><div class="notice-modal-text">${item.text}</div></div>`).join('')}
+    <button onclick="document.getElementById('notice-modal').style.display='none'" class="btn btnP" style="margin-top:16px">확인했습니다 ✓</button>
+  `;
+}
+
+// 페이지 로드 시 공지사항 동기화
+function initNoticeOnLoad(){
+  const data = loadNoticeData();
+  syncNoticeToApply();
+  syncNoticeToBanner();
+}
 
 window.rkSearch = function(){
   const q=(document.getElementById('rk-srch')||{}).value||'';
@@ -1425,13 +1642,13 @@ window.saveEdit = async function(){
   }catch(e){ hideLoading(); alert('저장 오류: '+e.message); }
 };
 
-const ADM_SECTIONS = ['tot','today','ranking','excel','home'];
+const ADM_SECTIONS = ['tot','today','notice','ranking','excel','home'];
 window.showAdmSection = function(name){
   ADM_SECTIONS.forEach(s=>{
     const el=document.getElementById('sec-'+s);
     if(el) el.style.display='none';
   });
-  ['tot','today','ranking','excel'].forEach(s=>{
+  ['tot','today','notice','ranking','excel'].forEach(s=>{
     const btn=document.getElementById('btn-'+s);
     if(btn) btn.style.outline = s===name?'3px solid #3b82f6':'none';
   });
@@ -1440,6 +1657,7 @@ window.showAdmSection = function(name){
   if(name==='today') renderTodaySection();
   if(name==='tot'){ currentOsFilter='all'; ['all','android','ios'].forEach(k=>{ const b=document.getElementById('os-btn-'+k); if(b) b.className='os-btn'+(k==='all'?' on':''); }); renderOsList(); }
   if(name==='ranking') rkReset();
+  if(name==='notice') initNoticeEditor();
   if(name==='excel'){
     const prev=document.getElementById('excel-preview');
     const msg=document.getElementById('excel-msg');
