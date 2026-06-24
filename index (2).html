@@ -649,25 +649,35 @@ function withTimeout(promise, ms){
 
 async function init(){
   const isAdmin = location.search.includes('admin');
+
+  // 최대 20초 대기, 실패해도 반드시 화면 전환
+  const safeLoad = async () => {
+    try { await withTimeout(loadMB(), 20000); return true; }
+    catch(e) { console.warn('loadMB 실패:', e.message); return false; }
+  };
+
   if(isAdmin){
     if(loadAdm()){
       document.getElementById('loading-txt').textContent='데이터 로딩 중...';
-      try{
-        await withTimeout(loadMB(), 8000);
-        hideLoading(); showAdmDash(); showToast('✅ 자동로그인');
-      }catch(e){ hideLoading(); goSc('sc-adm-login'); }
-    } else { hideLoading(); goSc('sc-adm-login'); }
+      const ok = await safeLoad();
+      hideLoading();
+      if(ok){ showAdmDash(); showToast('✅ 자동로그인'); }
+      else { goSc('sc-adm-login'); }
+    } else {
+      hideLoading(); goSc('sc-adm-login');
+    }
     return;
   }
+
   const savedId = loadUser();
   if(savedId){
     document.getElementById('loading-txt').textContent='로딩 중...';
-    try{
-      await withTimeout(loadMB(), 8000);
+    const ok = await safeLoad();
+    if(ok){
       const found = MB.find(m=>m.id===savedId);
       if(found){ me=found; hideLoading(); showUserDash(); showToast('✅ '+me.name+'님 자동로그인'); return; }
       else { clearUser(); }
-    }catch(e){ console.error('init 오류:', e.message); }
+    }
   }
   hideLoading();
   goSc('sc-login');
@@ -1675,6 +1685,26 @@ window.restart=function(){
   [[1,'y'],[1,'n'],[2,'y'],[2,'n']].forEach(([n,k])=>{document.getElementById('ag'+n+k).className='ab';document.getElementById('ck'+n+k).textContent='';});
   updPg(1);showSl('sl1');document.querySelector('.pg-wrap').style.display='block';
 };
+
+// Firebase 모듈 로딩 실패 대비 fallback
+window.addEventListener('error', function(e){
+  if(e.message && e.message.includes('firebase')){
+    hideLoading();
+    const isAdmin = location.search.includes('admin');
+    goSc(isAdmin ? 'sc-adm-login' : 'sc-login');
+  }
+});
+
+// 최대 25초 후에도 로딩중이면 강제로 화면 전환
+setTimeout(function(){
+  const overlay = document.getElementById('loading-overlay');
+  if(overlay && overlay.style.display !== 'none'){
+    hideLoading();
+    const isAdmin = location.search.includes('admin');
+    goSc(isAdmin ? 'sc-adm-login' : 'sc-login');
+    console.warn('25초 타임아웃 - 강제 화면 전환');
+  }
+}, 25000);
 
 init();
 </script>
