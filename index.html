@@ -230,7 +230,7 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 
 <!-- 신청서 -->
 <div id="sc-apply" class="screen">
-  <div class="lang-gap"></div><div class="ap-top"><div class="ap-title" data-ko="🏆 리워드 체험단" data-en="🏆 Reward Program">🏆 리워드 체험단</div><div class="ap-sub" id="ap-sub-txt">신청서 작성</div></div>
+  <div class="lang-gap"></div><div class="ap-top"><div class="ap-title" id="ap-title">🏆 리워드 체험단</div><div class="ap-sub" id="ap-sub-txt">신청서 작성</div></div>
   <div class="pg-wrap">
     <div class="pg-lbl" id="pg-lbl">1 / 6단계</div>
     <div class="pg-bg"><div class="pg-fill" id="pg-fill" style="width:16.6%"></div></div>
@@ -238,10 +238,10 @@ textarea{resize:none;min-height:80px;line-height:1.6}
   <div class="wp" style="padding-top:18px">
     <div class="slide on" id="sl1">
       <div class="st">기본 정보 입력</div><div class="ss">성함과 연락처를 정확히 입력해 주세요</div>
-      <div class="fl"><span class="lbl">성함 *</span><input type="text" id="a-name" placeholder="실명 입력" autocomplete="off"></div>
-      <div class="fl"><span class="lbl">연락처 * (숫자만)</span><input type="tel" id="a-phone" placeholder="01012345678" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'')"></div>
+      <div class="fl"><span class="lbl" id="lbl-a-name">성함 *</span><input type="text" id="a-name" placeholder="실명 입력" autocomplete="off"></div>
+      <div class="fl"><span class="lbl" id="lbl-a-phone">연락처 * (숫자만)</span><input type="tel" id="a-phone" placeholder="01012345678" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'')"></div>
       <div id="e1" class="er"></div>
-      <button class="btn btnP" onclick="anext(1)">다음 →</button>
+      <button class="btn btnP" id="btn-next1" onclick="anext(1)">다음 →</button>
     </div>
     <div class="slide" id="sl2">
       <div class="st">나이 확인</div><div class="ss">해당하는 항목을 선택해 주세요</div>
@@ -250,29 +250,29 @@ textarea{resize:none;min-height:80px;line-height:1.6}
         <div class="cb" id="cb-adult" onclick="pickAge('adult')"><div class="cb-ic">👤</div><div class="cb-nm">성인</div><div class="cb-dc">만 18세 이상</div></div>
       </div>
       <div id="e2" class="er"></div>
-      <div class="br2"><button class="btn btnS" onclick="aback(2)">← 이전</button><button class="btn btnP" onclick="anext(2)">다음 →</button></div>
+      <div class="br2"><button class="btn btnS" id="btn-back2" onclick="aback(2)">← 이전</button><button class="btn btnP" id="btn-next2" onclick="anext(2)">다음 →</button></div>
     </div>
     <div class="slide" id="sl3">
       <div class="st">휴대폰 종류</div><div class="ss">사용 중인 스마트폰을 선택해 주세요</div>
       <div class="cg">
-        <div class="cb" id="cb-android" onclick="pickOs('android')"><div class="cb-ic">🤖</div><div class="cb-nm">안드로이드</div><div class="cb-dc">갤럭시, LG 등</div></div>
-        <div class="cb" id="cb-ios" onclick="pickOs('ios')"><div class="cb-ic">🍎</div><div class="cb-nm">애플 (iOS)</div><div class="cb-dc">아이폰</div></div>
+        <div class="cb" id="cb-android" onclick="pickOs('android')"><div class="cb-ic">🤖</div><div class="cb-nm" id="android-nm">안드로이드</div><div class="cb-dc">갤럭시, LG 등</div></div>
+        <div class="cb" id="cb-ios" onclick="pickOs('ios')"><div class="cb-ic">🍎</div><div class="cb-nm" id="ios-nm">애플 (iOS)</div><div class="cb-dc">아이폰</div></div>
       </div>
       <div id="e3" class="er"></div>
-      <div class="br2"><button class="btn btnS" onclick="aback(3)">← 이전</button><button class="btn btnP" onclick="anext(3)">다음 →</button></div>
+      <div class="br2"><button class="btn btnS" id="btn-back3" onclick="aback(3)">← 이전</button><button class="btn btnP" id="btn-next3" onclick="anext(3)">다음 →</button></div>
     </div>
     <div class="slide" id="sl4">
       <div class="st">입금 계좌 정보</div><div class="ss">본인 명의 계좌를 입력해 주세요</div>
       <div class="aw">
-        <div class="fl"><span class="lbl">은행명 *</span>
+        <div class="fl"><span class="lbl" id="lbl-a-bank">은행명 *</span>
           <select id="a-bank"><option value="">은행 선택</option><option>카카오뱅크</option><option>토스뱅크</option><option>케이뱅크</option><option>국민은행</option><option>신한은행</option><option>우리은행</option><option>하나은행</option><option>농협은행</option><option>기업은행</option><option>SC제일은행</option><option>대구은행</option><option>부산은행</option><option>광주은행</option><option>전북은행</option><option>경남은행</option><option>새마을금고</option><option>신협</option><option>우체국</option></select>
         </div>
-        <div class="fl"><span class="lbl">계좌번호 * (숫자만)</span><input type="text" id="a-acct" inputmode="numeric" placeholder="숫자만 입력" oninput="this.value=this.value.replace(/\D/g,'')"></div>
-        <div class="fl"><span class="lbl">예금주 *</span><input type="text" id="a-holder" placeholder="본인 명의와 동일해야 합니다"></div>
+        <div class="fl"><span class="lbl" id="lbl-a-acct">계좌번호 * (숫자만)</span><input type="text" id="a-acct" inputmode="numeric" placeholder="숫자만 입력" oninput="this.value=this.value.replace(/\D/g,'')"></div>
+        <div class="fl"><span class="lbl" id="lbl-a-holder">예금주 *</span><input type="text" id="a-holder" placeholder="본인 명의와 동일해야 합니다"></div>
       </div>
-      <div class="hb">⚠️ 예금주는 신청자 성함 <b id="hh">-</b>과(와) 동일해야 합니다</div>
+      <div class="hb">⚠️ <span id="holder-hint-pre">예금주는 신청자 성함</span> <b id="hh">-</b><span id="holder-hint-suf">과(와) 동일해야 합니다</span></div>
       <div id="e4" class="er"></div>
-      <div class="br2"><button class="btn btnS" onclick="aback(4)">← 이전</button><button class="btn btnP" onclick="anext(4)">다음 →</button></div>
+      <div class="br2"><button class="btn btnS" id="btn-back4" onclick="aback(4)">← 이전</button><button class="btn btnP" id="btn-next4" onclick="anext(4)">다음 →</button></div>
     </div>
     <div class="slide" id="sl5">
       <div class="st">안내사항 확인</div><div class="ss">꼼꼼히 읽고 동의 여부를 선택해 주세요</div>
@@ -288,9 +288,9 @@ textarea{resize:none;min-height:80px;line-height:1.6}
       </div>
       <div class="al">위 안내사항을 이해하셨나요? *</div>
       <div class="ab" id="ag1y" onclick="selAg(1,'y')"><div class="ck" id="ck1y"></div><div class="at"><b>동의합니다</b></div></div>
-      <div class="ab" id="ag1n" onclick="selAg(1,'n')"><div class="ck" id="ck1n"></div><div class="at"><b>미동의</b> — 신청서가 삭제됩니다</div></div>
+      <div class="ab" id="ag1n" onclick="selAg(1,'n')"><div class="ck" id="ck1n"></div><div class="at"><b id="agree-no1-txt">미동의</b> — <span id="agree-no1-sub">신청서가 삭제됩니다</span></div></div>
       <div id="e5" class="er"></div>
-      <div class="br2"><button class="btn btnS" onclick="aback(5)">← 이전</button><button class="btn btnP" onclick="anext(5)">다음 →</button></div>
+      <div class="br2"><button class="btn btnS" id="btn-back5" onclick="aback(5)">← 이전</button><button class="btn btnP" id="btn-next5" onclick="anext(5)">다음 →</button></div>
     </div>
     <div class="slide" id="sl6">
       <div class="st">개인정보 수집 및 이용 동의</div><div class="ss">아래 내용을 확인 후 동의 여부를 선택해 주세요</div>
@@ -301,23 +301,23 @@ textarea{resize:none;min-height:80px;line-height:1.6}
       </div>
       <div class="al">개인정보 수집 및 이용에 동의하시겠습니까? *</div>
       <div class="ab" id="ag2y" onclick="selAg(2,'y')"><div class="ck" id="ck2y"></div><div class="at"><b>동의합니다</b></div></div>
-      <div class="ab" id="ag2n" onclick="selAg(2,'n')"><div class="ck" id="ck2n"></div><div class="at"><b>미동의</b> — 신청서가 삭제됩니다</div></div>
+      <div class="ab" id="ag2n" onclick="selAg(2,'n')"><div class="ck" id="ck2n"></div><div class="at"><b id="agree-no2-txt">미동의</b> — <span id="agree-no2-sub">신청서가 삭제됩니다</span></div></div>
       <div id="e6" class="er"></div>
-      <div class="br2"><button class="btn btnS" onclick="aback(6)">← 이전</button><button class="btn btnP" onclick="doSubmit()">제출하기 ✓</button></div>
+      <div class="br2"><button class="btn btnS" id="btn-back6" onclick="aback(6)">← 이전</button><button class="btn btnP" id="btn-submit" onclick="doSubmit()">제출하기 ✓</button></div>
     </div>
     <div class="slide" id="sl-ok">
       <div class="dw">
         <div class="di di-ok">✅</div>
-        <div style="font-size:20px;font-weight:800;margin-bottom:8px;color:#1a1a2e">신청 완료!</div>
-        <div style="font-size:14px;color:#64748b;line-height:1.7;margin-bottom:18px">신청서가 성공적으로 접수되었습니다.<br>카카오톡으로 안내드리겠습니다.</div>
+        <div id="done-title" style="font-size:20px;font-weight:800;margin-bottom:8px;color:#1a1a2e">신청 완료!</div>
+        <div id="done-sub" style="font-size:14px;color:#64748b;line-height:1.7;margin-bottom:18px">신청서가 성공적으로 접수되었습니다.<br>카카오톡으로 안내드리겠습니다.</div>
         <div class="scard" id="sum-box"></div>
       </div>
     </div>
     <div class="slide" id="sl-del">
       <div class="dw">
         <div class="di di-no">🗑️</div>
-        <div style="font-size:20px;font-weight:800;margin-bottom:8px;color:#1a1a2e">신청서가 삭제되었습니다</div>
-        <button class="btn btnP" onclick="restart()">처음부터 다시 시작</button>
+        <div id="deleted-title" style="font-size:20px;font-weight:800;margin-bottom:8px;color:#1a1a2e">신청서가 삭제되었습니다</div>
+        <button class="btn btnP" id="btn-restart" onclick="restart()">처음부터 다시 시작</button>
       </div>
     </div>
   </div>
@@ -332,14 +332,14 @@ textarea{resize:none;min-height:80px;line-height:1.6}
   </div>
   <div class="wp">
     <div class="card">
-      <div class="fl"><span class="lbl">성함</span><input type="text" id="l-name" placeholder="신청 시 입력한 성함" autocomplete="off"></div>
-      <div class="fl"><span class="lbl">연락처 (숫자만)</span><input type="tel" id="l-phone" placeholder="01012345678" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'')"></div>
+      <div class="fl"><span class="lbl" id="lbl-l-name">성함</span><input type="text" id="l-name" placeholder="신청 시 입력한 성함" autocomplete="off"></div>
+      <div class="fl"><span class="lbl" id="lbl-l-phone">연락처 (숫자만)</span><input type="tel" id="l-phone" placeholder="01012345678" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'')"></div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
         <input type="checkbox" id="l-auto" checked>
         <label for="l-auto" style="font-size:14px;color:#374151;cursor:pointer;font-weight:500">자동 로그인</label>
       </div>
       <div id="l-er" class="er"></div>
-      <button class="btn btnP" onclick="doLogin()">로그인</button>
+      <button class="btn btnP" id="btn-login" onclick="doLogin()">로그인</button>
     </div>
     <div style="text-align:center;margin-top:18px;font-size:15px;color:#64748b">
       처음이신가요? <span style="color:#3b82f6;font-weight:700;cursor:pointer" onclick="goSc('sc-apply')">신청서 작성 →</span>
@@ -352,24 +352,24 @@ textarea{resize:none;min-height:80px;line-height:1.6}
   <div class="lang-gap"></div><div class="uh">
     <div class="uh-top">
       <div class="uh-name" id="u-nm">이름님</div>
-      <div class="lo" onclick="doUserLogout()">로그아웃</div>
+      <div class="lo" id="btn-user-logout" onclick="doUserLogout()">로그아웃</div>
     </div>
     <div class="uh-stats">
       <div class="uh-stat" onclick="openTotalModal()">
-        <span class="uh-stat-lbl">💰 총 누적 리워드</span>
+        <span class="uh-stat-lbl" id="lbl-total-reward">💰 총 누적 리워드</span>
         <span class="uh-stat-val" id="u-total-pts">0원</span>
       </div>
       <div class="uh-stat">
-        <span class="uh-stat-lbl">📅 주간 리워드</span>
+        <span class="uh-stat-lbl" id="lbl-week-reward">📅 주간 리워드</span>
         <span class="uh-stat-val" id="u-week-pts">0원</span>
       </div>
     </div>
   </div>
   <div class="dash-wrap">
     <div class="week-card">
-      <div class="week-card-title">📅 주간 리워드 금액</div>
+      <div class="week-card-title" id="week-card-title">📅 주간 리워드 금액</div>
       <div class="week-nav">
-        <button class="week-nav-btn" onclick="prevWeek()">◀ 이전주</button>
+        <button class="week-nav-btn" id="btn-prev-week" onclick="prevWeek()">◀ 이전주</button>
         <span class="week-nav-lbl" id="week-nav-label"></span>
         <button class="week-nav-btn" id="week-nav-next" onclick="nextWeek()">다음주 ▶</button>
       </div>
@@ -382,8 +382,8 @@ textarea{resize:none;min-height:80px;line-height:1.6}
       <div class="notice-banner-left">
         <div class="notice-banner-icon">📢</div>
         <div class="notice-banner-text">
-          <div class="notice-banner-title">안내사항</div>
-          <div class="notice-banner-sub">참여 전 꼭 확인해 주세요!</div>
+          <div class="notice-banner-title" id="banner-title">안내사항</div>
+          <div class="notice-banner-sub" id="banner-sub">참여 전 꼭 확인해 주세요!</div>
         </div>
       </div>
       <div class="notice-banner-arrow">›</div>
@@ -391,10 +391,10 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 
     <div class="rk-card">
       <div class="rk-card-head">
-        <div class="rk-card-title">🏆 알바 랭킹</div>
+        <div class="rk-card-title" id="rk-title">🏆 알바 랭킹</div>
         <div class="rk-tabs">
-          <button class="rk-tab on" onclick="setRk('week',this)">주간</button>
-          <button class="rk-tab" onclick="setRk('month',this)">월간</button>
+          <button class="rk-tab on" id="rk-tab-week" onclick="setRk('week',this)">주간</button>
+          <button class="rk-tab" id="rk-tab-month" onclick="setRk('month',this)">월간</button>
         </div>
       </div>
       <div id="rk-podium"></div>
@@ -609,23 +609,17 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 <div id="total-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9200;overflow-y:auto">
   <div style="background:#fff;max-width:460px;margin:40px auto 20px;border-radius:20px;overflow:hidden">
     <div style="background:linear-gradient(135deg,#1e40af,#4f46e5);padding:16px 18px;display:flex;align-items:center;justify-content:space-between">
-      <div style="font-size:16px;font-weight:800;color:#fff">💰 총 누적 리워드 내역</div>
+      <div id="total-modal-title" style="font-size:16px;font-weight:800;color:#fff">💰 총 누적 리워드 내역</div>
       <div onclick="closeTotalModal()" style="color:#fff;font-size:22px;cursor:pointer;font-weight:700;line-height:1">✕</div>
     </div>
     <div style="padding:12px 16px;background:#f8fafc;border-bottom:1px solid #e2e8f0">
       <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
         <select id="tot-year" style="flex:1;min-width:80px;font-size:13px;padding:9px 8px" onchange="onTotYearChange()"></select>
-        <select id="tot-month" style="flex:1;min-width:70px;font-size:13px;padding:9px 8px" onchange="onTotMonthChange()">
-          <option value="">전체 월</option>
-          <option value="01">1월</option><option value="02">2월</option><option value="03">3월</option>
-          <option value="04">4월</option><option value="05">5월</option><option value="06">6월</option>
-          <option value="07">7월</option><option value="08">8월</option><option value="09">9월</option>
-          <option value="10">10월</option><option value="11">11월</option><option value="12">12월</option>
-        </select>
+        <select id="tot-month" style="flex:1;min-width:70px;font-size:13px;padding:9px 8px" onchange="onTotMonthChange()"></select>
         <select id="tot-day" style="flex:1;min-width:70px;font-size:13px;padding:9px 8px" onchange="renderTotalModal()">
           <option value="">전체 일</option>
         </select>
-        <button onclick="resetTotalFilter()" style="padding:9px 12px;font-size:12px;border:1px solid #dde1e7;border-radius:10px;background:#fff;cursor:pointer;color:#64748b;font-weight:600;font-family:inherit;white-space:nowrap">초기화</button>
+        <button id="btn-tot-reset" onclick="resetTotalFilter()" style="padding:9px 12px;font-size:12px;border:1px solid #dde1e7;border-radius:10px;background:#fff;cursor:pointer;color:#64748b;font-weight:600;font-family:inherit;white-space:nowrap">초기화</button>
       </div>
     </div>
     <div id="tot-summary" style="padding:10px 16px;font-size:13px;font-weight:700;color:#1e40af;background:#eff6ff;border-bottom:1px solid #dbeafe"></div>
@@ -881,6 +875,12 @@ const T = {
     nick_modal_title:'닉네임 관리', nick_sub:'닉네임은 여러 개 등록 가능합니다. + 버튼으로 추가하세요.',
     nick_placeholder:'닉네임 입력 후 + 클릭', nick_save_ok:'✓ 저장되었습니다!',
     fail_modal_title:'❌ 미적립 실패 리스트', fail_modal_sub:'⚠️ 아래 인원은 정보 불일치로 리워드가 적립되지 않았습니다.\n엑셀 정보를 확인 후 재업로드 해주세요.',
+    // 추가 키
+    phone_lbl:'연락처 * (숫자만)',
+    bank_lbl:'은행명 *', acct_lbl:'계좌번호 * (숫자만)', holder_lbl:'예금주 *',
+    total_modal_title:'💰 총 누적 리워드 내역',
+    reset:'초기화', login:'로그인', next:'다음 →', prev:'← 이전',
+    submit:'제출하기 ✓', restart:'처음부터 다시 시작',
   },
   en: {
     // 공통
@@ -949,6 +949,12 @@ const T = {
     nick_modal_title:'Nickname Management', nick_sub:'You can register multiple nicknames. Click + to add.',
     nick_placeholder:'Enter nickname then click +', nick_save_ok:'✓ Saved!',
     fail_modal_title:'❌ Failed Reward List', fail_modal_sub:'⚠️ The following members could not receive rewards due to mismatched info.\nPlease check the Excel file and re-upload.',
+    // 추가 키
+    phone_lbl:'Phone * (numbers only)',
+    bank_lbl:'Bank Name *', acct_lbl:'Account Number * (numbers only)', holder_lbl:'Account Holder *',
+    total_modal_title:'💰 Total Reward History',
+    reset:'Reset', login:'Login', next:'Next →', prev:'← Back',
+    submit:'Submit ✓', restart:'Start Over',
   }
 };
 
@@ -1004,61 +1010,102 @@ window.setLang = async function(lang){
 };
 
 function applyLang(){
-  const l = currentLang;
-  // ── 신청서 ──
+  // ── 신청서 제목·진행바 ──
   setTxt('ap-title', t('apply_title'));
   setTxt('ap-sub-txt', t('apply_sub'));
-  // step1
+
+  // ── 1단계 ──
   setTxtQ('#sl1 .st', t('step1_title'));
   setTxtQ('#sl1 .ss', t('step1_sub'));
+  setLbl('#sl1 .lbl:first-of-type', t('name_lbl'));
+  setTxt('lbl-a-phone', t('phone_lbl'));
   setAttr('a-name','placeholder', t('name_ph'));
   setAttr('a-phone','placeholder', t('phone_ph'));
-  setLbl('#sl1 .lbl:first-of-type', t('name_lbl'));
-  // step2
+  setTxt('btn-next1', t('next'));
+
+  // ── 2단계 ──
   setTxtQ('#sl2 .st', t('step2_title'));
   setTxtQ('#sl2 .ss', t('step2_sub'));
   setTxtQ('#cb-minor .cb-nm', t('minor_nm'));
   setTxtQ('#cb-minor .cb-dc', t('minor_dc'));
   setTxtQ('#cb-adult .cb-nm', t('adult_nm'));
   setTxtQ('#cb-adult .cb-dc', t('adult_dc'));
-  // step3
+  setTxt('btn-back2', t('prev'));
+  setTxt('btn-next2', t('next'));
+
+  // ── 3단계 ──
   setTxtQ('#sl3 .st', t('step3_title'));
   setTxtQ('#sl3 .ss', t('step3_sub'));
+  setTxt('android-nm', currentLang==='en'?'Android':'안드로이드');
   setTxtQ('#cb-android .cb-dc', t('android_dc'));
+  setTxt('ios-nm', currentLang==='en'?'Apple (iOS)':'애플 (iOS)');
   setTxtQ('#cb-ios .cb-dc', t('ios_dc'));
-  // step4
+  setTxt('btn-back3', t('prev'));
+  setTxt('btn-next3', t('next'));
+
+  // ── 4단계 ──
   setTxtQ('#sl4 .st', t('step4_title'));
   setTxtQ('#sl4 .ss', t('step4_sub'));
+  setTxt('lbl-a-bank', t('bank_lbl'));
+  setTxt('lbl-a-acct', t('acct_lbl'));
+  setTxt('lbl-a-holder', t('holder_lbl'));
   setAttr('a-acct','placeholder', t('acct_ph'));
   setAttr('a-holder','placeholder', t('holder_ph'));
-  // step5
+  setTxt('holder-hint-pre', currentLang==='en'?'The account holder':'예금주는 신청자 성함');
+  setTxt('holder-hint-suf', currentLang==='en'?'must match the applicant name':'과(와) 동일해야 합니다');
+  setTxt('btn-back4', t('prev'));
+  setTxt('btn-next4', t('next'));
+
+  // ── 5단계 ──
   setTxtQ('#sl5 .st', t('step5_title'));
   setTxtQ('#sl5 .ss', t('step5_sub'));
   setTxtQ('#sl5 .al', t('agree_q'));
   setTxtQ('#ag1y .at b', t('agree_yes'));
-  setTxtQ('#ag1n .at b', t('agree_no'));
-  // step6
+  setTxt('agree-no1-txt', t('agree_no'));
+  setTxt('agree-no1-sub', currentLang==='en'?'Application will be deleted':'신청서가 삭제됩니다');
+  setTxt('btn-back5', t('prev'));
+  setTxt('btn-next5', t('next'));
+
+  // ── 6단계 ──
   setTxtQ('#sl6 .st', t('step6_title'));
   setTxtQ('#sl6 .ss', t('step6_sub'));
   setTxtQ('#sl6 .al', t('privacy_q'));
   setTxtQ('#ag2y .at b', t('agree_yes'));
-  setTxtQ('#ag2n .at b', t('agree_no'));
-  // done/deleted
+  setTxt('agree-no2-txt', t('agree_no'));
+  setTxt('agree-no2-sub', currentLang==='en'?'Application will be deleted':'신청서가 삭제됩니다');
+  setTxt('btn-back6', t('prev'));
+  setTxt('btn-submit', t('submit'));
+
+  // ── 완료/삭제 화면 ──
   setTxtQ('#sl-ok .dw div:nth-child(2)', t('done_title'));
   setTxtQ('#sl-del .dw div:nth-child(2)', t('deleted_title'));
-  // ── 로그인 ──
+  setTxt('btn-restart', t('restart'));
+
+  // ── 로그인 화면 ──
   setTxtQ('.login-hero-t', t('login_title'));
   setTxtQ('.login-hero-s', t('login_sub'));
-  setAttr('l-name','placeholder', t('name_ph'));
+  setAttr('l-name','placeholder', currentLang==='en'?'Name used during application':'신청 시 입력한 성함');
   setAttr('l-phone','placeholder', t('phone_ph'));
   const lauto = document.querySelector('label[for="l-auto"]');
   if(lauto) lauto.textContent = t('auto_login');
+  setTxtQ('#sc-login .btn.btnP', t('login'));
+  const newHere = document.querySelector('#sc-login .wp > div:last-child');
+  if(newHere) newHere.innerHTML = (currentLang==='en'
+    ? 'New here? <span style="color:#3b82f6;font-weight:700;cursor:pointer" onclick="goSc('sc-apply')">Apply Now →</span>'
+    : '처음이신가요? <span style="color:#3b82f6;font-weight:700;cursor:pointer" onclick="goSc('sc-apply')">신청서 작성 →</span>');
+
   // ── 대시보드 ──
-  setTxtQ('.uh-name', document.getElementById('u-nm')?.textContent||'');
-  setTxtQ('.uh-stat-lbl:first-child', t('total_reward'));
+  // 이름 "님" 처리
+  const uNm = document.getElementById('u-nm');
+  if(uNm && me) uNm.textContent = me.name + (currentLang==='en'?' ':' 님');
   const wkLbl = document.querySelectorAll('.uh-stat-lbl');
   if(wkLbl[0]) wkLbl[0].textContent = t('total_reward');
   if(wkLbl[1]) wkLbl[1].textContent = t('week_reward');
+  // 총 누적 값 단위
+  const uTotal = document.getElementById('u-total-pts');
+  if(uTotal && me) uTotal.textContent = (me.points||0).toLocaleString()+(currentLang==='en'?' KRW':'원');
+  const uWeek = document.getElementById('u-week-pts');
+  if(uWeek && me) uWeek.textContent = calcMyWeekTotal(0).toLocaleString()+(currentLang==='en'?' KRW':'원');
   setTxtQ('.week-card-title', t('week_card_title'));
   setTxtQ('.rk-card-title', t('ranking_title'));
   const rkTabs = document.querySelectorAll('.rk-tab');
@@ -1066,39 +1113,67 @@ function applyLang(){
   if(rkTabs[1]) rkTabs[1].textContent = t('monthly');
   setTxtQ('.notice-banner-title', t('notice_title'));
   setTxtQ('.notice-banner-sub', t('notice_sub'));
+  // 주간 리워드 버튼
   const weekNavBtns = document.querySelectorAll('.week-nav-btn');
   if(weekNavBtns[0]) weekNavBtns[0].textContent = t('prev_week');
   if(weekNavBtns[1]) weekNavBtns[1].textContent = t('next_week');
-  // ── 관리자 ──
-  setTxtQ('.adm-title', t('adm_title'));
-  setTxtQ('.lhero div:nth-child(2)', t('adm_login_title'));
-  setAttr('adm-pw','placeholder', t('adm_pw_ph'));
-  const admAuto = document.querySelector('label[for="adm-auto"]');
-  if(admAuto) admAuto.textContent = t('adm_auto_login');
-  setTxtQ('#a-tot + .stat-l', t('total_workers'));
-  setTxtQ('#a-today + .stat-l', t('today_join'));
-  setTxtQ('#sec-home', t('home_hint'));
-  // 버튼들
-  const noticeManBtn = document.querySelector('#btn-notice div:first-child');
-  if(noticeManBtn) noticeManBtn.textContent = t('notice_manage');
-  const noticeManSub = document.querySelector('#btn-notice div:last-child');
-  if(noticeManSub) noticeManSub.textContent = t('notice_manage_sub');
-  const rankManBtn = document.querySelector('#btn-ranking div:first-child');
-  if(rankManBtn) rankManBtn.textContent = t('ranking_manage');
-  const excelBtn = document.querySelector('#btn-excel div:first-child');
-  if(excelBtn) excelBtn.textContent = t('excel_manage');
-  const excelSub = document.querySelector('#btn-excel div:last-child');
-  if(excelSub) excelSub.textContent = t('excel_manage_sub');
-  // ── 공지사항 배너 모달 언어 갱신 ──
+  // 로그아웃
+  setTxtQ('.lo', t('logout'));
+
+  // ── 로그인 화면 라벨 ──
+  setTxt('lbl-l-name', currentLang==='en'?'Full Name':'성함');
+  setTxt('lbl-l-phone', currentLang==='en'?'Phone (numbers only)':'연락처 (숫자만)');
+  setTxt('btn-login', currentLang==='en'?'Login':'로그인');
+
+  // ── 신청서 1단계 성함 라벨 ──
+  setTxt('lbl-a-name', currentLang==='en'?'Full Name *':'성함 *');
+
+  // ── 대시보드 라벨 ──
+  setTxt('btn-user-logout', currentLang==='en'?'Logout':'로그아웃');
+  setTxt('lbl-total-reward', currentLang==='en'?'💰 Total Reward':'💰 총 누적 리워드');
+  setTxt('lbl-week-reward', currentLang==='en'?'📅 Weekly Reward':'📅 주간 리워드');
+  setTxt('week-card-title', currentLang==='en'?'📅 Weekly Reward Amount':'📅 주간 리워드 금액');
+  setTxt('btn-prev-week', currentLang==='en'?'◀ Prev':'◀ 이전주');
+  setTxt('week-nav-next', currentLang==='en'?'Next ▶':'다음주 ▶');
+  setTxt('banner-title', currentLang==='en'?'Notice':'안내사항');
+  setTxt('banner-sub', currentLang==='en'?'Please check before participating!':'참여 전 꼭 확인해 주세요!');
+  setTxt('rk-title', currentLang==='en'?'🏆 Worker Ranking':'🏆 알바 랭킹');
+  setTxt('rk-tab-week', currentLang==='en'?'Weekly':'주간');
+  setTxt('rk-tab-month', currentLang==='en'?'Monthly':'월간');
+
+  // ── 신청서 완료/삭제 ──
+  setTxt('done-title', currentLang==='en'?'Application Complete!':'신청 완료!');
+  const doneSub = document.getElementById('done-sub');
+  if(doneSub) doneSub.innerHTML = currentLang==='en'
+    ? 'Your application has been submitted.<br>We will contact you via KakaoTalk.'
+    : '신청서가 성공적으로 접수되었습니다.<br>카카오톡으로 안내드리겠습니다.';
+  setTxt('deleted-title', currentLang==='en'?'Application Deleted':'신청서가 삭제됩니다');
+  setTxt('btn-restart', currentLang==='en'?'Start Over':'처음부터 다시 시작');
+
+  // ── 총 누적 리워드 모달 ──
+  setTxt('total-modal-title', currentLang==='en'?'💰 Total Reward History':'💰 총 누적 리워드 내역');
+  setTxt('btn-tot-reset', currentLang==='en'?'Reset':'초기화');
+  // 월 드롭다운 동적 생성
+  const totMonth = document.getElementById('tot-month');
+  if(totMonth){
+    const isEn = currentLang==='en';
+    const months = isEn
+      ? ['All Months','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
+      : ['전체 월','1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+    const vals = ['','01','02','03','04','05','06','07','08','09','10','11','12'];
+    const curVal = totMonth.value;
+    totMonth.innerHTML = months.map((m,i)=>`<option value="${vals[i]}">${m}</option>`).join('');
+    totMonth.value = curVal;
+  }
+
+  // ── 공지사항 모달 ──
   renderNoticeModal(cachedNoticeData || {guide:DEFAULT_GUIDE, privacy:DEFAULT_PRIVACY});
-  // ── 동적 섹션 재렌더 (언어 전환 시) ──
+
+  // ── 동적 렌더 갱신 ──
+  if(me) { renderWeekCard(); renderRk(); }
   if(document.getElementById('sec-ranking')?.style.display==='block') rkReset();
   if(document.getElementById('sec-tot')?.style.display==='block') renderOsList();
   if(document.getElementById('sec-today')?.style.display==='block') renderTodaySection();
-  // ── 로그아웃 버튼 ──
-  setTxtQ('.lo', t('logout'));
-  const admLogout = document.querySelector('[onclick="doLogout()"]');
-  if(admLogout) admLogout.textContent = t('adm_logout');
 }
 
 function setTxt(id, val){ const el=document.getElementById(id); if(el) el.textContent=val; }
@@ -1239,12 +1314,13 @@ window.openTotalModal = function(){
   const hist = me.weekHistory||[];
   const years=[...new Set(hist.map(h=>h.date.split('-')[0]))].sort().reverse();
   const joinYear = me.joinDate ? parseInt(me.joinDate.split('-')[0]) : curYear;
-  yearSel.innerHTML = '<option value="">전체 연도</option>';
+  yearSel.innerHTML = `<option value="">${currentLang==='en'?'All Years':'전체 연도'}</option>`;
   const allYears = new Set([...years.map(Number)]);
   for(let y=curYear; y>=joinYear; y--) allYears.add(y);
-  [...allYears].sort((a,b)=>b-a).forEach(y=>{ yearSel.innerHTML += `<option value="${y}">${y}년</option>`; });
+  [...allYears].sort((a,b)=>b-a).forEach(y=>{ yearSel.innerHTML += `<option value="${y}">${y}${currentLang==='en'?'':'년'}</option>`; });
   document.getElementById('tot-month').value='';
-  document.getElementById('tot-day').innerHTML='<option value="">전체 일</option>';
+  // 언어에 맞게 월 드롭다운 재생성 (이미 applyLang에서 처리됨)
+  document.getElementById('tot-day').innerHTML=`<option value="">${currentLang==='en'?'All Days':'전체 일'}</option>`;
   document.getElementById('total-modal').style.display='block';
   renderTotalModal();
 };
@@ -1252,12 +1328,12 @@ window.closeTotalModal = function(){document.getElementById('total-modal').style
 window.resetTotalFilter = function(){
   document.getElementById('tot-year').value='';
   document.getElementById('tot-month').value='';
-  document.getElementById('tot-day').innerHTML='<option value="">전체 일</option>';
+  document.getElementById('tot-day').innerHTML=`<option value="">${currentLang==='en'?'All Days':'전체 일'}</option>`;
   renderTotalModal();
 };
 window.onTotYearChange = function(){
   document.getElementById('tot-month').value='';
-  document.getElementById('tot-day').innerHTML='<option value="">전체 일</option>';
+  document.getElementById('tot-day').innerHTML=`<option value="">${currentLang==='en'?'All Days':'전체 일'}</option>`;
   renderTotalModal();
 };
 window.onTotMonthChange = function(){
@@ -1269,7 +1345,7 @@ window.onTotMonthChange = function(){
     const hist=me.weekHistory||[];
     const prefix=`${year}-${month}-`;
     const days=[...new Set(hist.filter(h=>h.date.startsWith(prefix)).map(h=>h.date.split('-')[2]))].sort();
-    days.forEach(d=>{ daySel.innerHTML+=`<option value="${d}">${parseInt(d)}일</option>`; });
+    days.forEach(d=>{ daySel.innerHTML+=`<option value="${d}">${parseInt(d)}${currentLang==='en'?'':' 일'}</option>`; });
   }
   renderTotalModal();
 };
@@ -1286,15 +1362,15 @@ window.renderTotalModal = function(){
   const total=filtered.reduce((s,h)=>s+(h.amt||0),0);
   let html='';
   if(!filtered.length){
-    html='<div style="text-align:center;padding:30px;color:#94a3b8;font-size:13px">해당 기간 내역이 없습니다.</div>';
+    html=`<div style="text-align:center;padding:30px;color:#94a3b8;font-size:13px">${currentLang==='en'?'No records for this period.':'해당 기간 내역이 없습니다.'}</div>`;
   } else {
     const byDate={};
     filtered.forEach(h=>{if(!byDate[h.date])byDate[h.date]=[];byDate[h.date].push(h);});
     if(!year&&!month&&!day){
       const total2=me.points||0;
       html=`<div style="padding:12px 0;border-bottom:2px solid #dbeafe;margin-bottom:4px">
-        <div style="display:flex;justify-content:space-between"><span style="font-size:13px;font-weight:700">총 누적 리워드</span>
-        <span style="font-size:15px;font-weight:800;color:#1e40af">${total2.toLocaleString()}원</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="font-size:13px;font-weight:700">${currentLang==='en'?'Total Reward':'총 누적 리워드'}</span>
+        <span style="font-size:15px;font-weight:800;color:#1e40af">${total2.toLocaleString()}${currentLang==='en'?' KRW':'원'}</span></div>
       </div>`;
     }
     html+=Object.keys(byDate).sort().reverse().map(date=>{
@@ -1311,8 +1387,15 @@ window.renderTotalModal = function(){
       </div>`;
     }).join('');
   }
-  const label=year?(month?(day?`${year}년 ${parseInt(month)}월 ${parseInt(day)}일`:`${year}년 ${parseInt(month)}월`):year+'년'):'전체';
-  document.getElementById('tot-summary').textContent=`${label} 합계: ${total.toLocaleString()}원`;
+  const isEnTot = currentLang==='en';
+  const label=year
+    ?(month
+      ?(day
+        ?(isEnTot?`${year}/${parseInt(month)}/${parseInt(day)}`:`${year}년 ${parseInt(month)}월 ${parseInt(day)}일`)
+        :(isEnTot?`${year}/${parseInt(month)}`:`${year}년 ${parseInt(month)}월`))
+      :(isEnTot?`${year}`:`${year}년`))
+    :(isEnTot?'All':'전체');
+  document.getElementById('tot-summary').textContent=`${label} ${isEnTot?'Total':'합계'}: ${total.toLocaleString()}${isEnTot?' KRW':'원'}`;
   document.getElementById('tot-list').innerHTML=html;
 };
 
@@ -1348,10 +1431,10 @@ function startUserListener(){
 
 function updateUserUI(){
   if(!me) return;
-  document.getElementById('u-nm').textContent = me.name+'님';
-  document.getElementById('u-total-pts').textContent = (me.points||0).toLocaleString()+'원';
+  document.getElementById('u-nm').textContent = me.name+(currentLang==='en'?' ':' 님');
+  document.getElementById('u-total-pts').textContent = (me.points||0).toLocaleString()+(currentLang==='en'?' KRW':'원');
   const weekAmt = calcMyWeekTotal(0);
-  document.getElementById('u-week-pts').textContent = weekAmt.toLocaleString()+'원';
+  document.getElementById('u-week-pts').textContent = weekAmt.toLocaleString()+(currentLang==='en'?' KRW':'원');
   renderWeekCard();
   renderRk();
 }
@@ -1381,12 +1464,16 @@ function dateStr(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStar
 
 function renderWeekCard(){
   const wr=getWeekRange();
-  const dayNames=['월','화','수','목','금','토','일'];
+  const isEn = currentLang==='en';
+  const dayNames = isEn ? ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] : ['월','화','수','목','금','토','일'];
   const hist = me.weekHistory||[];
   const isCurrentWeek = weekOffset===0;
   const weekLabel=`${fmtDate(wr.from)} ~ ${fmtDate(wr.to)}`;
-  const weekTitle = isCurrentWeek ? `이번주 (${weekLabel})` :
-    weekOffset===-1 ? `지난주 (${weekLabel})` : `${Math.abs(weekOffset)}주 전 (${weekLabel})`;
+  const weekTitle = isCurrentWeek
+    ? (isEn ? `This week (${weekLabel})` : `이번주 (${weekLabel})`)
+    : weekOffset===-1
+      ? (isEn ? `Last week (${weekLabel})` : `지난주 (${weekLabel})`)
+      : (isEn ? `${Math.abs(weekOffset)} weeks ago (${weekLabel})` : `${Math.abs(weekOffset)}주 전 (${weekLabel})`);
   document.getElementById('week-nav-label').textContent = weekTitle;
   document.getElementById('week-nav-next').style.opacity = isCurrentWeek ? '0.3' : '1';
   document.getElementById('week-nav-next').style.pointerEvents = isCurrentWeek ? 'none' : 'auto';
@@ -1417,14 +1504,18 @@ function renderWeekCard(){
         return `<div class="week-list-item">
           <div>
             <div class="week-item-name">${date} (${items.map(h=>ex(h.appName||'미션')).join(', ')})</div>
-            <div class="week-item-date">승인 완료</div>
+            <div class="week-item-date">${isEn?'Approved':'승인 완료'}</div>
           </div>
           <div class="week-item-amt">+${dayTotal.toLocaleString()}원</div>
         </div>`;
       }).join('');
     } else {
-      const weekWord = isCurrentWeek?'이번주':weekOffset===-1?'지난주':`${Math.abs(weekOffset)}주 전`;
-      html=`<div style="text-align:center;padding:16px;color:#94a3b8;font-size:13px">${weekWord} 승인된 리워드가 없습니다. (0원)</div>`;
+      const weekWord = isCurrentWeek
+        ? (isEn?'This week':'이번주')
+        : weekOffset===-1
+          ? (isEn?'Last week':'지난주')
+          : (isEn?`${Math.abs(weekOffset)} weeks ago`:`${Math.abs(weekOffset)}주 전`);
+      html=`<div style="text-align:center;padding:16px;color:#94a3b8;font-size:13px">${weekWord} ${isEn?'No approved rewards. (0 KRW)':'승인된 리워드가 없습니다. (0원)'}</div>`;
     }
   } else {
     const d=new Date(wr.from); d.setDate(wr.from.getDate()+selWeekDay);
@@ -1433,14 +1524,18 @@ function renderWeekCard(){
     total=dayItems.reduce((s,h)=>s+(h.amt||0),0);
     if(total>0){
       html=dayItems.map(h=>`<div class="week-list-item">
-        <div><div class="week-item-name">${ex(h.appName||'미션')}</div><div class="week-item-date">승인 완료</div></div>
+        <div><div class="week-item-name">${ex(h.appName||'미션')}</div><div class="week-item-date">${isEn?'Approved':'승인 완료'}</div></div>
         <div class="week-item-amt">+${(h.amt||0).toLocaleString()}원</div>
       </div>`).join('');
     } else {
-      html=`<div style="text-align:center;padding:16px;color:#94a3b8;font-size:13px">${dayNames[selWeekDay]}요일 승인된 리워드가 없습니다. (0원)</div>`;
+      html=`<div style="text-align:center;padding:16px;color:#94a3b8;font-size:13px">${dayNames[selWeekDay]}${isEn?' ':' 요일 '}${isEn?'No approved rewards. (0 KRW)':'승인된 리워드가 없습니다. (0원)'}</div>`;
     }
   }
-  document.getElementById('week-total').textContent=`${selWeekDay===null?'주간 합계':dayNames[selWeekDay]+'요일'}: ${total.toLocaleString()}원`;
+  const unitStr = isEn ? ' KRW' : '원';
+  const sumLabel = selWeekDay===null
+    ? (isEn ? 'Weekly Total' : '주간 합계')
+    : (isEn ? dayNames[selWeekDay] : dayNames[selWeekDay]+'요일');
+  document.getElementById('week-total').textContent = `${sumLabel}: ${total.toLocaleString()}${unitStr}`;
   document.getElementById('week-list').innerHTML=html;
 }
 
@@ -1489,7 +1584,7 @@ function renderRk(){
   }
   restEl.innerHTML=restHtml;
   const noteEl=document.getElementById('rk-note');
-  if(noteEl&&me) noteEl.textContent=myIdx>=5?'내 순위: '+(myIdx+1)+'위':'';
+  if(noteEl&&me) noteEl.textContent=myIdx>=5?(currentLang==='en'?'My Rank: #'+(myIdx+1):'내 순위: '+(myIdx+1)+'위'):'';
 }
 
 window.doAdmLogin = async function(){
@@ -2497,7 +2592,7 @@ window.saveNickTags = async function(){
 };
 
 function showSl(id){document.querySelectorAll('#sc-apply .slide').forEach(s=>s.classList.remove('on'));document.getElementById(id).classList.add('on');const sp=id==='sl-ok'||id==='sl-del';document.querySelector('.pg-wrap').style.display=sp?'none':'block';}
-function updPg(s){document.getElementById('pg-lbl').textContent=s+' / 6단계';document.getElementById('pg-fill').style.width=(s/6*100)+'%';}
+function updPg(s){document.getElementById('pg-lbl').textContent=currentLang==='en'?`Step ${s} / 6`:`${s} / 6단계`;document.getElementById('pg-fill').style.width=(s/6*100)+'%';}
 
 window.pickAge=v=>{ageVal=v;document.getElementById('cb-minor').className='cb'+(v==='minor'?' on':'');document.getElementById('cb-adult').className='cb'+(v==='adult'?' on':'');};
 window.pickOs=v=>{osVal=v;document.getElementById('cb-android').className='cb'+(v==='android'?' on':'');document.getElementById('cb-ios').className='cb'+(v==='ios'?' on':'');};
