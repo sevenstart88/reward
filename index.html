@@ -961,20 +961,45 @@ window.setLang = async function(lang){
   try{ localStorage.setItem('rw_lang', lang); }catch(e){}
   applyLang();
   // 영어로 전환 시 공지사항 번역
-  if(lang === 'en' && cachedNoticeData){
+  if(lang === 'en'){
+    // cachedNoticeData가 없으면 먼저 로드
+    if(!cachedNoticeData){
+      cachedNoticeData = await loadNoticeFromDB();
+      syncNoticeToApply(cachedNoticeData);
+    }
     const body = document.getElementById('notice-modal-body');
-    if(body) body.innerHTML = '<div style="text-align:center;padding:20px;color:#64748b;font-size:13px">🔄 Translating...</div>';
-    const enData = await translateNoticeToEn(cachedNoticeData);
-    // 신청서 5·6단계도 영어로
+    if(body) body.innerHTML = '<div style="text-align:center;padding:24px;color:#64748b;font-size:13px">🔄 Translating...</div>';
+    // 신청서 5단계도 번역 중 표시
     const ns5 = document.querySelector('#sl5 .ns');
+    if(ns5) ns5.innerHTML = '<div style="text-align:center;padding:20px;color:#64748b;font-size:13px">🔄 Translating...</div>';
+    const enData = await translateNoticeToEn(cachedNoticeData);
+    // 신청서 5단계 영어 적용
     if(ns5) ns5.innerHTML = enData.guide.map(item=>`<div class="ni"><span>${item.icon}</span><div class="ni-t">${item.text}</div></div>`).join('');
+    // 신청서 6단계 영어 적용
     const ns6 = document.querySelector('#sl6 .ns');
     if(ns6) ns6.innerHTML = enData.privacy.map(item=>`<div class="ni"><span>${item.icon}</span><div class="ni-t">${item.text}</div></div>`).join('');
+    // 공지사항 배너 팝업 영어 적용
     renderNoticeModal(cachedNoticeData, enData);
-  } else if(lang === 'ko' && cachedNoticeData){
+    // 동의 버튼 텍스트도 번역
+    setTxtQ('#sl5 .al', t('agree_q'));
+    setTxtQ('#ag1y .at b', t('agree_yes'));
+    setTxtQ('#ag1n .at b', t('agree_no'));
+    setTxtQ('#sl6 .al', t('privacy_q'));
+    setTxtQ('#ag2y .at b', t('agree_yes'));
+    setTxtQ('#ag2n .at b', t('agree_no'));
+  } else if(lang === 'ko'){
     // 한국어로 전환 시 원본으로 복원
-    syncNoticeToApply(cachedNoticeData);
-    renderNoticeModal(cachedNoticeData, null);
+    if(cachedNoticeData){
+      syncNoticeToApply(cachedNoticeData);
+      renderNoticeModal(cachedNoticeData, null);
+    }
+    // 동의 버튼도 한국어로
+    setTxtQ('#sl5 .al', t('agree_q'));
+    setTxtQ('#ag1y .at b', t('agree_yes'));
+    setTxtQ('#ag1n .at b', t('agree_no'));
+    setTxtQ('#sl6 .al', t('privacy_q'));
+    setTxtQ('#ag2y .at b', t('agree_yes'));
+    setTxtQ('#ag2n .at b', t('agree_no'));
   }
 };
 
@@ -1143,7 +1168,7 @@ async function init(){
   }
   // 자동로그인 정보 없거나 실패 → 즉시 로그인 화면
   goSc('sc-login');
-  initNoticeOnLoad();
+  await initNoticeOnLoad();
   initLang();
 }
 
@@ -1303,6 +1328,9 @@ async function showUserDash(){
     updateUserUI();
     goSc('sc-user');
     startUserListener();
+    // 공지사항 로드 및 언어 초기화 (자동로그인 경로)
+    if(!cachedNoticeData) await initNoticeOnLoad();
+    initLang();
   }catch(e){hideLoading();alert('오류: '+e.message);}
 }
 
