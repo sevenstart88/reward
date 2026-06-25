@@ -187,6 +187,10 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 .notice-edit-text:focus{border-color:#3b82f6;outline:none}
 .notice-section-head{font-size:13px;font-weight:800;color:#1e40af;background:#eff6ff;border-radius:10px;padding:8px 12px;margin:10px 0 8px;display:flex;align-items:center;justify-content:space-between}
 .drag-handle{color:#94a3b8;cursor:grab;font-size:18px;padding:0 4px}
+.lang-bar{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:10000;display:flex;justify-content:flex-end;padding:6px 12px;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);border-bottom:1px solid #e2e8f0;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.lang-btn{padding:5px 14px;font-size:12px;font-weight:700;border-radius:20px;border:1.5px solid #dde1e7;background:#fff;cursor:pointer;font-family:inherit;color:#64748b;transition:all .2s}
+.lang-btn.on{background:#3b82f6;border-color:#3b82f6;color:#fff}
+.lang-gap{margin-top:38px}
 </style>
 </head>
 <body>
@@ -222,6 +226,12 @@ textarea{resize:none;min-height:80px;line-height:1.6}
   </div>
 </div>
 
+<!-- 언어 선택 바 -->
+<div class="lang-bar" id="lang-bar">
+  <button class="lang-btn on" id="lang-ko" onclick="setLang('ko')">🇰🇷 한국어</button>
+  <button class="lang-btn" id="lang-en" onclick="setLang('en')" style="margin-left:6px">🇺🇸 English</button>
+</div>
+
 <script>
 // 페이지 로드 즉시 로그인 화면 표시 (Firebase 로딩과 무관)
 (function(){
@@ -240,7 +250,7 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 
 <!-- 신청서 -->
 <div id="sc-apply" class="screen">
-  <div class="ap-top"><div class="ap-title">🏆 리워드 체험단</div><div class="ap-sub">신청서 작성</div></div>
+  <div class="lang-gap"></div><div class="ap-top"><div class="ap-title" data-ko="🏆 리워드 체험단" data-en="🏆 Reward Program">🏆 리워드 체험단</div><div class="ap-sub" id="ap-sub-txt">신청서 작성</div></div>
   <div class="pg-wrap">
     <div class="pg-lbl" id="pg-lbl">1 / 6단계</div>
     <div class="pg-bg"><div class="pg-fill" id="pg-fill" style="width:16.6%"></div></div>
@@ -335,7 +345,7 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 
 <!-- 알바 로그인 -->
 <div id="sc-login" class="screen">
-  <div class="login-hero">
+  <div class="lang-gap"></div><div class="login-hero">
     <div class="login-hero-ic">🏆</div>
     <div class="login-hero-t">리워드 체험단</div>
     <div class="login-hero-s">성함과 연락처로 로그인하세요</div>
@@ -359,7 +369,7 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 
 <!-- 알바 대시보드 -->
 <div id="sc-user" class="screen">
-  <div class="uh">
+  <div class="lang-gap"></div><div class="uh">
     <div class="uh-top">
       <div class="uh-name" id="u-nm">이름님</div>
       <div class="lo" onclick="doUserLogout()">로그아웃</div>
@@ -416,7 +426,7 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 
 <!-- 관리자 로그인 -->
 <div id="sc-adm-login" class="screen">
-  <div class="lhero">
+  <div class="lang-gap"></div><div class="lhero">
     <div style="font-size:52px;margin-bottom:14px">🔐</div>
     <div style="font-size:22px;font-weight:800;margin-bottom:6px">관리자 로그인</div>
   </div>
@@ -435,7 +445,7 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 
 <!-- 관리자 대시보드 -->
 <div id="sc-adm" class="screen">
-  <div class="adm-top">
+  <div class="lang-gap"></div><div class="adm-top">
     <div class="adm-title">👥 알바인원 관리</div>
     <span onclick="doLogout()" style="font-size:13px;color:rgba(255,255,255,.9);cursor:pointer;font-weight:700;background:rgba(255,255,255,.2);padding:7px 13px;border-radius:10px">로그아웃 ↩</span>
   </div>
@@ -734,7 +744,7 @@ window.addEventListener('DOMContentLoaded', function(){
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/11.9.0/firebase-app.js';
 import {
   getFirestore, collection, doc, getDocs, addDoc, updateDoc, deleteDoc,
-  onSnapshot, serverTimestamp
+  setDoc, onSnapshot, serverTimestamp
 } from 'https://www.gstatic.com/firebasejs/11.9.0/firebase-firestore.js';
 
 const firebaseConfig = {
@@ -790,6 +800,267 @@ function withTimeout(promise, ms){
   ]);
 }
 
+// ══════════════════════════════════════
+// 다국어 지원 (한국어 / English)
+// ══════════════════════════════════════
+let currentLang = 'ko';
+
+const T = {
+  ko: {
+    // 공통
+    logout:'로그아웃', login:'로그인', save:'💾 저장하기', cancel:'취소',
+    search:'검색', reset:'초기화', delete_btn:'삭제', close:'닫기',
+    next:'다음 →', prev:'← 이전', submit:'제출하기 ✓', restart:'처음부터 다시 시작',
+    // 신청서
+    apply_title:'🏆 리워드 체험단', apply_sub:'신청서 작성',
+    step1_title:'기본 정보 입력', step1_sub:'성함과 연락처를 정확히 입력해 주세요',
+    name_lbl:'성함 *', name_ph:'실명 입력',
+    phone_lbl:'연락처 * (숫자만)', phone_ph:'01012345678',
+    step2_title:'나이 확인', step2_sub:'해당하는 항목을 선택해 주세요',
+    minor_nm:'미성년자', minor_dc:'만 18세 미만', adult_nm:'성인', adult_dc:'만 18세 이상',
+    step3_title:'휴대폰 종류', step3_sub:'사용 중인 스마트폰을 선택해 주세요',
+    android_dc:'갤럭시, LG 등', ios_dc:'아이폰',
+    step4_title:'입금 계좌 정보', step4_sub:'본인 명의 계좌를 입력해 주세요',
+    bank_lbl:'은행명 *', bank_ph:'은행 선택',
+    acct_lbl:'계좌번호 * (숫자만)', acct_ph:'숫자만 입력',
+    holder_lbl:'예금주 *', holder_ph:'본인 명의와 동일해야 합니다',
+    holder_hint:'과(와) 동일해야 합니다',
+    step5_title:'안내사항 확인', step5_sub:'꼼꼼히 읽고 동의 여부를 선택해 주세요',
+    agree_q:'위 안내사항을 이해하셨나요? *',
+    agree_yes:'동의합니다', agree_no:'미동의 — 신청서가 삭제됩니다',
+    step6_title:'개인정보 수집 및 이용 동의', step6_sub:'아래 내용을 확인 후 동의 여부를 선택해 주세요',
+    privacy_q:'개인정보 수집 및 이용에 동의하시겠습니까? *',
+    done_title:'신청 완료!', done_sub:'신청서가 성공적으로 접수되었습니다.\n카카오톡으로 안내드리겠습니다.',
+    deleted_title:'신청서가 삭제되었습니다',
+    dup_err:'이미 가입된 성함/연락처입니다.', name_err:'성함을 입력해 주세요.',
+    phone_err:'연락처를 정확히 입력해 주세요.', age_err:'항목을 선택해 주세요.',
+    os_err:'휴대폰 종류를 선택해 주세요.', acct_err:'모든 계좌 정보를 입력해 주세요.',
+    agree_err:'동의 여부를 선택해 주세요.',
+    // 로그인
+    login_title:'리워드 체험단', login_sub:'성함과 연락처로 로그인하세요',
+    auto_login:'자동 로그인', new_here:'처음이신가요?', go_apply:'신청서 작성 →',
+    login_err_both:'성함과 연락처를 모두 입력하세요.', login_err_no_apply:'신청서를 먼저 작성해 주세요.',
+    login_err_mismatch:'성함 또는 연락처가 일치하지 않습니다.',
+    // 대시보드
+    total_reward:'💰 총 누적 리워드', week_reward:'📅 주간 리워드',
+    week_card_title:'📅 주간 리워드 금액', prev_week:'◀ 이전주', next_week:'다음주 ▶',
+    week_sum:'주간 합계', approved:'승인 완료', no_reward_this_week:'이번주', no_reward_last_week:'지난주',
+    no_reward_suffix:'승인된 리워드가 없습니다. (0원)',
+    ranking_title:'🏆 알바 랭킹', weekly:'주간', monthly:'월간',
+    my_rank:'내 순위:', no_data:'아직 데이터가 없습니다',
+    notice_title:'안내사항', notice_sub:'참여 전 꼭 확인해 주세요!',
+    notice_confirm:'확인했습니다 ✓', notice_warn:'⚠️ 아래 사항을 반드시 확인하고 참여해 주세요',
+    notice_section1:'📋 참여 안내', notice_section2:'🔒 개인정보 수집 및 이용 동의',
+    loading:'연결 중...', processing:'처리 중...', saving:'저장 중...', loading_data:'데이터 로딩 중...',
+    logging_in:'로그인 중...', checking:'확인 중...', applying:'신청서 저장 중...', reading_file:'파일 읽는 중...',
+    auto_login_ok:'✅ 자동로그인',
+    // 관리자
+    adm_title:'👥 알바인원 관리', adm_login_title:'관리자 로그인',
+    adm_pw_lbl:'비밀번호', adm_pw_ph:'관리자 비밀번호', adm_auto_login:'자동 로그인',
+    total_workers:'총 알바인원 🔍', today_join:'오늘 가입 👁️',
+    ranking_manage:'🏆 알바 랭킹 닉네임 관리', ranking_manage_sub:'닉네임 등록 · 랭킹 표시 이름 설정',
+    notice_manage:'📢 공지사항 관리', notice_manage_sub:'안내사항 · 개인정보 항목 수정',
+    excel_manage:'📊 주간 리워드 일괄 설정', excel_manage_sub:'엑셀 업로드로 리워드 적용',
+    home_hint:'위 버튼을 눌러 원하는 기능을 선택하세요.',
+    pw_err:'비밀번호가 틀렸습니다.', adm_logout:'로그아웃 ↩',
+    // 모달 공통
+    total_modal_title:'💰 총 누적 리워드 내역', total_all_years:'전체 연도', total_all_months:'전체 월', total_all_days:'전체 일',
+    edit_modal_title:'✏️ 정보 수정', basic_info:'👤 기본 정보',
+    name_label_edit:'성함 *', phone_label_edit:'연락처 * (숫자만)', age_label:'나이', os_label:'휴대폰 종류',
+    bank_info:'🏦 계좌 정보', bank_label:'은행명', acct_label_edit:'계좌번호 (숫자만)', holder_label_edit:'예금주',
+    reward_manual:'💰 리워드 금액 수동 수정', accum_reward:'누적 리워드 (원)', week_reward_edit:'주간 리워드 (원)', month_reward:'월간 리워드 (원)',
+    save_ok:'✅ 저장되었습니다!',
+    nick_modal_title:'닉네임 관리', nick_sub:'닉네임은 여러 개 등록 가능합니다. + 버튼으로 추가하세요.',
+    nick_placeholder:'닉네임 입력 후 + 클릭', nick_save_ok:'✓ 저장되었습니다!',
+    fail_modal_title:'❌ 미적립 실패 리스트', fail_modal_sub:'⚠️ 아래 인원은 정보 불일치로 리워드가 적립되지 않았습니다.\n엑셀 정보를 확인 후 재업로드 해주세요.',
+  },
+  en: {
+    // 공통
+    logout:'Logout', login:'Login', save:'💾 Save', cancel:'Cancel',
+    search:'Search', reset:'Reset', delete_btn:'Delete', close:'Close',
+    next:'Next →', prev:'← Back', submit:'Submit ✓', restart:'Start Over',
+    // 신청서
+    apply_title:'🏆 Reward Program', apply_sub:'Application Form',
+    step1_title:'Basic Information', step1_sub:'Please enter your name and phone number accurately',
+    name_lbl:'Full Name *', name_ph:'Enter your real name',
+    phone_lbl:'Phone * (numbers only)', phone_ph:'01012345678',
+    step2_title:'Age Verification', step2_sub:'Please select your age group',
+    minor_nm:'Minor', minor_dc:'Under 18', adult_nm:'Adult', adult_dc:'18 or older',
+    step3_title:'Phone Type', step3_sub:'Select your smartphone type',
+    android_dc:'Galaxy, LG, etc.', ios_dc:'iPhone',
+    step4_title:'Bank Account Info', step4_sub:'Please enter your bank account',
+    bank_lbl:'Bank Name *', bank_ph:'Select Bank',
+    acct_lbl:'Account Number * (numbers only)', acct_ph:'Numbers only',
+    holder_lbl:'Account Holder *', holder_ph:'Must match your registered name',
+    holder_hint:'must match the account holder name',
+    step5_title:'Terms & Conditions', step5_sub:'Please read carefully and select your agreement',
+    agree_q:'Do you agree to the above terms? *',
+    agree_yes:'I Agree', agree_no:'Disagree — Application will be deleted',
+    step6_title:'Privacy Policy Agreement', step6_sub:'Please review and select your agreement below',
+    privacy_q:'Do you agree to the collection and use of personal information? *',
+    done_title:'Application Complete!', done_sub:'Your application has been submitted.\nWe will contact you via KakaoTalk.',
+    deleted_title:'Application Deleted',
+    dup_err:'This name/phone is already registered.', name_err:'Please enter your name.',
+    phone_err:'Please enter a valid phone number.', age_err:'Please select an option.',
+    os_err:'Please select your phone type.', acct_err:'Please fill in all bank account fields.',
+    agree_err:'Please select your agreement.',
+    // 로그인
+    login_title:'Reward Program', login_sub:'Login with your name and phone number',
+    auto_login:'Auto Login', new_here:'New here?', go_apply:'Apply Now →',
+    login_err_both:'Please enter both name and phone number.', login_err_no_apply:'Please submit an application first.',
+    login_err_mismatch:'Name or phone number does not match.',
+    // 대시보드
+    total_reward:'💰 Total Reward', week_reward:'📅 Weekly Reward',
+    week_card_title:'📅 Weekly Reward Amount', prev_week:'◀ Prev', next_week:'Next ▶',
+    week_sum:'Weekly Total', approved:'Approved', no_reward_this_week:'This week', no_reward_last_week:'Last week',
+    no_reward_suffix:'No approved rewards. (0 KRW)',
+    ranking_title:'🏆 Worker Ranking', weekly:'Weekly', monthly:'Monthly',
+    my_rank:'My Rank:', no_data:'No data yet',
+    notice_title:'Notice', notice_sub:'Please check before participating!',
+    notice_confirm:'Got it ✓', notice_warn:'⚠️ Please check the following before participating',
+    notice_section1:'📋 Participation Guide', notice_section2:'🔒 Privacy Policy',
+    loading:'Connecting...', processing:'Processing...', saving:'Saving...', loading_data:'Loading data...',
+    logging_in:'Logging in...', checking:'Checking...', applying:'Submitting...', reading_file:'Reading file...',
+    auto_login_ok:'✅ Auto Login',
+    // 관리자
+    adm_title:'👥 Worker Management', adm_login_title:'Admin Login',
+    adm_pw_lbl:'Password', adm_pw_ph:'Admin Password', adm_auto_login:'Auto Login',
+    total_workers:'Total Workers 🔍', today_join:"Today's Joins 👁️",
+    ranking_manage:'🏆 Ranking Nickname Management', ranking_manage_sub:'Register nicknames · Set display names',
+    notice_manage:'📢 Notice Management', notice_manage_sub:'Edit guide & privacy items',
+    excel_manage:'📊 Bulk Weekly Reward', excel_manage_sub:'Apply rewards via Excel upload',
+    home_hint:'Select a function from the buttons above.',
+    pw_err:'Incorrect password.', adm_logout:'Logout ↩',
+    // 모달 공통
+    total_modal_title:'💰 Total Reward History', total_all_years:'All Years', total_all_months:'All Months', total_all_days:'All Days',
+    edit_modal_title:'✏️ Edit Info', basic_info:'👤 Basic Info',
+    name_label_edit:'Full Name *', phone_label_edit:'Phone * (numbers only)', age_label:'Age', os_label:'Phone Type',
+    bank_info:'🏦 Bank Info', bank_label:'Bank Name', acct_label_edit:'Account Number (numbers only)', holder_label_edit:'Account Holder',
+    reward_manual:'💰 Manual Reward Edit', accum_reward:'Total Reward (KRW)', week_reward_edit:'Weekly Reward (KRW)', month_reward:'Monthly Reward (KRW)',
+    save_ok:'✅ Saved!',
+    nick_modal_title:'Nickname Management', nick_sub:'You can register multiple nicknames. Click + to add.',
+    nick_placeholder:'Enter nickname then click +', nick_save_ok:'✓ Saved!',
+    fail_modal_title:'❌ Failed Reward List', fail_modal_sub:'⚠️ The following members could not receive rewards due to mismatched info.\nPlease check the Excel file and re-upload.',
+  }
+};
+
+function t(key){ return (T[currentLang] && T[currentLang][key]) || (T['ko'] && T['ko'][key]) || key; }
+
+window.setLang = function(lang){
+  currentLang = lang;
+  document.getElementById('lang-ko').className = 'lang-btn' + (lang==='ko'?' on':'');
+  document.getElementById('lang-en').className = 'lang-btn' + (lang==='en'?' on':'');
+  try{ localStorage.setItem('rw_lang', lang); }catch(e){}
+  applyLang();
+};
+
+function applyLang(){
+  const l = currentLang;
+  // ── 신청서 ──
+  setTxt('ap-title', t('apply_title'));
+  setTxt('ap-sub-txt', t('apply_sub'));
+  // step1
+  setTxtQ('#sl1 .st', t('step1_title'));
+  setTxtQ('#sl1 .ss', t('step1_sub'));
+  setAttr('a-name','placeholder', t('name_ph'));
+  setAttr('a-phone','placeholder', t('phone_ph'));
+  setLbl('#sl1 .lbl:first-of-type', t('name_lbl'));
+  // step2
+  setTxtQ('#sl2 .st', t('step2_title'));
+  setTxtQ('#sl2 .ss', t('step2_sub'));
+  setTxtQ('#cb-minor .cb-nm', t('minor_nm'));
+  setTxtQ('#cb-minor .cb-dc', t('minor_dc'));
+  setTxtQ('#cb-adult .cb-nm', t('adult_nm'));
+  setTxtQ('#cb-adult .cb-dc', t('adult_dc'));
+  // step3
+  setTxtQ('#sl3 .st', t('step3_title'));
+  setTxtQ('#sl3 .ss', t('step3_sub'));
+  setTxtQ('#cb-android .cb-dc', t('android_dc'));
+  setTxtQ('#cb-ios .cb-dc', t('ios_dc'));
+  // step4
+  setTxtQ('#sl4 .st', t('step4_title'));
+  setTxtQ('#sl4 .ss', t('step4_sub'));
+  setAttr('a-acct','placeholder', t('acct_ph'));
+  setAttr('a-holder','placeholder', t('holder_ph'));
+  // step5
+  setTxtQ('#sl5 .st', t('step5_title'));
+  setTxtQ('#sl5 .ss', t('step5_sub'));
+  setTxtQ('#sl5 .al', t('agree_q'));
+  setTxtQ('#ag1y .at b', t('agree_yes'));
+  setTxtQ('#ag1n .at b', t('agree_no'));
+  // step6
+  setTxtQ('#sl6 .st', t('step6_title'));
+  setTxtQ('#sl6 .ss', t('step6_sub'));
+  setTxtQ('#sl6 .al', t('privacy_q'));
+  setTxtQ('#ag2y .at b', t('agree_yes'));
+  setTxtQ('#ag2n .at b', t('agree_no'));
+  // done/deleted
+  setTxtQ('#sl-ok .dw div:nth-child(2)', t('done_title'));
+  setTxtQ('#sl-del .dw div:nth-child(2)', t('deleted_title'));
+  // ── 로그인 ──
+  setTxtQ('.login-hero-t', t('login_title'));
+  setTxtQ('.login-hero-s', t('login_sub'));
+  setAttr('l-name','placeholder', t('name_ph'));
+  setAttr('l-phone','placeholder', t('phone_ph'));
+  const lauto = document.querySelector('label[for="l-auto"]');
+  if(lauto) lauto.textContent = t('auto_login');
+  // ── 대시보드 ──
+  setTxtQ('.uh-name', document.getElementById('u-nm')?.textContent||'');
+  setTxtQ('.uh-stat-lbl:first-child', t('total_reward'));
+  const wkLbl = document.querySelectorAll('.uh-stat-lbl');
+  if(wkLbl[0]) wkLbl[0].textContent = t('total_reward');
+  if(wkLbl[1]) wkLbl[1].textContent = t('week_reward');
+  setTxtQ('.week-card-title', t('week_card_title'));
+  setTxtQ('.rk-card-title', t('ranking_title'));
+  const rkTabs = document.querySelectorAll('.rk-tab');
+  if(rkTabs[0]) rkTabs[0].textContent = t('weekly');
+  if(rkTabs[1]) rkTabs[1].textContent = t('monthly');
+  setTxtQ('.notice-banner-title', t('notice_title'));
+  setTxtQ('.notice-banner-sub', t('notice_sub'));
+  const weekNavBtns = document.querySelectorAll('.week-nav-btn');
+  if(weekNavBtns[0]) weekNavBtns[0].textContent = t('prev_week');
+  if(weekNavBtns[1]) weekNavBtns[1].textContent = t('next_week');
+  // ── 관리자 ──
+  setTxtQ('.adm-title', t('adm_title'));
+  setTxtQ('.lhero div:nth-child(2)', t('adm_login_title'));
+  setAttr('adm-pw','placeholder', t('adm_pw_ph'));
+  const admAuto = document.querySelector('label[for="adm-auto"]');
+  if(admAuto) admAuto.textContent = t('adm_auto_login');
+  setTxtQ('#a-tot + .stat-l', t('total_workers'));
+  setTxtQ('#a-today + .stat-l', t('today_join'));
+  setTxtQ('#sec-home', t('home_hint'));
+  // 버튼들
+  const noticeManBtn = document.querySelector('#btn-notice div:first-child');
+  if(noticeManBtn) noticeManBtn.textContent = t('notice_manage');
+  const noticeManSub = document.querySelector('#btn-notice div:last-child');
+  if(noticeManSub) noticeManSub.textContent = t('notice_manage_sub');
+  const rankManBtn = document.querySelector('#btn-ranking div:first-child');
+  if(rankManBtn) rankManBtn.textContent = t('ranking_manage');
+  const excelBtn = document.querySelector('#btn-excel div:first-child');
+  if(excelBtn) excelBtn.textContent = t('excel_manage');
+  const excelSub = document.querySelector('#btn-excel div:last-child');
+  if(excelSub) excelSub.textContent = t('excel_manage_sub');
+  // ── 공지사항 배너 모달 ──
+  syncNoticeToUI(cachedNoticeData || {guide:DEFAULT_GUIDE, privacy:DEFAULT_PRIVACY});
+  // ── 로그아웃 버튼 ──
+  setTxtQ('.lo', t('logout'));
+  const admLogout = document.querySelector('[onclick="doLogout()"]');
+  if(admLogout) admLogout.textContent = t('adm_logout');
+}
+
+function setTxt(id, val){ const el=document.getElementById(id); if(el) el.textContent=val; }
+function setTxtQ(sel, val){ const el=document.querySelector(sel); if(el) el.textContent=val; }
+function setAttr(id, attr, val){ const el=document.getElementById(id); if(el) el.setAttribute(attr,val); }
+function setLbl(sel, val){ const el=document.querySelector(sel); if(el) el.textContent=val; }
+
+// 저장된 언어 설정 불러오기
+function initLang(){
+  try{
+    const saved = localStorage.getItem('rw_lang');
+    if(saved && (saved==='ko'||saved==='en')){ currentLang=saved; setLang(saved); }
+  }catch(e){}
+}
+
 async function init(){
   const isAdmin = location.search.includes('admin');
 
@@ -843,6 +1114,7 @@ async function init(){
   // 자동로그인 정보 없거나 실패 → 즉시 로그인 화면
   goSc('sc-login');
   initNoticeOnLoad();
+  initLang();
 }
 
 async function loadMB(){
@@ -1424,9 +1696,10 @@ window.changeOsInline = async function(id, newOs){
 };
 
 // ══════════════════════════════════════
-// 공지사항 관리
+// 공지사항 관리 (Firebase 저장 - 모든 기기 동기화)
 // ══════════════════════════════════════
-const NOTICE_KEY = 'rw_notice_items';
+const NOTICE_DOC = 'config';
+const NOTICE_COLLECTION = 'settings';
 const DEFAULT_GUIDE = [
   {icon:'💎', text:'리워드 체험단은 어플, 구글지도, 유튜브 등을 간접 체험하고 리뷰를 달아주는 신개념 리워드 부업입니다.'},
   {icon:'📅', text:'일주일 기준 2~5회 이내 참여(랜덤), 건당 1,500원, 10분 이내 소액 알바입니다.'},
@@ -1444,22 +1717,34 @@ const DEFAULT_PRIVACY = [
 ];
 const ICONS = ['💎','📅','⚠️','💬','📱','📶','💰','⭐','🗄️','🎯','⏰','📌','✅','❌','🔒','📋','👥','💳','🏦','📞'];
 
-function loadNoticeData(){
+// Firebase에서 공지사항 로드
+async function loadNoticeFromDB(){
   try{
-    const raw = localStorage.getItem(NOTICE_KEY);
-    if(raw){ const d=JSON.parse(raw); return d; }
-  }catch(e){}
+    const snap = await getDocs(collection(db, NOTICE_COLLECTION));
+    let data = null;
+    snap.forEach(d=>{ if(d.id===NOTICE_DOC) data=d.data(); });
+    if(data && data.guide && data.privacy) return data;
+  }catch(e){ console.warn('공지사항 로드 실패:', e.message); }
   return {guide:[...DEFAULT_GUIDE], privacy:[...DEFAULT_PRIVACY]};
 }
-function saveNoticeData(data){
-  try{ localStorage.setItem(NOTICE_KEY, JSON.stringify(data)); }catch(e){}
+
+// Firebase에 공지사항 저장
+async function saveNoticeToDB(data){
+  try{
+    await setDoc(doc(db, NOTICE_COLLECTION, NOTICE_DOC), data);
+  }catch(e){
+    console.error('공지사항 저장 오류:', e.message);
+    throw e;
+  }
 }
-function getNoticeData(){ return loadNoticeData(); }
 
 let noticeEditData = null;
+let cachedNoticeData = null;
 
-function initNoticeEditor(){
-  noticeEditData = loadNoticeData();
+async function initNoticeEditor(){
+  showLoading('공지사항 로딩 중...');
+  noticeEditData = await loadNoticeFromDB();
+  hideLoading();
   renderNoticeEditor();
 }
 
@@ -1515,8 +1800,8 @@ window.moveNoticeItem = function(type, idx, dir){
   [arr[idx], arr[newIdx]] = [arr[newIdx], arr[idx]];
   renderNoticeEditor();
 };
-window.saveNoticeItems = function(){
-  // textarea 값 현재 상태로 동기화
+window.saveNoticeItems = async function(){
+  // textarea/select 현재값 동기화
   ['guide','privacy'].forEach(type=>{
     const items = noticeEditData[type]||[];
     items.forEach((item,i)=>{
@@ -1526,36 +1811,34 @@ window.saveNoticeItems = function(){
       if(sel) item.icon = sel.value;
     });
   });
-  saveNoticeData(noticeEditData);
-  // 신청서 5단계 동기화
-  syncNoticeToApply();
-  // 공지사항 배너 팝업 동기화
-  syncNoticeToBanner();
-  const msg = document.getElementById('notice-save-msg');
-  if(msg){ msg.style.display='block'; setTimeout(()=>msg.style.display='none',2000); }
-  showToast('✅ 공지사항 저장 완료!');
+  showLoading('저장 중...');
+  try{
+    await saveNoticeToDB({guide: noticeEditData.guide, privacy: noticeEditData.privacy});
+    cachedNoticeData = {guide:[...noticeEditData.guide], privacy:[...noticeEditData.privacy]};
+    syncNoticeToUI(cachedNoticeData);
+    hideLoading();
+    const msg = document.getElementById('notice-save-msg');
+    if(msg){ msg.style.display='block'; setTimeout(()=>msg.style.display='none',2000); }
+    showToast('✅ 공지사항 저장 완료! 모든 기기에 반영됩니다.');
+  }catch(e){
+    hideLoading();
+    alert('저장 오류: '+e.message);
+  }
 };
 
-function syncNoticeToApply(){
-  const data = loadNoticeData();
-  // 5단계 NS 업데이트
+function syncNoticeToUI(data){
+  if(!data) return;
+  // 신청서 5단계 동기화
   const ns5 = document.querySelector('#sl5 .ns');
-  if(ns5){
-    ns5.innerHTML = data.guide.map(item=>`
-      <div class="ni"><span>${item.icon}</span><div class="ni-t">${item.text}</div></div>
-    `).join('');
-  }
-  // 6단계 NS 업데이트
+  if(ns5) ns5.innerHTML = data.guide.map(item=>`
+    <div class="ni"><span>${item.icon}</span><div class="ni-t">${item.text}</div></div>
+  `).join('');
+  // 신청서 6단계 동기화
   const ns6 = document.querySelector('#sl6 .ns');
-  if(ns6){
-    ns6.innerHTML = data.privacy.map(item=>`
-      <div class="ni"><span>${item.icon}</span><div class="ni-t">${item.text}</div></div>
-    `).join('');
-  }
-}
-
-function syncNoticeToBanner(){
-  const data = loadNoticeData();
+  if(ns6) ns6.innerHTML = data.privacy.map(item=>`
+    <div class="ni"><span>${item.icon}</span><div class="ni-t">${item.text}</div></div>
+  `).join('');
+  // 배너 팝업 동기화
   const modal = document.getElementById('notice-modal');
   if(!modal) return;
   const body = modal.querySelector('div[style*="padding:16px 18px"]');
@@ -1572,11 +1855,15 @@ function syncNoticeToBanner(){
   `;
 }
 
-// 페이지 로드 시 공지사항 동기화
-function initNoticeOnLoad(){
-  const data = loadNoticeData();
-  syncNoticeToApply();
-  syncNoticeToBanner();
+// 페이지 로드 시 Firebase에서 공지사항 불러와서 동기화
+async function initNoticeOnLoad(){
+  try{
+    cachedNoticeData = await loadNoticeFromDB();
+    syncNoticeToUI(cachedNoticeData);
+  }catch(e){
+    // 실패 시 기본값 사용
+    syncNoticeToUI({guide:DEFAULT_GUIDE, privacy:DEFAULT_PRIVACY});
+  }
 }
 
 window.rkSearch = function(){
