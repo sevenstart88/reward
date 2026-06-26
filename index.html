@@ -966,44 +966,12 @@ window.setLang = async function(lang){
   document.getElementById('lang-en').className = 'lang-btn' + (lang==='en'?' on':'');
   try{ localStorage.setItem('rw_lang', lang); }catch(e){}
   applyLang();
-  // 영어로 전환 시 공지사항 번역
-  if(lang === 'en'){
-    // cachedNoticeData가 없으면 먼저 로드
-    if(!cachedNoticeData){
-      cachedNoticeData = await loadNoticeFromDB();
-      syncNoticeToApply(cachedNoticeData);
-    }
-    const body = document.getElementById('notice-modal-body');
-    if(body) body.innerHTML = '<div style="text-align:center;padding:24px;color:#64748b;font-size:13px">🔄 Translating...</div>';
-    // 신청서 5단계도 번역 중 표시
-    const ns5 = document.querySelector('#sl5 .ns');
-    if(ns5) ns5.innerHTML = '<div style="text-align:center;padding:20px;color:#64748b;font-size:13px">🔄 Translating...</div>';
-    const enData = await translateNoticeToEn(cachedNoticeData);
-    // 신청서 5·6단계 영어 적용
-    syncNoticeToApplyEn(enData);
-    // 공지사항 배너 팝업 영어 적용
-    renderNoticeModal(cachedNoticeData, enData);
-    // 동의 버튼 텍스트도 번역
-    setTxtQ('#sl5 .al', t('agree_q'));
-    setTxtQ('#ag1y .at b', t('agree_yes'));
-    setTxtQ('#ag1n .at b', t('agree_no'));
-    setTxtQ('#sl6 .al', t('privacy_q'));
-    setTxtQ('#ag2y .at b', t('agree_yes'));
-    setTxtQ('#ag2n .at b', t('agree_no'));
-  } else if(lang === 'ko'){
-    // 한국어로 전환 시 원본으로 복원
-    if(cachedNoticeData){
-      syncNoticeToApply(cachedNoticeData);
-      renderNoticeModal(cachedNoticeData, null);
-    }
-    // 동의 버튼도 한국어로
-    setTxtQ('#sl5 .al', t('agree_q'));
-    setTxtQ('#ag1y .at b', t('agree_yes'));
-    setTxtQ('#ag1n .at b', t('agree_no'));
-    setTxtQ('#sl6 .al', t('privacy_q'));
-    setTxtQ('#ag2y .at b', t('agree_yes'));
-    setTxtQ('#ag2n .at b', t('agree_no'));
+  // 언어 전환 시 공지사항 즉시 반영 (textEn 직접 사용)
+  if(!cachedNoticeData){
+    cachedNoticeData = await loadNoticeFromDB();
   }
+  syncNoticeToApply(cachedNoticeData);
+  renderNoticeModal(cachedNoticeData);
 };
 
 function applyLang(){
@@ -1813,19 +1781,19 @@ window.changeOsInline = async function(id, newOs){
 const NOTICE_DOC = 'config';
 const NOTICE_COLLECTION = 'settings';
 const DEFAULT_GUIDE = [
-  {icon:'💎', text:'리워드 체험단은 어플, 구글지도, 유튜브 등을 간접 체험하고 리뷰를 달아주는 신개념 리워드 부업입니다.'},
-  {icon:'📅', text:'일주일 기준 2~5회 이내 참여(랜덤), 건당 1,500원, 10분 이내 소액 알바입니다.'},
-  {icon:'⚠️', text:'당일 안에 참여하셔야 리워드 지급이 가능합니다. 날짜가 지나면 미지급됩니다.'},
-  {icon:'💬', text:'당일 참여 불가 시 리워드 매니저에게 미리 말씀해 주세요.'},
-  {icon:'📱', text:'사용 중인 개통된 휴대폰만 가능. 공기계·태블릿·PC 불가.'},
-  {icon:'📶', text:'와이파이 가능하나 가끔 모바일 데이터 사용을 권장합니다.'},
-  {icon:'💰', text:'월~일 참여 취합 후 다음 주 화요일에 계좌로 현금 입금합니다.'},
-  {icon:'⭐', text:'성실하게 참여하시는 분들께는 별도 추가 지급도 있습니다.'},
+  {icon:'💎', text:'리워드 체험단은 어플, 구글지도, 유튜브 등을 간접 체험하고 리뷰를 달아주는 신개념 리워드 부업입니다.', textEn:'Reward Program lets you earn rewards by reviewing apps, Google Maps, YouTube, and more.'},
+  {icon:'📅', text:'일주일 기준 2~5회 이내 참여(랜덤), 건당 1,500원, 10분 이내 소액 알바입니다.', textEn:'Participate 2–5 times per week (random), 1,500 KRW per task, taking under 10 minutes.'},
+  {icon:'⚠️', text:'당일 안에 참여하셔야 리워드 지급이 가능합니다. 날짜가 지나면 미지급됩니다.', textEn:'You must participate on the same day. Tasks expire at midnight — no reward after that.'},
+  {icon:'💬', text:'당일 참여 불가 시 리워드 매니저에게 미리 말씀해 주세요.', textEn:'If you cannot participate that day, please notify your Reward Manager in advance.'},
+  {icon:'📱', text:'사용 중인 개통된 휴대폰만 가능. 공기계·태블릿·PC 불가.', textEn:'Active registered phones only. No spare phones, tablets, or PCs.'},
+  {icon:'📶', text:'와이파이 가능하나 가끔 모바일 데이터 사용을 권장합니다.', textEn:'Wi-Fi is fine, but mobile data is occasionally recommended.'},
+  {icon:'💰', text:'월~일 참여 취합 후 다음 주 화요일에 계좌로 현금 입금합니다.', textEn:'Rewards are collected Mon–Sun and deposited to your account the following Tuesday.'},
+  {icon:'⭐', text:'성실하게 참여하시는 분들께는 별도 추가 지급도 있습니다.', textEn:'Consistent, dedicated participants may receive bonus rewards.'},
 ];
 const DEFAULT_PRIVACY = [
-  {icon:'🗄️', text:'수집 항목: 성함 / 연락처 / 계좌정보만 수집합니다.'},
-  {icon:'🎯', text:'수집 목적: 참여자 확인 및 리워드 입금 시 계좌 정보 확인'},
-  {icon:'⏰', text:'보유 기간: 탈퇴일로부터 14일 보유 후 완전 파기'},
+  {icon:'🗄️', text:'수집 항목: 성함 / 연락처 / 계좌정보만 수집합니다.', textEn:'Data collected: Name, phone number, and bank account only.'},
+  {icon:'🎯', text:'수집 목적: 참여자 확인 및 리워드 입금 시 계좌 정보 확인', textEn:'Purpose: Verifying participants and processing reward payments.'},
+  {icon:'⏰', text:'보유 기간: 탈퇴일로부터 14일 보유 후 완전 파기', textEn:'Retention: Deleted 14 days after withdrawal.'},
 ];
 const ICONS = ['💎','📅','⚠️','💬','📱','📶','💰','⭐','🗄️','🎯','⏰','📌','✅','❌','🔒','📋','👥','💳','🏦','📞'];
 
@@ -1881,7 +1849,14 @@ function renderNoticeSection(elId, type){
           <button onclick="deleteNoticeItem('${type}',${i})" style="padding:4px 8px;border:none;border-radius:6px;background:#fef2f2;color:#ef4444;cursor:pointer;font-size:12px;font-weight:700">✕</button>
         </div>
       </div>
-      <textarea class="notice-edit-text" onchange="updateNoticeText('${type}',${i},this.value)">${ex(item.text)}</textarea>
+      <div style="display:flex;gap:4px;margin-bottom:4px">
+        <span style="font-size:10px;background:#e0f2fe;color:#0369a1;padding:2px 7px;border-radius:6px;font-weight:700">🇰🇷 한국어</span>
+      </div>
+      <textarea class="notice-edit-text" placeholder="한국어 내용" onchange="updateNoticeText('${type}',${i},this.value)">${ex(item.text)}</textarea>
+      <div style="display:flex;gap:4px;margin:6px 0 4px">
+        <span style="font-size:10px;background:#dcfce7;color:#166534;padding:2px 7px;border-radius:6px;font-weight:700">🇺🇸 English</span>
+      </div>
+      <textarea class="notice-edit-text" placeholder="English content" style="border-color:#86efac" onchange="updateNoticeTextEn('${type}',${i},this.value)">${ex(item.textEn||'')}</textarea>
     </div>
   `).join('');
 }
@@ -1894,9 +1869,13 @@ window.updateNoticeText = function(type, idx, val){
   if(!noticeEditData[type]) return;
   noticeEditData[type][idx].text = val;
 };
+window.updateNoticeTextEn = function(type, idx, val){
+  if(!noticeEditData[type]) return;
+  noticeEditData[type][idx].textEn = val;
+};
 window.addNoticeItem = function(type){
   if(!noticeEditData[type]) noticeEditData[type]=[];
-  noticeEditData[type].push({icon:'📌', text:'새 항목을 입력하세요.'});
+  noticeEditData[type].push({icon:'📌', text:'새 항목을 입력하세요.', textEn:'Enter content here.'});
   renderNoticeEditor();
 };
 window.deleteNoticeItem = function(type, idx){
@@ -1917,8 +1896,9 @@ window.saveNoticeItems = async function(){
   ['guide','privacy'].forEach(type=>{
     const items = noticeEditData[type]||[];
     items.forEach((item,i)=>{
-      const ta = document.querySelector(`#nei-${type}-${i} textarea`);
-      if(ta) item.text = ta.value;
+      const tas = document.querySelectorAll(`#nei-${type}-${i} textarea`);
+      if(tas[0]) item.text = tas[0].value;     // 한국어
+      if(tas[1]) item.textEn = tas[1].value;   // 영어
       const sel = document.querySelector(`#nei-${type}-${i} select`);
       if(sel) item.icon = sel.value;
     });
@@ -1927,18 +1907,8 @@ window.saveNoticeItems = async function(){
   try{
     await saveNoticeToDB({guide: noticeEditData.guide, privacy: noticeEditData.privacy});
     cachedNoticeData = {guide:[...noticeEditData.guide], privacy:[...noticeEditData.privacy]};
-    translatedNoticeCache = null; // 내용 변경 → 번역 캐시 초기화
     syncNoticeToApply(cachedNoticeData);
-    // 현재 영어 모드면 즉시 재번역해서 반영
-    if(currentLang === 'en'){
-      renderNoticeModal(cachedNoticeData, null);
-      translateNoticeToEn(cachedNoticeData).then(enData=>{
-        syncNoticeToApplyEn(enData);
-        renderNoticeModal(cachedNoticeData, enData);
-      });
-    } else {
-      renderNoticeModal(cachedNoticeData);
-    }
+    renderNoticeModal(cachedNoticeData);
     hideLoading();
     const msg = document.getElementById('notice-save-msg');
     if(msg){ msg.style.display='block'; setTimeout(()=>msg.style.display='none',2000); }
@@ -1951,27 +1921,31 @@ window.saveNoticeItems = async function(){
 
 function syncNoticeToUI(data){ syncNoticeToApply(data); renderNoticeModal(data); }
 
+// 신청서 5·6단계에 공지사항 적용 (언어 자동 선택)
 function syncNoticeToApply(data){
   if(!data) return;
+  const isEn = currentLang === 'en';
+  const guide = isEn
+    ? data.guide.map(item=>({icon:item.icon, text:(item.textEn&&item.textEn.trim())?item.textEn:item.text}))
+    : data.guide;
+  const privacy = isEn
+    ? data.privacy.map(item=>({icon:item.icon, text:(item.textEn&&item.textEn.trim())?item.textEn:item.text}))
+    : data.privacy;
   const ns5 = document.querySelector('#sl5 .ns');
-  if(ns5) ns5.innerHTML = data.guide.map(item=>`<div class="ni"><span>${item.icon}</span><div class="ni-t">${item.text}</div></div>`).join('');
+  if(ns5) ns5.innerHTML = guide.map(item=>`<div class="ni"><span>${item.icon}</span><div class="ni-t">${item.text}</div></div>`).join('');
   const ns6 = document.querySelector('#sl6 .ns');
-  if(ns6) ns6.innerHTML = data.privacy.map(item=>`<div class="ni"><span>${item.icon}</span><div class="ni-t">${item.text}</div></div>`).join('');
+  if(ns6) ns6.innerHTML = privacy.map(item=>`<div class="ni"><span>${item.icon}</span><div class="ni-t">${item.text}</div></div>`).join('');
 }
 
-// 영어 번역 데이터를 신청서 5/6단계에 적용
+// 영어 번역 데이터를 신청서 5/6단계에 적용 (하위 호환)
 function syncNoticeToApplyEn(enData){
   if(!enData) return;
-  const ns5 = document.querySelector('#sl5 .ns');
-  if(ns5) ns5.innerHTML = enData.guide.map(item=>`<div class="ni"><span>${item.icon}</span><div class="ni-t">${item.text}</div></div>`).join('');
-  const ns6 = document.querySelector('#sl6 .ns');
-  if(ns6) ns6.innerHTML = enData.privacy.map(item=>`<div class="ni"><span>${item.icon}</span><div class="ni-t">${item.text}</div></div>`).join('');
+  syncNoticeToApply(enData);
 }
 
 function renderNoticeModal(data, enData){
   if(!data) return;
   const isEn = currentLang === 'en';
-  const displayData = (isEn && enData) ? enData : data;
   const modal = document.getElementById('notice-modal');
   if(!modal) return;
   const hdr = document.getElementById('notice-modal-header');
@@ -1982,12 +1956,19 @@ function renderNoticeModal(data, enData){
   const sec1 = isEn ? '📋 Participation Guide' : '📋 참여 안내';
   const sec2 = isEn ? '🔒 Privacy Policy' : '🔒 개인정보 수집 및 이용 동의';
   const confirm_btn = isEn ? 'Got it ✓' : '확인했습니다 ✓';
+  // 영어 모드: textEn 있으면 사용, 없으면 text 사용
+  const getGuide = isEn
+    ? data.guide.map(item=>({icon:item.icon, text:(item.textEn&&item.textEn.trim())?item.textEn:item.text}))
+    : data.guide;
+  const getPrivacy = isEn
+    ? data.privacy.map(item=>({icon:item.icon, text:(item.textEn&&item.textEn.trim())?item.textEn:item.text}))
+    : data.privacy;
   body.innerHTML = `
     <div style="font-size:13px;font-weight:700;color:#f59e0b;background:#fef9c3;border-radius:10px;padding:8px 12px;margin-bottom:14px;text-align:center">${warn}</div>
     <div style="font-size:13px;font-weight:800;color:#1a1a2e;margin-bottom:10px;padding-bottom:6px;border-bottom:2px solid #f1f5f9">${sec1}</div>
-    ${displayData.guide.map(item=>`<div class="notice-modal-item"><div class="notice-modal-icon">${item.icon}</div><div class="notice-modal-text">${item.text}</div></div>`).join('')}
+    ${getGuide.map(item=>`<div class="notice-modal-item"><div class="notice-modal-icon">${item.icon}</div><div class="notice-modal-text">${item.text}</div></div>`).join('')}
     <div style="font-size:13px;font-weight:800;color:#1a1a2e;margin:14px 0 10px;padding-bottom:6px;border-bottom:2px solid #f1f5f9">${sec2}</div>
-    ${displayData.privacy.map(item=>`<div class="notice-modal-item"><div class="notice-modal-icon">${item.icon}</div><div class="notice-modal-text">${item.text}</div></div>`).join('')}
+    ${getPrivacy.map(item=>`<div class="notice-modal-item"><div class="notice-modal-icon">${item.icon}</div><div class="notice-modal-text">${item.text}</div></div>`).join('')}
     <button onclick="document.getElementById('notice-modal').style.display='none'" class="btn btnP" style="margin-top:16px">${confirm_btn}</button>
   `;
 }
