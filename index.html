@@ -187,7 +187,11 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 .notice-edit-text:focus{border-color:#3b82f6;outline:none}
 .notice-section-head{font-size:13px;font-weight:800;color:#1e40af;background:#eff6ff;border-radius:10px;padding:8px 12px;margin:10px 0 8px;display:flex;align-items:center;justify-content:space-between}
 .drag-handle{color:#94a3b8;cursor:grab;font-size:18px;padding:0 4px}
-.lang-bar{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:10000;display:flex;justify-content:flex-end;padding:6px 12px;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);border-bottom:1px solid #e2e8f0;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.lang-bar{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:10000;display:flex;justify-content:space-between;align-items:center;padding:6px 12px;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);border-bottom:1px solid #e2e8f0;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.back-btn{display:none;align-items:center;gap:4px;padding:5px 10px;font-size:13px;font-weight:700;color:#374151;cursor:pointer;border-radius:10px;border:1.5px solid #dde1e7;background:#fff;font-family:inherit;transition:all .15s;white-space:nowrap}
+.back-btn:active{background:#f1f5f9}
+.back-btn.show{display:flex}
+.lang-right{display:flex;gap:6px;align-items:center}
 .lang-btn{padding:5px 14px;font-size:12px;font-weight:700;border-radius:20px;border:1.5px solid #dde1e7;background:#fff;cursor:pointer;font-family:inherit;color:#64748b;transition:all .2s}
 .lang-btn.on{background:#3b82f6;border-color:#3b82f6;color:#fff}
 .lang-gap{margin-top:38px}
@@ -219,8 +223,11 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 
 <!-- 언어 선택 바 -->
 <div class="lang-bar" id="lang-bar">
-  <button class="lang-btn on" id="lang-ko" onclick="setLang('ko')">🇰🇷 한국어</button>
-  <button class="lang-btn" id="lang-en" onclick="setLang('en')" style="margin-left:6px">🇺🇸 English</button>
+  <button class="back-btn" id="back-btn" onclick="goBack()">← 뒤로</button>
+  <div class="lang-right">
+    <button class="lang-btn on" id="lang-ko" onclick="setLang('ko')">🇰🇷 한국어</button>
+    <button class="lang-btn" id="lang-en" onclick="setLang('en')">🇺🇸 English</button>
+  </div>
 </div>
 
 <script>
@@ -326,6 +333,7 @@ textarea{resize:none;min-height:80px;line-height:1.6}
         <div id="done-title" style="font-size:20px;font-weight:800;margin-bottom:8px;color:#1a1a2e">Application Complete!</div>
         <div id="done-sub" style="font-size:14px;color:#64748b;line-height:1.7;margin-bottom:18px">Your application has been submitted.<br>We will contact you via KakaoTalk.</div>
         <div class="scard" id="sum-box"></div>
+        <button id="btn-go-login" onclick="goToLogin()" class="btn btnP" style="margin-top:16px">🔑 로그인 하러가기</button>
       </div>
     </div>
     <div class="slide" id="sl-del">
@@ -935,7 +943,29 @@ window.openNoticeModal = function(){
   document.getElementById('notice-modal').style.display='block';
 };
 
-window.goSc = id => {
+// ── 화면 히스토리 스택 ──
+const screenHistory = [];
+
+// 뒤로가기 불필요한 최상위 화면들
+const ROOT_SCREENS = ['sc-login', 'sc-adm-login', 'sc-adm', 'sc-user'];
+
+function updateBackBtn(id){
+  const btn = document.getElementById('back-btn');
+  if(!btn) return;
+  const showBack = screenHistory.length > 0;
+  btn.className = 'back-btn' + (showBack ? ' show' : '');
+  // 언어 전환
+  const isEn = currentLang === 'en';
+  btn.textContent = isEn ? '← Back' : '← 뒤로';
+}
+
+window.goSc = (id, pushHistory=true) => {
+  const current = document.querySelector('.screen.on')?.id;
+  if(pushHistory && current && current !== id){
+    screenHistory.push(current);
+    // 히스토리 최대 20개
+    if(screenHistory.length > 20) screenHistory.shift();
+  }
   document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
   document.getElementById(id).classList.add('on');
   window.scrollTo(0,0);
@@ -945,6 +975,26 @@ window.goSc = id => {
     const isAdmScreen = id==='sc-adm' || id==='sc-adm-login';
     langBar.style.display = isAdmScreen ? 'none' : 'flex';
   }
+  updateBackBtn(id);
+};
+
+window.goBack = function(){
+  if(screenHistory.length === 0) return;
+  const prev = screenHistory.pop();
+  goSc(prev, false); // 뒤로갈 땐 히스토리에 추가 안 함
+};
+
+// 신청 완료 후 로그인 이동
+window.goToLogin = function(){
+  screenHistory.length = 0; // 히스토리 초기화
+  // 신청서 초기화
+  restart();
+  goSc('sc-login', false);
+  // 이름·전화번호 자동채우기
+  try{
+    const name = document.getElementById('a-name')?.dataset?.lastVal || '';
+    document.getElementById('l-name').value = name;
+  }catch(e){}
 };
 
 const saveAdm=()=>{try{localStorage.setItem(ADM_KEY,'1');}catch(e){}};
@@ -1136,6 +1186,9 @@ window.setLang = async function(lang){
 function applyLang(){
   try{
   const ko = currentLang==='ko';
+  // ── 뒤로가기 버튼 ──
+  const backBtn = document.getElementById('back-btn');
+  if(backBtn) backBtn.textContent = ko ? '← 뒤로' : '← Back';
   // ── 신청서 ──
   setTxt('ap-title', ko?'🏆 리워드 체험단':'🏆 Reward Program');
   setTxt('ap-sub-txt', ko?'신청서 작성':'Application Form');
@@ -1206,6 +1259,7 @@ function applyLang(){
   if(doneSub) doneSub.innerHTML=ko?'신청서가 성공적으로 접수되었습니다.<br>카카오톡으로 안내드리겠습니다.':'Your application has been submitted.<br>We will contact you via KakaoTalk.';
   setTxt('deleted-title', ko?'신청서가 삭제되었습니다':'Application Deleted');
   setTxt('btn-restart', ko?'처음부터 다시 시작':'Start Over');
+  setTxt('btn-go-login', ko?'🔑 로그인 하러가기':'🔑 Go to Login');
   // ── 로그인 ──
   setTxt('login-hero-t', ko?'리워드 체험단':'Reward Program');
   setTxt('login-hero-s', ko?'성함과 연락처로 로그인하세요':'Login with your name and phone number');
@@ -1367,6 +1421,7 @@ window.doLogin = async function(){
 };
 
 window.doUserLogout = function(){
+  screenHistory.length = 0;
   clearUser(); me=null;
   if(userRefreshTimer){ clearInterval(userRefreshTimer); userRefreshTimer=null; }
   if(unsubUser){ unsubUser(); unsubUser=null; }
@@ -1495,6 +1550,7 @@ let userRefreshTimer = null;
 let unsubUser = null;
 
 async function showUserDash(){
+  screenHistory.length = 0; // 로그인 후 히스토리 초기화
   showLoading(currentLang==='ko'?'데이터 로딩 중...':'Loading data...');
   try{
     await loadMB();
@@ -1691,12 +1747,14 @@ window.doAdmLogin = async function(){
 };
 
 window.doLogout = function(){
+  screenHistory.length = 0;
   clearAdm(); stopListener();
   document.getElementById('adm-pw').value='';
   goSc('sc-adm-login');
 };
 
 function showAdmDash(){
+  screenHistory.length = 0; // 관리자 로그인 후 히스토리 초기화
   updateStats();
   ADM_SECTIONS.forEach(s=>{
     const el=document.getElementById('sec-'+s);
@@ -3130,6 +3188,8 @@ window.doSubmit = async function(){
   if(!ag2){e.textContent=currentLang==='ko'?'동의 여부를 선택해 주세요.':'Please select your agreement.';e.classList.add('on');return;}
   if(ag2==='n'){showSl('sl-del');return;}
   const name=document.getElementById('a-name').value.trim();
+  // 완료 후 로그인 자동 채우기용 임시 저장
+  try{ document.getElementById('a-name').dataset.lastVal = name; }catch(e){}
   const phone=np(document.getElementById('a-phone').value);
   const bank=document.getElementById('a-bank').value;
   const acct=document.getElementById('a-acct').value.trim();
