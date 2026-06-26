@@ -265,7 +265,11 @@ textarea{resize:none;min-height:80px;line-height:1.6}
       <div class="st" id="sl4-title">Bank Account Info</div><div class="ss" id="sl4-sub">Please enter your bank account details</div>
       <div class="aw">
         <div class="fl"><span class="lbl" id="lbl-a-bank">Bank Name *</span>
-          <select id="a-bank"><option value="">Select Bank</option><option>카카오뱅크</option><option>토스뱅크</option><option>케이뱅크</option><option>국민은행</option><option>신한은행</option><option>우리은행</option><option>하나은행</option><option>농협은행</option><option>기업은행</option><option>SC제일은행</option><option>대구은행</option><option>부산은행</option><option>광주은행</option><option>전북은행</option><option>경남은행</option><option>새마을금고</option><option>신협</option><option>우체국</option></select>
+          <select id="a-bank" onchange="onBankChange()"><option value="">Select Bank</option><option value="카카오뱅크">카카오뱅크</option><option value="토스뱅크">토스뱅크</option><option value="케이뱅크">케이뱅크</option><option value="국민은행">국민은행</option><option value="신한은행">신한은행</option><option value="우리은행">우리은행</option><option value="하나은행">하나은행</option><option value="농협은행">농협은행</option><option value="기업은행">기업은행</option><option value="SC제일은행">SC제일은행</option><option value="대구은행">대구은행</option><option value="부산은행">부산은행</option><option value="광주은행">광주은행</option><option value="전북은행">전북은행</option><option value="경남은행">경남은행</option><option value="새마을금고">새마을금고</option><option value="신협">신협</option><option value="우체국">우체국</option></select>
+        </div>
+        <div class="fl">
+          <span class="lbl" id="lbl-a-bankcode">은행 코드 *</span>
+          <input type="text" id="a-bankcode" inputmode="numeric" placeholder="자동 입력" readonly style="background:#f1f5f9;color:#64748b;cursor:not-allowed">
         </div>
         <div class="fl"><span class="lbl" id="lbl-a-acct">Account No. * (numbers only)</span><input type="text" id="a-acct" inputmode="numeric" placeholder="Numbers only" oninput="this.value=this.value.replace(/\D/g,'')"></div>
         <div class="fl"><span class="lbl" id="lbl-a-holder">Account Holder *</span><input type="text" id="a-holder" placeholder="Must match your registered name"></div>
@@ -458,9 +462,14 @@ textarea{resize:none;min-height:80px;line-height:1.6}
       <div style="font-size:12px;color:#64748b;margin-top:3px">엑셀 업로드로 리워드 적용</div>
     </div>
 
-    <div class="stat-card" style="cursor:pointer;margin-bottom:14px;text-align:center;padding:13px" id="btn-pwchange" onclick="showAdmSection('pwchange')">
+    <div class="stat-card" style="cursor:pointer;margin-bottom:10px;text-align:center;padding:13px" id="btn-pwchange" onclick="showAdmSection('pwchange')">
       <div style="font-size:16px;font-weight:800;color:#1a1a2e">🔐 관리자 비밀번호 변경</div>
       <div style="font-size:12px;color:#64748b;margin-top:3px">아이디 및 비밀번호 설정</div>
+    </div>
+
+    <div class="stat-card" style="cursor:pointer;margin-bottom:14px;text-align:center;padding:13px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac" id="btn-settle" onclick="showAdmSection('settle')">
+      <div style="font-size:16px;font-weight:800;color:#166534">📥 주간 정산 엑셀 추출</div>
+      <div style="font-size:12px;color:#16a34a;margin-top:3px">인원별 이번 주 리워드 합산 → 엑셀 다운로드</div>
     </div>
 
     <!-- 섹션1: 총 알바인원 검색 -->
@@ -583,6 +592,37 @@ textarea{resize:none;min-height:80px;line-height:1.6}
       </div>
     </div>
 
+    <!-- 섹션: 주간 정산 엑셀 추출 -->
+    <div id="sec-settle" style="display:none">
+      <div class="search-box">
+        <div class="search-title">📥 주간 정산 엑셀 추출</div>
+        <div style="font-size:12px;color:#64748b;margin-bottom:14px;background:#f0fdf4;border-radius:10px;padding:10px;line-height:1.8;border:1px solid #bbf7d0">
+          📅 <b>정산 기준:</b> 선택한 주의 <b>월요일~일요일</b> 미션 합산<br>
+          💳 <b>입금 기준일:</b> 그 다음 주 화요일<br>
+          📋 <b>추출 항목:</b> 성함 / 예금주 / 은행명 / 은행코드 / 계좌번호 / 주간 미션 총금액
+        </div>
+
+        <!-- 주 선택 -->
+        <div style="background:#f8fafc;border-radius:12px;padding:12px;margin-bottom:12px">
+          <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px">📅 정산할 주 선택</div>
+          <div style="display:flex;align-items:center;gap:8px;justify-content:space-between;background:#fff;border-radius:10px;padding:8px 12px;border:1.5px solid #e2e8f0">
+            <button onclick="settleWeekOffset(-1)" style="padding:6px 14px;border:1px solid #dde1e7;border-radius:8px;background:#fff;cursor:pointer;font-size:13px;font-weight:700;font-family:inherit">◀ 이전주</button>
+            <div id="settle-week-label" style="font-size:13px;font-weight:700;color:#1e40af;text-align:center;flex:1"></div>
+            <button onclick="settleWeekOffset(1)" id="settle-next-btn" style="padding:6px 14px;border:1px solid #dde1e7;border-radius:8px;background:#fff;cursor:pointer;font-size:13px;font-weight:700;font-family:inherit">다음주 ▶</button>
+          </div>
+          <div id="settle-deposit-date" style="text-align:center;font-size:12px;color:#16a34a;font-weight:600;margin-top:6px"></div>
+        </div>
+
+        <!-- 미리보기 -->
+        <div id="settle-preview" style="margin-bottom:12px"></div>
+
+        <!-- 추출 버튼 -->
+        <button onclick="downloadSettleExcel()" class="btn" style="background:#16a34a;color:#fff;border-radius:12px;padding:14px;font-size:15px;font-weight:700">
+          📥 엑셀 다운로드
+        </button>
+      </div>
+    </div>
+
     <!-- 섹션: 비밀번호 변경 -->
     <div id="sec-pwchange" style="display:none">
       <div class="search-box">
@@ -646,7 +686,7 @@ textarea{resize:none;min-height:80px;line-height:1.6}
       </div>
       <div style="font-size:13px;font-weight:700;color:#374151;margin:14px 0 10px;padding-bottom:6px;border-bottom:2px solid #f1f5f9">🏦 계좌 정보</div>
       <div class="fl"><span class="lbl">은행명</span>
-        <select id="edit-bank">
+        <select id="edit-bank" onchange="onEditBankChange()">
           <option value="">은행 선택</option>
           <option>카카오뱅크</option><option>토스뱅크</option><option>케이뱅크</option>
           <option>국민은행</option><option>신한은행</option><option>우리은행</option>
@@ -656,6 +696,7 @@ textarea{resize:none;min-height:80px;line-height:1.6}
           <option>새마을금고</option><option>신협</option><option>우체국</option>
         </select>
       </div>
+      <div class="fl"><span class="lbl">은행 코드</span><input type="text" id="edit-bankcode" readonly style="background:#f1f5f9;color:#1d4ed8;font-weight:700;cursor:not-allowed"></div>
       <div class="fl"><span class="lbl">계좌번호 (숫자만)</span><input type="text" id="edit-acct" inputmode="numeric" oninput="this.value=this.value.replace(/\D/g,'')"></div>
       <div class="fl"><span class="lbl">예금주</span><input type="text" id="edit-holder" placeholder="예금주명"></div>
       <div style="font-size:13px;font-weight:700;color:#374151;margin:14px 0 10px;padding-bottom:6px;border-bottom:2px solid #f1f5f9">💰 리워드 금액 수동 수정</div>
@@ -1018,6 +1059,9 @@ function applyLang(){
   setTxt('holder-hint-suf', ko?'과(와) 동일해야 합니다':'must match applicant name');
   const bankSel = document.getElementById('a-bank');
   if(bankSel && bankSel.options[0]) bankSel.options[0].text = ko?'은행 선택':'Select Bank';
+  setTxt('lbl-a-bankcode', ko?'은행 코드 *':'Bank Code *');
+  const bcEl = document.getElementById('a-bankcode');
+  if(bcEl && !bcEl.value) bcEl.placeholder = ko?'자동 입력':'Auto-filled';
   setTxt('btn-back4', ko?'← 이전':'← Back');
   setTxt('btn-next4', ko?'다음 →':'Next →');
   // 5단계
@@ -1536,7 +1580,7 @@ function showAdmDash(){
     const el=document.getElementById('sec-'+s);
     if(el) el.style.display='none';
   });
-  ['tot','today','notice','ranking','excel','pwchange'].forEach(s=>{
+  ['tot','today','notice','ranking','excel','pwchange','settle'].forEach(s=>{
     const btn=document.getElementById('btn-'+s);
     if(btn) btn.style.outline='none';
   });
@@ -1630,7 +1674,8 @@ function renderList(list){
       <div class="mem-body">
         <div class="mem-row"><span class="mem-key">📱 연락처</span><span class="mem-val">${ex(m.phone)}</span></div>
         <div class="mem-row"><span class="mem-key">📲 폰 종류</span><span class="mem-val">${ex(m.os||'')}</span></div>
-        <div class="mem-row"><span class="mem-key">🏦 은행</span><span class="mem-val">${ex(m.bank||'')} ${ex(m.account||'')}</span></div>
+        <div class="mem-row"><span class="mem-key">🏦 은행</span><span class="mem-val">${ex(m.bank||'')} <span style="background:#eff6ff;color:#1d4ed8;font-size:11px;padding:1px 6px;border-radius:5px;font-weight:700">${ex(m.bankCode||BANK_CODES[m.bank]||'')}</span></span></div>
+        <div class="mem-row"><span class="mem-key">💳 계좌</span><span class="mem-val">${ex(m.account||'')}</span></div>
         <div class="mem-row"><span class="mem-key">👤 예금주</span><span class="mem-val">${ex(m.holder||'')}</span></div>
         <div class="mem-row"><span class="mem-key">💰 주간</span><span class="mem-val" style="color:#16a34a;font-weight:800">${(m.weekPts||0).toLocaleString()}원</span></div>
         <div class="mem-row"><span class="mem-key">💎 누적</span><span class="mem-val" style="color:#1e40af;font-weight:800">${(m.points||0).toLocaleString()}원</span></div>
@@ -1732,7 +1777,8 @@ function renderOsList(){
             </button>
           </span>
         </div>
-        <div class="mem-row"><span class="mem-key">🏦 은행</span><span class="mem-val">${ex(m.bank||'')} ${ex(m.account||'')}</span></div>
+        <div class="mem-row"><span class="mem-key">🏦 은행</span><span class="mem-val">${ex(m.bank||'')} <span style="background:#eff6ff;color:#1d4ed8;font-size:11px;padding:1px 6px;border-radius:5px;font-weight:700">${ex(m.bankCode||BANK_CODES[m.bank]||'')}</span></span></div>
+        <div class="mem-row"><span class="mem-key">💳 계좌</span><span class="mem-val">${ex(m.account||'')}</span></div>
         <div class="mem-row"><span class="mem-key">👤 예금주</span><span class="mem-val">${ex(m.holder||'')}</span></div>
         <div class="mem-row"><span class="mem-key">💰 주간</span><span class="mem-val" style="color:#16a34a;font-weight:800">${(m.weekPts||0).toLocaleString()}원</span></div>
         <div class="mem-row"><span class="mem-key">💎 누적</span><span class="mem-val" style="color:#1e40af;font-weight:800">${(m.points||0).toLocaleString()}원</span></div>
@@ -2089,6 +2135,218 @@ ${JSON.stringify(allTexts)}`
   }
 }
 
+// ══════════════════════════════════════
+// 은행코드 매핑
+// ══════════════════════════════════════
+const BANK_CODES = {
+  '카카오뱅크': '090',
+  '토스뱅크':   '092',
+  '케이뱅크':   '089',
+  '국민은행':   '004',
+  '신한은행':   '088',
+  '우리은행':   '020',
+  '하나은행':   '081',
+  '농협은행':   '011',
+  '기업은행':   '003',
+  'SC제일은행': '023',
+  '대구은행':   '031',
+  '부산은행':   '032',
+  '광주은행':   '034',
+  '전북은행':   '037',
+  '경남은행':   '039',
+  '새마을금고': '045',
+  '신협':       '048',
+  '우체국':     '071',
+};
+
+window.onBankChange = function(){
+  const bank = document.getElementById('a-bank').value;
+  const codeEl = document.getElementById('a-bankcode');
+  if(codeEl){
+    codeEl.value = bank ? (BANK_CODES[bank] || '-') : '';
+  }
+};
+
+window.onEditBankChange = function(){
+  const bank = document.getElementById('edit-bank').value;
+  const codeEl = document.getElementById('edit-bankcode');
+  if(codeEl) codeEl.value = bank ? (BANK_CODES[bank] || '-') : '';
+};
+
+// ══════════════════════════════════════
+// 주간 정산 엑셀 추출
+// ══════════════════════════════════════
+let settleOffset = -1; // 기본: 지난주 (이번주 일요일 마감 후 정산)
+
+function getSettleWeekRange(offset){
+  const now = new Date();
+  const day = now.getDay(); // 0=일, 1=월
+  const diffToMon = day === 0 ? -6 : 1 - day;
+  const mon = new Date(now);
+  mon.setDate(now.getDate() + diffToMon + offset * 7);
+  mon.setHours(0,0,0,0);
+  const sun = new Date(mon);
+  sun.setDate(mon.getDate() + 6);
+  sun.setHours(23,59,59,999);
+  return { from: mon, to: sun };
+}
+
+function getDepositDate(offset){
+  const { to } = getSettleWeekRange(offset);
+  // 그 다음 주 화요일
+  const tue = new Date(to);
+  tue.setDate(to.getDate() + 2); // 일요일 + 2 = 화요일
+  return tue;
+}
+
+function fmtDateKo(d){
+  return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+}
+
+function initSettle(){
+  settleOffset = -1;
+  renderSettlePreview();
+}
+
+window.settleWeekOffset = function(dir){
+  settleOffset += dir;
+  const nextBtn = document.getElementById('settle-next-btn');
+  if(nextBtn) nextBtn.style.opacity = settleOffset >= 0 ? '0.3' : '1';
+  if(settleOffset >= 0) settleOffset = 0; // 이번주 이상 불가
+  renderSettlePreview();
+};
+
+function renderSettlePreview(){
+  const { from, to } = getSettleWeekRange(settleOffset);
+  const deposit = getDepositDate(settleOffset);
+
+  const lbl = document.getElementById('settle-week-label');
+  if(lbl) lbl.textContent = `${fmtDateKo(from)} (월) ~ ${fmtDateKo(to)} (일)`;
+
+  const depLbl = document.getElementById('settle-deposit-date');
+  if(depLbl) depLbl.textContent = `💳 입금 예정일: ${fmtDateKo(deposit)} (화요일)`;
+
+  const nextBtn = document.getElementById('settle-next-btn');
+  if(nextBtn) nextBtn.style.opacity = settleOffset >= 0 ? '0.3' : '1';
+
+  // 정산 대상 인원 계산
+  const rows = calcSettleRows(from, to);
+  const preview = document.getElementById('settle-preview');
+  if(!preview) return;
+
+  if(!rows.length){
+    preview.innerHTML = `<div style="text-align:center;padding:20px;color:#94a3b8;font-size:13px">해당 주에 리워드 내역이 없습니다.</div>`;
+    return;
+  }
+
+  const grandTotal = rows.reduce((s,r) => s + r.total, 0);
+
+  let html = `
+    <div style="background:#f0fdf4;border-radius:10px;padding:10px 12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;border:1px solid #bbf7d0">
+      <div style="font-size:13px;font-weight:700;color:#166534">👥 정산 인원: <span style="font-size:15px">${rows.length}명</span></div>
+      <div style="font-size:13px;font-weight:700;color:#166534">💰 총 지급액: <span style="font-size:15px;color:#15803d">${grandTotal.toLocaleString()}원</span></div>
+    </div>
+    <div style="background:#fff;border-radius:10px;overflow:hidden;border:1px solid #e2e8f0">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 80px;background:#f8fafc;padding:8px 12px;font-size:11px;font-weight:700;color:#64748b;border-bottom:1px solid #e2e8f0">
+        <div>성함</div><div>은행</div><div>계좌번호</div><div style="text-align:right">금액</div>
+      </div>
+      ${rows.map(r => `
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 80px;padding:9px 12px;font-size:12px;border-bottom:1px solid #f1f5f9;align-items:center">
+          <div style="font-weight:700;color:#1a1a2e">${ex(r.name)}</div>
+          <div style="color:#374151">${ex(r.bank)} <span style="background:#eff6ff;color:#1d4ed8;font-size:10px;padding:1px 5px;border-radius:4px;font-weight:700">${ex(r.bankCode)}</span></div>
+          <div style="color:#64748b;font-size:11px">${ex(r.account)}</div>
+          <div style="text-align:right;font-weight:800;color:#16a34a">+${r.total.toLocaleString()}</div>
+        </div>
+      `).join('')}
+    </div>`;
+  preview.innerHTML = html;
+}
+
+function calcSettleRows(from, to){
+  const rows = [];
+  MB.forEach(m => {
+    const hist = m.weekHistory || [];
+    const items = hist.filter(h => {
+      const d = new Date(h.date + 'T12:00:00');
+      return d >= from && d <= to;
+    });
+    if(!items.length) return;
+    const total = items.reduce((s,h) => s + (h.amt||0), 0);
+    if(total <= 0) return;
+    rows.push({
+      name:     m.name || '',
+      holder:   m.holder || m.name || '',
+      bank:     m.bank || '',
+      bankCode: m.bankCode || BANK_CODES[m.bank] || '',
+      account:  m.account || '',
+      total,
+      items
+    });
+  });
+  // 금액 많은 순 정렬
+  rows.sort((a,b) => b.total - a.total);
+  return rows;
+}
+
+window.downloadSettleExcel = function(){
+  const { from, to } = getSettleWeekRange(settleOffset);
+  const deposit = getDepositDate(settleOffset);
+  const rows = calcSettleRows(from, to);
+
+  if(!rows.length){
+    alert('해당 주에 정산할 내역이 없습니다.');
+    return;
+  }
+
+  // XLSX 생성
+  const wb = XLSX.utils.book_new();
+
+  // ── 시트1: 정산 내역 ──
+  const header = ['성함', '예금주', '은행명', '은행코드', '계좌번호', '주간 미션 총금액(원)'];
+  const data = [header, ...rows.map(r => [
+    r.name,
+    r.holder,
+    r.bank,
+    r.bankCode,
+    r.account,
+    r.total
+  ])];
+
+  const ws = XLSX.utils.aoa_to_sheet(data);
+
+  // 열 너비 설정
+  ws['!cols'] = [
+    {wch:12}, // 성함
+    {wch:12}, // 예금주
+    {wch:14}, // 은행명
+    {wch:10}, // 은행코드
+    {wch:22}, // 계좌번호
+    {wch:20}, // 금액
+  ];
+
+  XLSX.utils.book_append_sheet(wb, ws, '주간정산');
+
+  // ── 시트2: 정산 요약 ──
+  const grandTotal = rows.reduce((s,r) => s + r.total, 0);
+  const summaryData = [
+    ['정산 기간', `${fmtDateKo(from)} ~ ${fmtDateKo(to)}`],
+    ['입금 예정일', fmtDateKo(deposit) + ' (화요일)'],
+    ['정산 인원', rows.length + '명'],
+    ['총 지급액', grandTotal + '원'],
+  ];
+  const ws2 = XLSX.utils.aoa_to_sheet(summaryData);
+  ws2['!cols'] = [{wch:14},{wch:30}];
+  XLSX.utils.book_append_sheet(wb, ws2, '정산요약');
+
+  // 파일명: 정산_YYYYMMDD_YYYYMMDD.xlsx
+  const fromStr = fmtDateKo(from).replace(/\./g,'');
+  const toStr   = fmtDateKo(to).replace(/\./g,'');
+  const fileName = `리워드정산_${fromStr}_${toStr}.xlsx`;
+
+  XLSX.writeFile(wb, fileName);
+  showToast(`✅ ${rows.length}명 정산 엑셀 다운로드 완료`);
+};
+
 window.rkSearch = function(){
   const q=(document.getElementById('rk-srch')||{}).value||'';
   const sorted=MB.slice().sort((a,b)=>(b.points||0)-(a.points||0));
@@ -2112,6 +2370,7 @@ window.openEditModal = function(id){
   document.getElementById('edit-age').value     = m.age||'성인';
   document.getElementById('edit-os').value      = m.os||'안드로이드';
   document.getElementById('edit-bank').value    = m.bank||'';
+  document.getElementById('edit-bankcode').value = m.bankCode || BANK_CODES[m.bank] || '';
   document.getElementById('edit-acct').value    = m.account||'';
   document.getElementById('edit-holder').value  = m.holder||'';
   document.getElementById('edit-points').value  = m.points||0;
@@ -2131,6 +2390,7 @@ window.saveEdit = async function(){
   const age    = document.getElementById('edit-age').value;
   const os     = document.getElementById('edit-os').value;
   const bank   = document.getElementById('edit-bank').value;
+  const bankCode = document.getElementById('edit-bankcode').value || BANK_CODES[bank] || '';
   const acct   = document.getElementById('edit-acct').value.trim();
   const holder = document.getElementById('edit-holder').value.trim();
   const points = parseInt(document.getElementById('edit-points').value)||0;
@@ -2140,7 +2400,7 @@ window.saveEdit = async function(){
   if(phone.length<10){ alert('연락처를 정확히 입력해 주세요.'); return; }
   showLoading(currentLang==='ko'?'저장 중...':'Saving...');
   try{
-    const updated = { name, phone, age, os, bank, account: acct, holder, points, weekPts, monthPts };
+    const updated = { name, phone, age, os, bank, bankCode, account: acct, holder, points, weekPts, monthPts };
     await updateDoc(doc(db,'members',editTargetId), updated);
     const m = MB.find(x=>x.id===editTargetId);
     if(m) Object.assign(m, updated);
@@ -2152,13 +2412,13 @@ window.saveEdit = async function(){
   }catch(e){ hideLoading(); alert('저장 오류: '+e.message); }
 };
 
-const ADM_SECTIONS = ['tot','today','notice','ranking','excel','pwchange','home'];
+const ADM_SECTIONS = ['tot','today','notice','ranking','excel','pwchange','settle','home'];
 window.showAdmSection = function(name){
   ADM_SECTIONS.forEach(s=>{
     const el=document.getElementById('sec-'+s);
     if(el) el.style.display='none';
   });
-  ['tot','today','notice','ranking','excel','pwchange'].forEach(s=>{
+  ['tot','today','notice','ranking','excel','pwchange','settle'].forEach(s=>{
     const btn=document.getElementById('btn-'+s);
     if(btn) btn.style.outline = s===name?'3px solid #3b82f6':'none';
   });
@@ -2169,6 +2429,7 @@ window.showAdmSection = function(name){
   if(name==='ranking') rkReset();
   if(name==='notice') initNoticeEditor();
   if(name==='pwchange') initPwChange();
+  if(name==='settle') initSettle();
   if(name==='excel'){
     const prev=document.getElementById('excel-preview');
     const msg=document.getElementById('excel-msg');
@@ -2595,16 +2856,17 @@ window.doSubmit = async function(){
   const ageL=ageVal==='minor'?'미성년자':'성인';
   const osL=osVal==='android'?'안드로이드':'애플 (iOS)';
   const today=new Date().toISOString().split('T')[0];
+  const bankCode = document.getElementById('a-bankcode')?.value || BANK_CODES[bank] || '';
   showLoading(currentLang==='ko'?'신청서 저장 중...':'Submitting...');
   try{
-    await addDoc(collection(db,'members'),{name,phone,age:ageL,os:osL,bank,account:acct,holder,nicknames:[],joinDate:today,createdAt:serverTimestamp()});
+    await addDoc(collection(db,'members'),{name,phone,age:ageL,os:osL,bank,bankCode,account:acct,holder,nicknames:[],joinDate:today,createdAt:serverTimestamp()});
     hideLoading();
     const isEn=currentLang==='en';
     const ageDisplay = ageL==='미성년자'?(isEn?'Minor':'미성년자'):(isEn?'Adult':'성인');
     const osDisplay = osL==='안드로이드'?(isEn?'Android':'안드로이드'):(isEn?'Apple (iOS)':'애플 (iOS)');
     const fields=isEn
-      ?[['Name',name],['Phone',phone],['Age',ageDisplay],['Phone Type',osDisplay],['Bank',bank],['Account',acct],['Holder',holder]]
-      :[['성함',name],['연락처',phone],['나이',ageL],['휴대폰',osL],['은행',bank],['계좌번호',acct],['예금주',holder]];
+      ?[['Name',name],['Phone',phone],['Age',ageDisplay],['Phone Type',osDisplay],['Bank',bank],['Bank Code',bankCode],['Account',acct],['Holder',holder]]
+      :[['성함',name],['연락처',phone],['나이',ageL],['휴대폰',osL],['은행',bank],['은행코드',bankCode],['계좌번호',acct],['예금주',holder]];
     document.getElementById('sum-box').innerHTML=fields.map(f=>`<div class="srow"><span class="sk">${f[0]}</span><span class="sv">${ex(f[1])}</span></div>`).join('');
     showSl('sl-ok');
   }catch(err){hideLoading();e.textContent=(currentLang==='ko'?'저장 오류: ':'Error: ')+err.message;e.classList.add('on');}
