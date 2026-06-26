@@ -1375,8 +1375,8 @@ window.renderTotalModal = function(){
         ?(isEnTot?`${year}/${parseInt(month)}/${parseInt(day)}`:`${year}년 ${parseInt(month)}월 ${parseInt(day)}일`)
         :(isEnTot?`${year}/${parseInt(month)}`:`${year}년 ${parseInt(month)}월`))
       :(isEnTot?`${year}`:`${year}년`))
-    :(!isEnTot?'All':'전체');
-  document.getElementById('tot-summary').textContent=`${label} ${!isEnTot?'Total':'합계'}: ${total.toLocaleString()}${isEnTot?' KRW':'원'}`;
+    :(isEnTot?'All':'전체');
+  document.getElementById('tot-summary').textContent=`${label} ${isEnTot?'Total':'합계'}: ${total.toLocaleString()}${isEnTot?' KRW':'원'}`;
   document.getElementById('tot-list').innerHTML=html;
 };
 
@@ -1446,15 +1446,15 @@ function dateStr(d){ return `${d.getFullYear()}-${String(d.getMonth()+1).padStar
 function renderWeekCard(){
   const wr=getWeekRange();
   const isEn = currentLang==='en';
-  const dayNames = !isEn ? ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] : ['월','화','수','목','금','토','일'];
+  const dayNames = isEn ? ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'] : ['월','화','수','목','금','토','일'];
   const hist = me.weekHistory||[];
   const isCurrentWeek = weekOffset===0;
   const weekLabel=`${fmtDate(wr.from)} ~ ${fmtDate(wr.to)}`;
   const weekTitle = isCurrentWeek
-    ? (!isEn ? `This week (${weekLabel})` : `이번주 (${weekLabel})`)
+    ? (isEn ? `This week (${weekLabel})` : `이번주 (${weekLabel})`)
     : weekOffset===-1
-      ? (!isEn ? `Last week (${weekLabel})` : `지난주 (${weekLabel})`)
-      : (!isEn ? `${Math.abs(weekOffset)} weeks ago (${weekLabel})` : `${Math.abs(weekOffset)}주 전 (${weekLabel})`);
+      ? (isEn ? `Last week (${weekLabel})` : `지난주 (${weekLabel})`)
+      : (isEn ? `${Math.abs(weekOffset)} weeks ago (${weekLabel})` : `${Math.abs(weekOffset)}주 전 (${weekLabel})`);
   document.getElementById('week-nav-label').textContent = weekTitle;
   document.getElementById('week-nav-next').style.opacity = isCurrentWeek ? '0.3' : '1';
   document.getElementById('week-nav-next').style.pointerEvents = isCurrentWeek ? 'none' : 'auto';
@@ -1485,18 +1485,18 @@ function renderWeekCard(){
         return `<div class="week-list-item">
           <div>
             <div class="week-item-name">${date} (${items.map(h=>ex(h.appName||(currentLang==='ko'?'미션':'Mission'))).join(', ')})</div>
-            <div class="week-item-date">${!isEn?'Approved':'승인 완료'}</div>
+            <div class="week-item-date">${isEn?'Approved':'승인 완료'}</div>
           </div>
-          <div class="week-item-amt">+${dayTotal.toLocaleString()}${!isEn?' KRW':'원'}</div>
+          <div class="week-item-amt">+${dayTotal.toLocaleString()}${isEn?' KRW':'원'}</div>
         </div>`;
       }).join('');
     } else {
       const weekWord = isCurrentWeek
-        ? (!isEn?'This week':'이번주')
+        ? (isEn?'This week':'이번주')
         : weekOffset===-1
-          ? (!isEn?'Last week':'지난주')
-          : (!isEn?`${Math.abs(weekOffset)} weeks ago`:`${Math.abs(weekOffset)}주 전`);
-      html=`<div style="text-align:center;padding:16px;color:#94a3b8;font-size:13px">${weekWord} ${!isEn?'No approved rewards. (0 KRW)':'승인된 리워드가 없습니다. (0원)'}</div>`;
+          ? (isEn?'Last week':'지난주')
+          : (isEn?`${Math.abs(weekOffset)} weeks ago`:`${Math.abs(weekOffset)}주 전`);
+      html=`<div style="text-align:center;padding:16px;color:#94a3b8;font-size:13px">${weekWord} ${isEn?'No approved rewards. (0 KRW)':'승인된 리워드가 없습니다. (0원)'}</div>`;
     }
   } else {
     const d=new Date(wr.from); d.setDate(wr.from.getDate()+selWeekDay);
@@ -1505,17 +1505,17 @@ function renderWeekCard(){
     total=dayItems.reduce((s,h)=>s+(h.amt||0),0);
     if(total>0){
       html=dayItems.map(h=>`<div class="week-list-item">
-        <div><div class="week-item-name">${ex(h.appName||(currentLang==='ko'?'미션':'Mission'))}</div><div class="week-item-date">${!isEn?'Approved':'승인 완료'}</div></div>
-        <div class="week-item-amt">+${(h.amt||0).toLocaleString()}${!isEn?' KRW':'원'}</div>
+        <div><div class="week-item-name">${ex(h.appName||(currentLang==='ko'?'미션':'Mission'))}</div><div class="week-item-date">${isEn?'Approved':'승인 완료'}</div></div>
+        <div class="week-item-amt">+${(h.amt||0).toLocaleString()}${isEn?' KRW':'원'}</div>
       </div>`).join('');
     } else {
-      html=`<div style="text-align:center;padding:16px;color:#94a3b8;font-size:13px">${dayNames[selWeekDay]}${isEn?' ':' 요일 '}${!isEn?'No approved rewards. (0 KRW)':'승인된 리워드가 없습니다. (0원)'}</div>`;
+      html=`<div style="text-align:center;padding:16px;color:#94a3b8;font-size:13px">${dayNames[selWeekDay]}${isEn?' ':' 요일 '}${isEn?'No approved rewards. (0 KRW)':'승인된 리워드가 없습니다. (0원)'}</div>`;
     }
   }
-  const unitStr = !isEn ? ' KRW' : '원';
+  const unitStr = isEn ? ' KRW' : '원';
   const sumLabel = selWeekDay===null
-    ? (!isEn ? 'Weekly Total' : '주간 합계')
-    : (!isEn ? dayNames[selWeekDay] : dayNames[selWeekDay]+'요일');
+    ? (isEn ? 'Weekly Total' : '주간 합계')
+    : (isEn ? dayNames[selWeekDay] : dayNames[selWeekDay]+'요일');
   document.getElementById('week-total').textContent = `${sumLabel}: ${total.toLocaleString()}${unitStr}`;
   document.getElementById('week-list').innerHTML=html;
 }
@@ -2936,3 +2936,5 @@ init();
 </script>
 </body>
 </html>
+
+        
