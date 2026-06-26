@@ -206,6 +206,17 @@ textarea{resize:none;min-height:80px;line-height:1.6}
   </div>
 </div>
 
+<!-- 이벤트 모달 -->
+<div id="event-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:9100;overflow-y:auto">
+  <div style="background:#fff;max-width:460px;margin:40px auto 20px;border-radius:20px;overflow:hidden">
+    <div style="background:linear-gradient(135deg,#7c3aed,#a855f7);padding:16px 18px;display:flex;align-items:center;justify-content:space-between">
+      <div id="event-modal-header" style="font-size:16px;font-weight:800;color:#fff">🎉 이벤트</div>
+      <div onclick="document.getElementById('event-modal').style.display='none'" style="color:#fff;font-size:22px;cursor:pointer;font-weight:700;line-height:1">✕</div>
+    </div>
+    <div id="event-modal-body" style="padding:16px 18px"></div>
+  </div>
+</div>
+
 <!-- 언어 선택 바 -->
 <div class="lang-bar" id="lang-bar">
   <button class="lang-btn on" id="lang-ko" onclick="setLang('ko')">🇰🇷 한국어</button>
@@ -393,6 +404,20 @@ textarea{resize:none;min-height:80px;line-height:1.6}
       <div class="notice-banner-arrow">›</div>
     </div>
 
+    <!-- 이벤트 배너 -->
+    <div id="event-banner" style="display:none;background:linear-gradient(135deg,#7c3aed,#a855f7);border-radius:14px;padding:14px 16px;margin-bottom:14px;cursor:pointer;box-shadow:0 2px 8px rgba(124,58,237,.2)" onclick="openEventModal()">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="font-size:22px;flex-shrink:0" id="event-banner-icon">🎉</div>
+          <div>
+            <div id="event-banner-title" style="font-size:14px;font-weight:800;color:#fff;margin-bottom:2px">이벤트</div>
+            <div id="event-banner-sub" style="font-size:12px;color:rgba(255,255,255,.85)">자세히 보기</div>
+          </div>
+        </div>
+        <div style="color:#fff;font-size:18px;font-weight:700">›</div>
+      </div>
+    </div>
+
     <div class="rk-card">
       <div class="rk-card-head">
         <div class="rk-card-title" id="rk-title">🏆 Worker Ranking</div>
@@ -465,6 +490,11 @@ textarea{resize:none;min-height:80px;line-height:1.6}
     <div class="stat-card" style="cursor:pointer;margin-bottom:10px;text-align:center;padding:13px" id="btn-pwchange" onclick="showAdmSection('pwchange')">
       <div style="font-size:16px;font-weight:800;color:#1a1a2e">🔐 관리자 비밀번호 변경</div>
       <div style="font-size:12px;color:#64748b;margin-top:3px">아이디 및 비밀번호 설정</div>
+    </div>
+
+    <div class="stat-card" style="cursor:pointer;margin-bottom:10px;text-align:center;padding:13px;background:linear-gradient(135deg,#faf5ff,#ede9fe);border:1.5px solid #c4b5fd" id="btn-event" onclick="showAdmSection('event')">
+      <div style="font-size:16px;font-weight:800;color:#6d28d9">🎉 이벤트 관리</div>
+      <div style="font-size:12px;color:#7c3aed;margin-top:3px">이벤트 작성 · 알바인원 페이지에 표시</div>
     </div>
 
     <div class="stat-card" style="cursor:pointer;margin-bottom:14px;text-align:center;padding:13px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border:1.5px solid #86efac" id="btn-settle" onclick="showAdmSection('settle')">
@@ -589,6 +619,84 @@ textarea{resize:none;min-height:80px;line-height:1.6}
         </div>
         <div id="excel-msg" style="margin-top:8px;font-size:12px;display:none"></div>
         <div id="excel-preview" style="margin-top:10px;display:none"></div>
+      </div>
+    </div>
+
+    <!-- 섹션: 이벤트 관리 -->
+    <div id="sec-event" style="display:none">
+      <div class="search-box">
+        <div class="search-title">🎉 이벤트 관리</div>
+        <div style="font-size:12px;color:#64748b;margin-bottom:12px;background:#faf5ff;border-radius:10px;padding:10px;line-height:1.7;border:1px solid #e9d5ff">
+          여기서 작성하면 알바인원 페이지 <b>안내사항 아래</b>에 이벤트 배너로 표시됩니다.<br>
+          이벤트가 없을 때는 배너가 자동으로 숨겨집니다.
+        </div>
+
+        <!-- 이벤트 활성화 토글 -->
+        <div style="display:flex;align-items:center;justify-content:space-between;background:#f8fafc;border-radius:10px;padding:10px 14px;margin-bottom:12px;border:1px solid #e2e8f0">
+          <div>
+            <div style="font-size:13px;font-weight:700;color:#1a1a2e">이벤트 표시 여부</div>
+            <div style="font-size:11px;color:#64748b;margin-top:2px">OFF로 설정하면 배너가 숨겨집니다</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button id="event-on-btn" onclick="setEventActive(true)" style="padding:6px 16px;border:2px solid #7c3aed;border-radius:20px;background:#7c3aed;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">ON</button>
+            <button id="event-off-btn" onclick="setEventActive(false)" style="padding:6px 16px;border:2px solid #e2e8f0;border-radius:20px;background:#fff;color:#94a3b8;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">OFF</button>
+          </div>
+        </div>
+
+        <!-- 이벤트 아이콘 -->
+        <div class="fl">
+          <span class="lbl">이벤트 아이콘</span>
+          <select id="event-icon-sel" style="font-size:20px;padding:8px 12px">
+            <option value="🎉">🎉 파티</option>
+            <option value="🎁">🎁 선물</option>
+            <option value="🏆">🏆 트로피</option>
+            <option value="⭐">⭐ 별</option>
+            <option value="💰">💰 돈</option>
+            <option value="🔥">🔥 불꽃</option>
+            <option value="🎊">🎊 폭죽</option>
+            <option value="💎">💎 다이아</option>
+            <option value="🎯">🎯 타겟</option>
+            <option value="📣">📣 메가폰</option>
+          </select>
+        </div>
+
+        <!-- 이벤트 제목 -->
+        <div class="fl">
+          <span class="lbl">이벤트 제목 (배너에 표시)</span>
+          <input type="text" id="event-title-input" placeholder="예: 7월 특별 리워드 이벤트!" maxlength="30">
+        </div>
+
+        <!-- 이벤트 부제목 -->
+        <div class="fl">
+          <span class="lbl">부제목 (배너 아래 작은 글씨)</span>
+          <input type="text" id="event-sub-input" placeholder="예: 자세히 보기 →" maxlength="40">
+        </div>
+
+        <!-- 이벤트 본문 -->
+        <div class="fl">
+          <span class="lbl">이벤트 내용 (팝업에 표시)</span>
+          <textarea id="event-body-input" style="min-height:160px;font-size:14px;line-height:1.8" placeholder="이벤트 상세 내용을 입력하세요.&#10;&#10;예)&#10;🎁 이번 달 미션 10회 이상 참여하신 분께&#10;추가 보너스 3,000원을 지급합니다!&#10;&#10;기간: 7/1 ~ 7/31"></textarea>
+        </div>
+
+        <!-- 영어 제목/내용 -->
+        <div style="background:#f0fdf4;border-radius:10px;padding:10px 12px;margin-bottom:12px;border:1px solid #bbf7d0">
+          <div style="font-size:11px;font-weight:700;color:#166534;margin-bottom:8px">🇺🇸 English (선택사항 — 비워두면 한국어 내용으로 표시)</div>
+          <div class="fl" style="margin-bottom:8px">
+            <span class="lbl" style="font-size:12px">English Title</span>
+            <input type="text" id="event-title-en-input" placeholder="e.g. July Special Reward Event!" maxlength="50">
+          </div>
+          <div class="fl" style="margin-bottom:0">
+            <span class="lbl" style="font-size:12px">English Sub</span>
+            <input type="text" id="event-sub-en-input" placeholder="e.g. Tap to see details →" maxlength="60">
+          </div>
+          <div class="fl" style="margin-bottom:0;margin-top:8px">
+            <span class="lbl" style="font-size:12px">English Content</span>
+            <textarea id="event-body-en-input" style="min-height:100px;font-size:13px;line-height:1.7" placeholder="English event content here..."></textarea>
+          </div>
+        </div>
+
+        <div id="event-save-msg" style="font-size:12px;color:#16a34a;margin-bottom:8px;display:none">✅ 저장되었습니다!</div>
+        <button onclick="saveEvent()" class="btn btnP" style="margin-top:4px">💾 저장하기</button>
       </div>
     </div>
 
@@ -1140,6 +1248,8 @@ function applyLang(){
     totMonth.innerHTML=(ko?mko:men).map((m,i)=>`<option value="${mv2[i]}">${m}</option>`).join('');
     totMonth.value=mv;
   }
+  // ── 이벤트 배너 언어 갱신 ──
+  if(cachedEventData) renderEventBanner(cachedEventData);
   // ── 공지사항 모달 갱신 ──
   renderNoticeModal(cachedNoticeData||{guide:DEFAULT_GUIDE,privacy:DEFAULT_PRIVACY});
   // ── 동적 렌더 갱신 ──
@@ -1225,6 +1335,7 @@ async function init(){
   // 자동로그인 정보 없거나 실패 → 즉시 로그인 화면
   goSc('sc-login');
   await initNoticeOnLoad();
+  await initEventOnLoad();
   initLang();
 }
 
@@ -1394,6 +1505,7 @@ async function showUserDash(){
     startUserListener();
     // 공지사항 로드 및 언어 초기화 (자동로그인 경로)
     if(!cachedNoticeData) await initNoticeOnLoad();
+    if(!cachedEventData) await initEventOnLoad();
     initLang();
   }catch(e){hideLoading();alert((currentLang==='ko'?'오류: ':'Error: ')+e.message);}
 }
@@ -1590,7 +1702,7 @@ function showAdmDash(){
     const el=document.getElementById('sec-'+s);
     if(el) el.style.display='none';
   });
-  ['tot','today','notice','ranking','excel','pwchange','settle'].forEach(s=>{
+  ['tot','today','notice','ranking','excel','pwchange','settle','event'].forEach(s=>{
     const btn=document.getElementById('btn-'+s);
     if(btn) btn.style.outline='none';
   });
@@ -2215,10 +2327,12 @@ function fmtDateKo(d){
 
 function initSettle(){
   settleOffset = -1;
+  settlePage = 1;
   renderSettlePreview();
 }
 
 window.settleWeekOffset = function(dir){
+  settlePage = 1;
   settleOffset += dir;
   const nextBtn = document.getElementById('settle-next-btn');
   if(nextBtn) nextBtn.style.opacity = settleOffset >= 0 ? '0.3' : '1';
@@ -2239,7 +2353,6 @@ function renderSettlePreview(){
   const nextBtn = document.getElementById('settle-next-btn');
   if(nextBtn) nextBtn.style.opacity = settleOffset >= 0 ? '0.3' : '1';
 
-  // 정산 대상 인원 계산
   const rows = calcSettleRows(from, to);
   const preview = document.getElementById('settle-preview');
   if(!preview) return;
@@ -2250,6 +2363,17 @@ function renderSettlePreview(){
   }
 
   const grandTotal = rows.reduce((s,r) => s + r.total, 0);
+  const totalPages = Math.ceil(rows.length / SETTLE_PAGE_SIZE);
+  if(settlePage > totalPages) settlePage = totalPages;
+  const pageRows = rows.slice((settlePage-1)*SETTLE_PAGE_SIZE, settlePage*SETTLE_PAGE_SIZE);
+
+  // 페이지네이션 컨트롤
+  const pageCtrl = totalPages > 1 ? `
+    <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px">
+      <button onclick="settleChangePage(${settlePage-1})" ${settlePage<=1?'disabled':''} style="padding:5px 12px;border:1px solid #dde1e7;border-radius:8px;background:#fff;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit;${settlePage<=1?'opacity:.4':''}">◀</button>
+      <span style="font-size:12px;font-weight:700;color:#374151">${settlePage} / ${totalPages} 페이지 (총 ${rows.length}명)</span>
+      <button onclick="settleChangePage(${settlePage+1})" ${settlePage>=totalPages?'disabled':''} style="padding:5px 12px;border:1px solid #dde1e7;border-radius:8px;background:#fff;cursor:pointer;font-size:12px;font-weight:700;font-family:inherit;${settlePage>=totalPages?'opacity:.4':''}">▶</button>
+    </div>` : '';
 
   let html = `
     <div style="background:#f0fdf4;border-radius:10px;padding:10px 12px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;border:1px solid #bbf7d0">
@@ -2257,20 +2381,32 @@ function renderSettlePreview(){
       <div style="font-size:13px;font-weight:700;color:#166534">💰 총 지급액: <span style="font-size:15px;color:#15803d">${grandTotal.toLocaleString()}원</span></div>
     </div>
     <div style="background:#fff;border-radius:10px;overflow:hidden;border:1px solid #e2e8f0">
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 80px;background:#f8fafc;padding:8px 12px;font-size:11px;font-weight:700;color:#64748b;border-bottom:1px solid #e2e8f0">
-        <div>성함</div><div>은행</div><div>계좌번호</div><div style="text-align:right">금액</div>
+      <div style="display:grid;grid-template-columns:28px 1fr 1fr 1fr 72px;background:#f8fafc;padding:8px 12px;font-size:11px;font-weight:700;color:#64748b;border-bottom:1px solid #e2e8f0">
+        <div>#</div><div>성함</div><div>은행</div><div>계좌번호</div><div style="text-align:right">금액</div>
       </div>
-      ${rows.map(r => `
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 80px;padding:9px 12px;font-size:12px;border-bottom:1px solid #f1f5f9;align-items:center">
+      ${pageRows.map((r,i) => `
+        <div style="display:grid;grid-template-columns:28px 1fr 1fr 1fr 72px;padding:9px 12px;font-size:12px;border-bottom:1px solid #f1f5f9;align-items:center">
+          <div style="color:#94a3b8;font-size:11px">${(settlePage-1)*SETTLE_PAGE_SIZE+i+1}</div>
           <div style="font-weight:700;color:#1a1a2e">${ex(r.name)}</div>
-          <div style="color:#374151">${ex(r.bank)} <span style="background:#eff6ff;color:#1d4ed8;font-size:10px;padding:1px 5px;border-radius:4px;font-weight:700">${ex(r.bankCode)}</span></div>
+          <div style="color:#374151">${ex(r.bank)} <span style="background:#eff6ff;color:#1d4ed8;font-size:10px;padding:1px 4px;border-radius:4px;font-weight:700">${ex(r.bankCode)}</span></div>
           <div style="color:#64748b;font-size:11px">${ex(r.account)}</div>
           <div style="text-align:right;font-weight:800;color:#16a34a">+${r.total.toLocaleString()}</div>
         </div>
       `).join('')}
-    </div>`;
+    </div>
+    ${pageCtrl}`;
   preview.innerHTML = html;
 }
+
+window.settleChangePage = function(page){
+  const { from, to } = getSettleWeekRange(settleOffset);
+  const rows = calcSettleRows(from, to);
+  const totalPages = Math.ceil(rows.length / SETTLE_PAGE_SIZE);
+  if(page < 1 || page > totalPages) return;
+  settlePage = page;
+  renderSettlePreview();
+  document.getElementById('settle-preview').scrollIntoView({behavior:'smooth', block:'nearest'});
+};
 
 function calcSettleRows(from, to){
   const rows = [];
@@ -2378,6 +2514,119 @@ window.downloadSettleExcel = function(bankType){
 };
 
 
+// ══════════════════════════════════════
+// 이벤트 관리
+// ══════════════════════════════════════
+const EVENT_DOC = 'eventconfig';
+let cachedEventData = null;
+
+async function loadEventFromDB(){
+  try{
+    const snap = await getDocs(collection(db, NOTICE_COLLECTION));
+    let data = null;
+    snap.forEach(d=>{ if(d.id===EVENT_DOC) data=d.data(); });
+    return data || {active:false, icon:'🎉', title:'', sub:'', body:'', titleEn:'', subEn:'', bodyEn:''};
+  }catch(e){ return {active:false, icon:'🎉', title:'', sub:'', body:'', titleEn:'', subEn:'', bodyEn:''}; }
+}
+
+async function initEventEditor(){
+  showLoading('이벤트 로딩 중...');
+  const data = await loadEventFromDB();
+  hideLoading();
+  // 폼에 데이터 세팅
+  document.getElementById('event-icon-sel').value = data.icon || '🎉';
+  document.getElementById('event-title-input').value = data.title || '';
+  document.getElementById('event-sub-input').value = data.sub || '';
+  document.getElementById('event-body-input').value = data.body || '';
+  document.getElementById('event-title-en-input').value = data.titleEn || '';
+  document.getElementById('event-sub-en-input').value = data.subEn || '';
+  document.getElementById('event-body-en-input').value = data.bodyEn || '';
+  setEventActiveUI(data.active !== false);
+}
+
+function setEventActiveUI(active){
+  const onBtn = document.getElementById('event-on-btn');
+  const offBtn = document.getElementById('event-off-btn');
+  if(onBtn){ onBtn.style.background = active?'#7c3aed':'#fff'; onBtn.style.color = active?'#fff':'#94a3b8'; onBtn.style.borderColor = active?'#7c3aed':'#e2e8f0'; }
+  if(offBtn){ offBtn.style.background = active?'#fff':'#6b7280'; offBtn.style.color = active?'#94a3b8':'#fff'; offBtn.style.borderColor = active?'#e2e8f0':'#6b7280'; }
+}
+
+window.setEventActive = function(active){
+  setEventActiveUI(active);
+};
+
+window.saveEvent = async function(){
+  const active = document.getElementById('event-on-btn').style.background.includes('7c3aed') ||
+                 document.getElementById('event-on-btn').style.background === 'rgb(124, 58, 237)';
+  const data = {
+    active,
+    icon:    document.getElementById('event-icon-sel').value,
+    title:   document.getElementById('event-title-input').value.trim(),
+    sub:     document.getElementById('event-sub-input').value.trim(),
+    body:    document.getElementById('event-body-input').value.trim(),
+    titleEn: document.getElementById('event-title-en-input').value.trim(),
+    subEn:   document.getElementById('event-sub-en-input').value.trim(),
+    bodyEn:  document.getElementById('event-body-en-input').value.trim(),
+  };
+  if(!data.title){ alert('이벤트 제목을 입력하세요.'); return; }
+  showLoading('저장 중...');
+  try{
+    await setDoc(doc(db, NOTICE_COLLECTION, EVENT_DOC), data);
+    cachedEventData = data;
+    renderEventBanner(data);
+    hideLoading();
+    const msg = document.getElementById('event-save-msg');
+    if(msg){ msg.style.display='block'; setTimeout(()=>msg.style.display='none',2000); }
+    showToast('✅ 이벤트 저장 완료!');
+  }catch(e){ hideLoading(); alert('저장 오류: '+e.message); }
+};
+
+async function initEventOnLoad(){
+  try{
+    cachedEventData = await loadEventFromDB();
+    renderEventBanner(cachedEventData);
+  }catch(e){}
+}
+
+function renderEventBanner(data){
+  const banner = document.getElementById('event-banner');
+  if(!banner) return;
+  if(!data || !data.active || !data.title){
+    banner.style.display = 'none';
+    return;
+  }
+  banner.style.display = 'block';
+  const isEn = currentLang === 'en';
+  const icon  = data.icon || '🎉';
+  const title = (isEn && data.titleEn) ? data.titleEn : data.title;
+  const sub   = (isEn && data.subEn)   ? data.subEn   : (data.sub || (isEn?'Tap to see details':'자세히 보기'));
+  document.getElementById('event-banner-icon').textContent  = icon;
+  document.getElementById('event-banner-title').textContent = title;
+  document.getElementById('event-banner-sub').textContent   = sub;
+}
+
+window.openEventModal = function(){
+  const data = cachedEventData;
+  if(!data || !data.active) return;
+  const isEn = currentLang === 'en';
+  const title = (isEn && data.titleEn) ? data.titleEn : data.title;
+  const body  = (isEn && data.bodyEn)  ? data.bodyEn  : data.body;
+  const hdr = document.getElementById('event-modal-header');
+  if(hdr) hdr.textContent = (data.icon||'🎉') + ' ' + title;
+  const bodyEl = document.getElementById('event-modal-body');
+  if(bodyEl) bodyEl.innerHTML = `
+    <div style="font-size:14px;color:#374151;line-height:1.9;white-space:pre-wrap">${ex(body)}</div>
+    <button onclick="document.getElementById('event-modal').style.display='none'" class="btn btnP" style="margin-top:16px">${isEn?'Close ✓':'확인했습니다 ✓'}</button>
+  `;
+  document.getElementById('event-modal').style.display = 'block';
+};
+
+// ══════════════════════════════════════
+// 정산 미리보기 페이지네이션
+// ══════════════════════════════════════
+const SETTLE_PAGE_SIZE = 20;
+let settlePage = 1;
+
 window.rkSearch = function(){
   const q=(document.getElementById('rk-srch')||{}).value||'';
   const sorted=MB.slice().sort((a,b)=>(b.points||0)-(a.points||0));
@@ -2443,13 +2692,13 @@ window.saveEdit = async function(){
   }catch(e){ hideLoading(); alert('저장 오류: '+e.message); }
 };
 
-const ADM_SECTIONS = ['tot','today','notice','ranking','excel','pwchange','settle','home'];
+const ADM_SECTIONS = ['tot','today','notice','ranking','excel','pwchange','settle','event','home'];
 window.showAdmSection = function(name){
   ADM_SECTIONS.forEach(s=>{
     const el=document.getElementById('sec-'+s);
     if(el) el.style.display='none';
   });
-  ['tot','today','notice','ranking','excel','pwchange','settle'].forEach(s=>{
+  ['tot','today','notice','ranking','excel','pwchange','settle','event'].forEach(s=>{
     const btn=document.getElementById('btn-'+s);
     if(btn) btn.style.outline = s===name?'3px solid #3b82f6':'none';
   });
@@ -2461,6 +2710,7 @@ window.showAdmSection = function(name){
   if(name==='notice') initNoticeEditor();
   if(name==='pwchange') initPwChange();
   if(name==='settle') initSettle();
+  if(name==='event') initEventEditor();
   if(name==='excel'){
     const prev=document.getElementById('excel-preview');
     const msg=document.getElementById('excel-msg');
