@@ -617,9 +617,19 @@ textarea{resize:none;min-height:80px;line-height:1.6}
         <div id="settle-preview" style="margin-bottom:12px"></div>
 
         <!-- 추출 버튼 -->
-        <button onclick="downloadSettleExcel()" class="btn" style="background:#16a34a;color:#fff;border-radius:12px;padding:14px;font-size:15px;font-weight:700">
-          📥 엑셀 다운로드
-        </button>
+        <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px">📥 대량이체 파일 다운로드</div>
+        <div style="display:flex;gap:10px">
+          <button onclick="downloadSettleExcel('nh')" class="btn" style="background:#007bff;color:#fff;border-radius:12px;padding:14px;font-size:14px;font-weight:700;flex:1;margin-top:0">
+            🌾 농협은행<br><span style="font-size:11px;font-weight:500;opacity:.9">농협 대량이체 양식</span>
+          </button>
+          <button onclick="downloadSettleExcel('kb')" class="btn" style="background:#ffcc00;color:#1a1a2e;border-radius:12px;padding:14px;font-size:14px;font-weight:700;flex:1;margin-top:0">
+            🏦 국민은행<br><span style="font-size:11px;font-weight:500;opacity:.8">KB 대량이체 양식</span>
+          </button>
+        </div>
+        <div style="font-size:11px;color:#94a3b8;margin-top:8px;text-align:center;line-height:1.6">
+          💡 A열=은행코드 · B열=계좌번호 · C열=금액 · D열=예금주<br>
+          인터넷뱅킹 대량이체 메뉴에서 파일 업로드 후 사용하세요
+        </div>
       </div>
     </div>
 
@@ -2288,7 +2298,7 @@ function calcSettleRows(from, to){
   return rows;
 }
 
-window.downloadSettleExcel = function(){
+window.downloadSettleExcel = function(bankType){
   const { from, to } = getSettleWeekRange(settleOffset);
   const deposit = getDepositDate(settleOffset);
   const rows = calcSettleRows(from, to);
@@ -2298,54 +2308,75 @@ window.downloadSettleExcel = function(){
     return;
   }
 
-  // XLSX 생성
   const wb = XLSX.utils.book_new();
-
-  // ── 시트1: 정산 내역 ──
-  const header = ['성함', '예금주', '은행명', '은행코드', '계좌번호', '주간 미션 총금액(원)'];
-  const data = [header, ...rows.map(r => [
-    r.name,
-    r.holder,
-    r.bank,
-    r.bankCode,
-    r.account,
-    r.total
-  ])];
-
-  const ws = XLSX.utils.aoa_to_sheet(data);
-
-  // 열 너비 설정
-  ws['!cols'] = [
-    {wch:12}, // 성함
-    {wch:12}, // 예금주
-    {wch:14}, // 은행명
-    {wch:10}, // 은행코드
-    {wch:22}, // 계좌번호
-    {wch:20}, // 금액
-  ];
-
-  XLSX.utils.book_append_sheet(wb, ws, '주간정산');
-
-  // ── 시트2: 정산 요약 ──
-  const grandTotal = rows.reduce((s,r) => s + r.total, 0);
-  const summaryData = [
-    ['정산 기간', `${fmtDateKo(from)} ~ ${fmtDateKo(to)}`],
-    ['입금 예정일', fmtDateKo(deposit) + ' (화요일)'],
-    ['정산 인원', rows.length + '명'],
-    ['총 지급액', grandTotal + '원'],
-  ];
-  const ws2 = XLSX.utils.aoa_to_sheet(summaryData);
-  ws2['!cols'] = [{wch:14},{wch:30}];
-  XLSX.utils.book_append_sheet(wb, ws2, '정산요약');
-
-  // 파일명: 정산_YYYYMMDD_YYYYMMDD.xlsx
   const fromStr = fmtDateKo(from).replace(/\./g,'');
   const toStr   = fmtDateKo(to).replace(/\./g,'');
-  const fileName = `리워드정산_${fromStr}_${toStr}.xlsx`;
+  const periodTxt = `${fmtDateKo(from)}~${fmtDateKo(to)}`;
 
-  XLSX.writeFile(wb, fileName);
-  showToast(`✅ ${rows.length}명 정산 엑셀 다운로드 완료`);
+  if(bankType === 'nh'){
+    // ══ 농협은행 대량이체 양식 ══
+    // 농협 개인/기업 인터넷뱅킹: 은행코드, 계좌번호, 금액, 예금주 순
+    const wsData = [
+      ['은행코드', '입금계좌번호', '이체금액', '예금주명', '성함', '비고'],
+      ...rows.map(r => [
+        r.bankCode,        // A: 은행코드 (3자리)
+        r.account,         // B: 입금계좌번호
+        r.total,           // C: 이체금액
+        r.holder,          // D: 예금주명
+        r.name,            // E: 성함 (참고용)
+        '리워드'           // F: 비고
+      ])
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    ws['!cols'] = [{wch:10},{wch:22},{wch:14},{wch:12},{wch:12},{wch:10}];
+    XLSX.utils.book_append_sheet(wb, ws, '농협대량이체');
+
+    // 요약 시트
+    const ws2 = XLSX.utils.aoa_to_sheet([
+      ['정산기간', periodTxt],
+      ['입금예정일', fmtDateKo(deposit)+' (화요일)'],
+      ['총인원', rows.length+'명'],
+      ['총지급액', rows.reduce((s,r)=>s+r.total,0)+'원'],
+    ]);
+    ws2['!cols'] = [{wch:14},{wch:28}];
+    XLSX.utils.book_append_sheet(wb, ws2, '정산요약');
+
+    XLSX.writeFile(wb, `농협대량이체_${fromStr}_${toStr}.xlsx`);
+    showToast(`✅ 농협 대량이체 파일 다운로드 완료 (${rows.length}명)`);
+
+  } else if(bankType === 'kb'){
+    // ══ 국민은행 대량이체 양식 ══
+    // KB 기업뱅킹 공식: A=은행코드(3자리), B=계좌번호, C=금액, D=예금주명(선택)
+    const wsData = [
+      ['은행코드', '입금계좌번호', '이체금액', '예금주명', '성함', '비고'],
+      ...rows.map(r => [
+        r.bankCode,        // A: 은행명 또는 은행코드 3자리 (필수)
+        r.account,         // B: 입금계좌번호 (필수)
+        r.total,           // C: 이체금액 (필수)
+        r.holder,          // D: 예금주명 (선택)
+        r.name,            // E: 성함 (참고용)
+        '리워드'           // F: 비고
+      ])
+    ];
+    const ws = XLSX.utils.aoa_to_sheet(wsData);
+    ws['!cols'] = [{wch:10},{wch:22},{wch:14},{wch:12},{wch:12},{wch:10}];
+    XLSX.utils.book_append_sheet(wb, ws, 'KB대량이체');
+
+    // 요약 시트
+    const ws2 = XLSX.utils.aoa_to_sheet([
+      ['정산기간', periodTxt],
+      ['입금예정일', fmtDateKo(deposit)+' (화요일)'],
+      ['총인원', rows.length+'명'],
+      ['총지급액', rows.reduce((s,r)=>s+r.total,0)+'원'],
+    ]);
+    ws2['!cols'] = [{wch:14},{wch:28}];
+    XLSX.utils.book_append_sheet(wb, ws2, '정산요약');
+
+    XLSX.writeFile(wb, `국민대량이체_${fromStr}_${toStr}.xlsx`);
+    showToast(`✅ 국민은행 대량이체 파일 다운로드 완료 (${rows.length}명)`);
+  }
 };
+
 
 window.rkSearch = function(){
   const q=(document.getElementById('rk-srch')||{}).value||'';
