@@ -187,10 +187,7 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 .notice-edit-text:focus{border-color:#3b82f6;outline:none}
 .notice-section-head{font-size:13px;font-weight:800;color:#1e40af;background:#eff6ff;border-radius:10px;padding:8px 12px;margin:10px 0 8px;display:flex;align-items:center;justify-content:space-between}
 .drag-handle{color:#94a3b8;cursor:grab;font-size:18px;padding:0 4px}
-.lang-bar{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:10000;display:flex;justify-content:space-between;align-items:center;padding:6px 12px;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);border-bottom:1px solid #e2e8f0;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-.back-btn{display:none;align-items:center;gap:4px;padding:5px 10px;font-size:13px;font-weight:700;color:#374151;cursor:pointer;border-radius:10px;border:1.5px solid #dde1e7;background:#fff;font-family:inherit;transition:all .15s;white-space:nowrap}
-.back-btn:active{background:#f1f5f9}
-.back-btn.show{display:flex}
+.lang-bar{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;z-index:10000;display:flex;justify-content:flex-end;align-items:center;padding:6px 12px;background:rgba(255,255,255,.95);backdrop-filter:blur(8px);border-bottom:1px solid #e2e8f0;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 .lang-right{display:flex;gap:6px;align-items:center}
 .lang-btn{padding:5px 14px;font-size:12px;font-weight:700;border-radius:20px;border:1.5px solid #dde1e7;background:#fff;cursor:pointer;font-family:inherit;color:#64748b;transition:all .2s}
 .lang-btn.on{background:#3b82f6;border-color:#3b82f6;color:#fff}
@@ -223,11 +220,8 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 
 <!-- 언어 선택 바 -->
 <div class="lang-bar" id="lang-bar">
-  <button class="back-btn" id="back-btn" onclick="goBack()">← 뒤로</button>
-  <div class="lang-right">
-    <button class="lang-btn on" id="lang-ko" onclick="setLang('ko')">🇰🇷 한국어</button>
-    <button class="lang-btn" id="lang-en" onclick="setLang('en')">🇺🇸 English</button>
-  </div>
+  <button class="lang-btn on" id="lang-ko" onclick="setLang('ko')">🇰🇷 한국어</button>
+  <button class="lang-btn" id="lang-en" onclick="setLang('en')" style="margin-left:6px">🇺🇸 English</button>
 </div>
 
 <script>
@@ -464,7 +458,10 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 <div id="sc-adm" class="screen">
   <div class="lang-gap"></div><div class="adm-top">
     <div class="adm-title">👥 알바인원 관리</div>
-    <span onclick="doLogout()" style="font-size:13px;color:rgba(255,255,255,.9);cursor:pointer;font-weight:700;background:rgba(255,255,255,.2);padding:7px 13px;border-radius:10px">로그아웃 ↩</span>
+    <div style="display:flex;gap:7px;align-items:center">
+      <span onclick="showAdmSection('pwchange')" style="font-size:12px;color:rgba(255,255,255,.9);cursor:pointer;font-weight:700;background:rgba(255,255,255,.15);padding:7px 11px;border-radius:10px;border:1px solid rgba(255,255,255,.25)">🔐 비밀번호</span>
+      <span onclick="doLogout()" style="font-size:13px;color:rgba(255,255,255,.9);cursor:pointer;font-weight:700;background:rgba(255,255,255,.2);padding:7px 13px;border-radius:10px">로그아웃 ↩</span>
+    </div>
   </div>
   <div class="adm-wrap">
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:14px">
@@ -495,10 +492,7 @@ textarea{resize:none;min-height:80px;line-height:1.6}
       <div style="font-size:12px;color:#64748b;margin-top:3px">엑셀 업로드로 리워드 적용</div>
     </div>
 
-    <div class="stat-card" style="cursor:pointer;margin-bottom:10px;text-align:center;padding:13px" id="btn-pwchange" onclick="showAdmSection('pwchange')">
-      <div style="font-size:16px;font-weight:800;color:#1a1a2e">🔐 관리자 비밀번호 변경</div>
-      <div style="font-size:12px;color:#64748b;margin-top:3px">아이디 및 비밀번호 설정</div>
-    </div>
+
 
     <div class="stat-card" style="cursor:pointer;margin-bottom:10px;text-align:center;padding:13px;background:linear-gradient(135deg,#faf5ff,#ede9fe);border:1.5px solid #c4b5fd" id="btn-event" onclick="showAdmSection('event')">
       <div style="font-size:16px;font-weight:800;color:#6d28d9">🎉 이벤트 관리</div>
@@ -512,17 +506,8 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 
     <!-- 섹션1: 총 알바인원 검색 -->
     <div id="sec-tot" style="display:none">
-      <!-- OS 필터 버튼 -->
+      <!-- 검색 먼저 -->
       <div class="search-box" style="margin-bottom:10px">
-        <div class="search-title">📱 기기별 조회</div>
-        <div class="os-filter-row">
-          <div class="os-btn" id="os-btn-all" onclick="filterByOs('all')">전체<br><span style="font-size:11px;font-weight:500" id="os-cnt-all">0명</span></div>
-          <div class="os-btn" id="os-btn-android" onclick="filterByOs('android')">🤖 안드로이드<br><span style="font-size:11px;font-weight:500" id="os-cnt-android">0명</span></div>
-          <div class="os-btn" id="os-btn-ios" onclick="filterByOs('ios')">🍎 애플(iOS)<br><span style="font-size:11px;font-weight:500" id="os-cnt-ios">0명</span></div>
-        </div>
-        <div id="os-list" style="margin-top:4px"></div>
-      </div>
-      <div class="search-box">
         <div class="search-title">🔍 알바인원 검색</div>
         <div style="background:#f8fafc;border-radius:12px;padding:12px;margin-bottom:10px">
           <div style="font-size:12px;font-weight:700;color:#374151;margin-bottom:8px">📅 가입 날짜로 검색</div>
@@ -546,6 +531,17 @@ textarea{resize:none;min-height:80px;line-height:1.6}
         <div id="srch-summary" style="font-size:12px;color:#3b82f6;margin-top:8px;font-weight:600;display:none"></div>
       </div>
       <div id="mem-list"></div>
+      <!-- 기기별 조회 버튼 (클릭 시 목록 표시) -->
+      <div class="search-box" style="margin-bottom:10px">
+        <div class="search-title">📱 기기별 조회</div>
+        <div style="font-size:12px;color:#64748b;margin-bottom:8px">버튼을 누르면 해당 기기 인원 목록이 표시됩니다</div>
+        <div class="os-filter-row">
+          <div class="os-btn" id="os-btn-all" onclick="filterByOs('all')">전체<br><span style="font-size:11px;font-weight:500" id="os-cnt-all">0명</span></div>
+          <div class="os-btn" id="os-btn-android" onclick="filterByOs('android')">🤖 안드로이드<br><span style="font-size:11px;font-weight:500" id="os-cnt-android">0명</span></div>
+          <div class="os-btn" id="os-btn-ios" onclick="filterByOs('ios')">🍎 애플(iOS)<br><span style="font-size:11px;font-weight:500" id="os-cnt-ios">0명</span></div>
+        </div>
+        <div id="os-list" style="margin-top:8px;display:none"></div>
+      </div>
     </div>
 
     <!-- 섹션2: 오늘 가입 -->
@@ -1057,7 +1053,7 @@ const T = {
     week_card_title:'📅 주간 리워드 금액', prev_week:'◀ 이전주', next_week:'다음주 ▶',
     week_sum:'주간 합계', approved:'승인 완료', no_reward_this_week:'이번주', no_reward_last_week:'지난주',
     no_reward_suffix:'승인된 리워드가 없습니다. (0원)',
-    ranking_title:'🏆 알바 랭킹', weekly:'주간', monthly:'월간',
+    ranking_title:'🏆 체험단 랭킹', weekly:'주간', monthly:'월간',
     my_rank:'내 순위:', no_data:'아직 데이터가 없습니다',
     notice_title:'안내사항', notice_sub:'참여 전 꼭 확인해 주세요!',
     notice_confirm:'확인했습니다 ✓', notice_warn:'⚠️ 아래 사항을 반드시 확인하고 참여해 주세요',
@@ -1131,7 +1127,7 @@ const T = {
     week_card_title:'📅 Weekly Reward Amount', prev_week:'◀ Prev', next_week:'Next ▶',
     week_sum:'Weekly Total', approved:'Approved', no_reward_this_week:'This week', no_reward_last_week:'Last week',
     no_reward_suffix:'No approved rewards. (0 KRW)',
-    ranking_title:'🏆 Worker Ranking', weekly:'Weekly', monthly:'Monthly',
+    ranking_title:'🏆 Challenger Ranking', weekly:'Weekly', monthly:'Monthly',
     my_rank:'My Rank:', no_data:'No data yet',
     notice_title:'Notice', notice_sub:'Please check before participating!',
     notice_confirm:'Got it ✓', notice_warn:'⚠️ Please check the following before participating',
@@ -1287,7 +1283,7 @@ function applyLang(){
   setTxt('week-nav-next', ko?'다음주 ▶':'Next ▶');
   setTxt('banner-title', ko?'안내사항':'Notice');
   setTxt('banner-sub', ko?'참여 전 꼭 확인해 주세요!':'Please check before participating!');
-  setTxt('rk-title', ko?'🏆 알바 랭킹':'🏆 Worker Ranking');
+  setTxt('rk-title', ko?'🏆 체험단 랭킹':'🏆 Challenger Ranking');
   setTxt('rk-tab-week', ko?'주간':'Weekly');
   setTxt('rk-tab-month', ko?'월간':'Monthly');
   // ── 총 누적 모달 ──
@@ -1322,16 +1318,9 @@ function setLbl(sel, val){ const el=document.querySelector(sel); if(el) el.textC
 function initLang(){
   try{
     const saved = localStorage.getItem('rw_lang');
-    if(saved==='ko'){ currentLang='ko'; setLang('ko'); }
-    // 저장값 없거나 'en'이면 기본 영어(HTML 기본값) 유지, 버튼만 업데이트
-    else {
-      currentLang='en';
-      const ko=document.getElementById('lang-ko');
-      const en=document.getElementById('lang-en');
-      if(ko) ko.className='lang-btn';
-      if(en) en.className='lang-btn on';
-    }
-  }catch(e){}
+    if(saved==='en'){ currentLang='en'; setLang('en'); }
+    else { currentLang='ko'; setLang('ko'); } // 기본값: 한국어
+  }catch(e){ currentLang='ko'; setLang('ko'); }
 }
 
 async function init(){
@@ -1695,7 +1684,17 @@ function calcRkPts(m, isWeek){
 }
 function renderRk(){
   const isW=rkMode==='week';
-  const sorted=MB.slice().sort((a,b)=>calcRkPts(b,isW)-calcRkPts(a,isW));
+  let sorted;
+  if(rkManualMode && rkManualOrder.length){
+    const orderMap = {};
+    rkManualOrder.forEach((id,i)=>orderMap[id]=i);
+    sorted = MB.slice().sort((a,b)=>{
+      const ai = orderMap[a.id]??999, bi = orderMap[b.id]??999;
+      return ai !== bi ? ai-bi : calcRkPts(b,isW)-calcRkPts(a,isW);
+    });
+  } else {
+    sorted = MB.slice().sort((a,b)=>calcRkPts(b,isW)-calcRkPts(a,isW));
+  }
   const top=sorted.slice(0,5);
   const myIdx=sorted.findIndex(m=>me&&m.id===me.id);
   const podEl=document.getElementById('rk-podium');
@@ -1760,7 +1759,7 @@ function showAdmDash(){
     const el=document.getElementById('sec-'+s);
     if(el) el.style.display='none';
   });
-  ['tot','today','notice','ranking','excel','pwchange','settle','event'].forEach(s=>{
+  ['tot','today','notice','ranking','excel','settle','event'].forEach(s=>{
     const btn=document.getElementById('btn-'+s);
     if(btn) btn.style.outline='none';
   });
@@ -1875,23 +1874,62 @@ function renderList(list){
   }).join('');
 }
 
-// ★ 추가: 랭킹 닉네임 관리 목록 렌더링
+// 수동 순위 배열 (id 순서)
+let rkManualOrder = [];
+let rkManualMode = false;
+
 function renderRkManageList(list){
   const el=document.getElementById('rk-manage-list');
   if(!el) return;
   if(!list.length){el.innerHTML='<div class="ep">검색 결과가 없습니다.</div>';return;}
-  el.innerHTML=list.map((m,i)=>{
+
+  // 수동 모드면 rkManualOrder 순서로 재정렬
+  if(rkManualMode && rkManualOrder.length){
+    const orderMap = {};
+    rkManualOrder.forEach((id,i)=>orderMap[id]=i);
+    list = list.slice().sort((a,b)=>{
+      const ai = orderMap[a.id]??999;
+      const bi = orderMap[b.id]??999;
+      return ai-bi;
+    });
+  }
+
+  const modeBtn = `
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;background:#f8fafc;border-radius:10px;padding:8px 12px;border:1px solid #e2e8f0">
+      <div>
+        <div style="font-size:12px;font-weight:700;color:#374151">순위 모드</div>
+        <div style="font-size:11px;color:#64748b">${rkManualMode?'✋ 수동 순위 — ▲▼ 버튼으로 조정':'🔢 자동 순위 — 포인트 순'}</div>
+      </div>
+      <div style="display:flex;gap:6px">
+        <button onclick="setRkMode(false)" style="padding:5px 12px;border:2px solid ${!rkManualMode?'#3b82f6':'#e2e8f0'};border-radius:8px;background:${!rkManualMode?'#eff6ff':'#fff'};color:${!rkManualMode?'#1d4ed8':'#94a3b8'};font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">자동</button>
+        <button onclick="setRkMode(true)" style="padding:5px 12px;border:2px solid ${rkManualMode?'#7c3aed':'#e2e8f0'};border-radius:8px;background:${rkManualMode?'#ede9fe':'#fff'};color:${rkManualMode?'#6d28d9':'#94a3b8'};font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">수동</button>
+      </div>
+    </div>`;
+
+  el.innerHTML = modeBtn + list.map((m,i)=>{
     const tags=(m.nicknames||[]).map(n=>`<span class="nick-tag">${ex(n)}</span>`).join('');
     const display=displayName(m);
-    return `<div class="mem-card">
+    const moveBtn = rkManualMode ? `
+      <div style="display:flex;flex-direction:column;gap:3px;margin-left:6px">
+        <button onclick="moveRkItem('${m.id}',-1)" ${i===0?'disabled':''} style="padding:2px 7px;border:1px solid #dde1e7;border-radius:5px;background:#fff;cursor:pointer;font-size:11px;font-weight:700;${i===0?'opacity:.3':''}">▲</button>
+        <button onclick="moveRkItem('${m.id}',1)" ${i===list.length-1?'disabled':''} style="padding:2px 7px;border:1px solid #dde1e7;border-radius:5px;background:#fff;cursor:pointer;font-size:11px;font-weight:700;${i===list.length-1?'opacity:.3':''}">▼</button>
+      </div>` : '';
+
+    return `<div class="mem-card" id="rk-item-${m.id}">
       <div class="mem-head">
-        <div class="mem-name">${i+1}위 ${ex(m.name)}</div>
-        <div class="mem-date">💰 ${(m.points||0).toLocaleString()}P</div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="background:${i<3?['#fbbf24','#94a3b8','#f97316'][i]:'#e2e8f0'};color:${i<3?'#fff':'#374151'};font-size:12px;font-weight:800;padding:2px 8px;border-radius:10px">${i+1}위</span>
+          <div class="mem-name">${ex(m.name)}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px">
+          <div class="mem-date">💰 ${(m.points||0).toLocaleString()}P</div>
+          ${moveBtn}
+        </div>
       </div>
       <div class="mem-body">
         <div class="mem-row">
           <span class="mem-key">랭킹표시</span>
-          <span class="mem-val" style="color:#3b82f6;font-size:15px;font-weight:800">${ex(display)}</span>
+          <span class="mem-val" style="color:#3b82f6;font-size:14px;font-weight:800">${ex(display)}</span>
         </div>
         <div class="nick-area">
           <div class="nick-title">
@@ -1905,24 +1943,44 @@ function renderRkManageList(list){
   }).join('');
 }
 
+window.setRkMode = function(manual){
+  rkManualMode = manual;
+  if(manual){
+    // 현재 자동 순위를 수동 초기값으로
+    const sorted = MB.slice().sort((a,b)=>(b.points||0)-(a.points||0));
+    if(!rkManualOrder.length) rkManualOrder = sorted.map(m=>m.id);
+  }
+  rkReset();
+};
+
+window.moveRkItem = function(id, dir){
+  if(!rkManualOrder.length){
+    rkManualOrder = MB.slice().sort((a,b)=>(b.points||0)-(a.points||0)).map(m=>m.id);
+  }
+  const idx = rkManualOrder.indexOf(id);
+  if(idx < 0) return;
+  const newIdx = idx + dir;
+  if(newIdx < 0 || newIdx >= rkManualOrder.length) return;
+  [rkManualOrder[idx], rkManualOrder[newIdx]] = [rkManualOrder[newIdx], rkManualOrder[idx]];
+  rkReset();
+};
+
 let currentOsFilter = 'all';
 let expandedMemId = null;
 
 window.filterByOs = function(os){
   currentOsFilter = os;
-  // 버튼 활성화
   ['all','android','ios'].forEach(k=>{
     const btn = document.getElementById('os-btn-'+k);
     if(btn) btn.className = 'os-btn' + (k===os?' on':'');
   });
+  // 목록 표시
+  const osListEl = document.getElementById('os-list');
+  if(osListEl) osListEl.style.display = 'block';
   renderOsList();
 };
 
-function renderOsList(){
-  const el = document.getElementById('os-list');
-  if(!el) return;
-
-  // OS 카운트 업데이트
+function updateOsCounts(){
   const andCount = MB.filter(m=>(m.os||'').includes('안드로이드')).length;
   const iosCount = MB.filter(m=>(m.os||'').includes('iOS')).length;
   const cntAll = document.getElementById('os-cnt-all');
@@ -1931,6 +1989,12 @@ function renderOsList(){
   if(cntAll) cntAll.textContent = MB.length+'명';
   if(cntAnd) cntAnd.textContent = andCount+'명';
   if(cntIos) cntIos.textContent = iosCount+'명';
+}
+
+function renderOsList(){
+  const el = document.getElementById('os-list');
+  if(!el) return;
+  updateOsCounts();
 
   let list = MB.slice();
   if(currentOsFilter==='android') list = MB.filter(m=>(m.os||'').includes('안드로이드'));
@@ -2756,14 +2820,21 @@ window.showAdmSection = function(name){
     const el=document.getElementById('sec-'+s);
     if(el) el.style.display='none';
   });
-  ['tot','today','notice','ranking','excel','pwchange','settle','event'].forEach(s=>{
+  ['tot','today','notice','ranking','excel','settle','event'].forEach(s=>{
     const btn=document.getElementById('btn-'+s);
     if(btn) btn.style.outline = s===name?'3px solid #3b82f6':'none';
   });
   const sec=document.getElementById('sec-'+name);
   if(sec) sec.style.display='block';
   if(name==='today') renderTodaySection();
-  if(name==='tot'){ currentOsFilter='all'; ['all','android','ios'].forEach(k=>{ const b=document.getElementById('os-btn-'+k); if(b) b.className='os-btn'+(k==='all'?' on':''); }); renderOsList(); }
+  if(name==='tot'){
+    currentOsFilter='all';
+    ['all','android','ios'].forEach(k=>{ const b=document.getElementById('os-btn-'+k); if(b) b.className='os-btn'+(k==='all'?' on':''); });
+    // 카운트만 업데이트, 목록은 숨김
+    const osListEl = document.getElementById('os-list');
+    if(osListEl){ osListEl.style.display='none'; osListEl.innerHTML=''; }
+    updateOsCounts();
+  }
   if(name==='ranking') rkReset();
   if(name==='notice') initNoticeEditor();
   if(name==='pwchange') initPwChange();
