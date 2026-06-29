@@ -3256,7 +3256,8 @@ window.saveEdit = async function(){
 };
 
 const ADM_SECTIONS = ['tot','today','notice','ranking','excel','pwchange','settle','event','home'];
-window.showAdmSection = function(name){
+// 실제 섹션 실행 함수 (잠금 해제 후 호출)
+function _doShowAdmSection(name){
   ADM_SECTIONS.forEach(s=>{
     const el=document.getElementById('sec-'+s);
     if(el) el.style.display='none';
@@ -3271,15 +3272,11 @@ window.showAdmSection = function(name){
   if(name==='tot'){
     currentOsFilter='all';
     ['all','android','ios'].forEach(k=>{ const b=document.getElementById('os-btn-'+k); if(b) b.className='os-btn'+(k==='all'?' on':''); });
-    // 카운트만 업데이트, 목록은 숨김
     const osListEl = document.getElementById('os-list');
     if(osListEl){ osListEl.style.display='none'; osListEl.innerHTML=''; }
     updateOsCounts();
   }
-  if(name==='ranking'){
-    if(needLock('ranking')){ requireInfoUnlock(()=>rkReset()); }
-    else { rkReset(); }
-  }
+  if(name==='ranking') rkReset();
   if(name==='notice') initNoticeEditor();
   if(name==='pwchange'){ initPwChange(); updateLockToggles(); }
   if(name==='settle') initSettle();
@@ -3293,6 +3290,23 @@ window.showAdmSection = function(name){
     if(fi) fi.value='';
     pendingExcelData=null;
     updateUploadDateLabel();
+  }
+}
+
+// 비밀번호 없이 접근 가능한 섹션 (잠금 제외)
+const NO_LOCK_SECTIONS = ['pwchange', 'home'];
+
+window.showAdmSection = function(name){
+  // pwchange(비밀번호 설정), home은 잠금 없이 접근 가능
+  if(NO_LOCK_SECTIONS.includes(name) || !INFO_PW){
+    _doShowAdmSection(name);
+    return;
+  }
+  // 나머지 모든 섹션은 비밀번호 필요
+  if(isInfoUnlocked()){
+    _doShowAdmSection(name);
+  } else {
+    requireInfoUnlock(()=>_doShowAdmSection(name));
   }
 };
 
