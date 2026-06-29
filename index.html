@@ -227,7 +227,7 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 <script>
 // 페이지 로드 즉시 로그인 화면 표시 (Firebase 로딩과 무관)
 (function(){
-  var isAdmin = location.search.includes('admin');
+  var isAdmin = location.search.includes('manage20260701');
   document.addEventListener('DOMContentLoaded', function(){
     var target = document.getElementById(isAdmin ? 'sc-adm-login' : 'sc-login');
     if(target) target.classList.add('on');
@@ -889,7 +889,7 @@ window.addEventListener('DOMContentLoaded', function(){
     var overlay = document.getElementById('loading-overlay');
     if(overlay && overlay.style.display !== 'none'){
       overlay.style.display = 'none';
-      var isAdmin = location.search.includes('admin');
+      var isAdmin = location.search.includes('manage20260701');
       var allScreens = document.querySelectorAll('.screen');
       allScreens.forEach(function(s){ s.classList.remove('on'); });
       var target = document.getElementById(isAdmin ? 'sc-adm-login' : 'sc-login');
@@ -1324,7 +1324,7 @@ function initLang(){
 }
 
 async function init(){
-  const isAdmin = location.search.includes('admin');
+  const isAdmin = location.search.includes('manage20260701');
   // 관리자 비밀번호 Firebase에서 로드
   await loadAdmConfig();
 
@@ -1735,10 +1735,35 @@ function renderRk(){
   if(noteEl&&me) noteEl.textContent=myIdx>=5?(currentLang==='ko'?'내 순위: '+(myIdx+1)+'위':'My Rank: #'+(myIdx+1)):'';
 }
 
+// 로그인 실패 횟수 추적
+let admLoginFailCount = 0;
+let admLoginLockUntil = 0;
+
 window.doAdmLogin = async function(){
+  // 잠금 체크
+  if(Date.now() < admLoginLockUntil){
+    const remain = Math.ceil((admLoginLockUntil - Date.now()) / 1000);
+    const er=document.getElementById('adm-er');
+    er.textContent=`⛔ ${remain}초 후 다시 시도하세요. (연속 실패 잠금)`;
+    er.classList.add('on'); return;
+  }
   const pw=document.getElementById('adm-pw').value;
   const er=document.getElementById('adm-er'); er.classList.remove('on');
-  if(pw!==ADM_PW){er.textContent='비밀번호가 틀렸습니다.';er.classList.add('on');return;}
+  if(pw!==ADM_PW){
+    admLoginFailCount++;
+    // 5회 실패 시 30초 잠금, 10회 시 5분 잠금
+    if(admLoginFailCount >= 10){
+      admLoginLockUntil = Date.now() + 300000;
+      er.textContent='⛔ 10회 연속 실패. 5분간 잠깁니다.';
+    } else if(admLoginFailCount >= 5){
+      admLoginLockUntil = Date.now() + 30000;
+      er.textContent=`비밀번호가 틀렸습니다. (${admLoginFailCount}회 실패 — 잠금 경고)`;
+    } else {
+      er.textContent=`비밀번호가 틀렸습니다. (${admLoginFailCount}회 실패)`;
+    }
+    er.classList.add('on'); return;
+  }
+  admLoginFailCount = 0; // 성공 시 초기화
   if(document.getElementById('adm-auto').checked) saveAdm();
   showLoading(currentLang==='ko'?'데이터 로딩 중...':'Loading data...');
   try{ await loadMB(); hideLoading(); showAdmDash(); }
@@ -3297,7 +3322,7 @@ window.restart=function(){
 window.addEventListener('error', function(e){
   if(e.message && e.message.includes('firebase')){
     hideLoading();
-    const isAdmin = location.search.includes('admin');
+    const isAdmin = location.search.includes('manage20260701');
     goSc(isAdmin ? 'sc-adm-login' : 'sc-login');
   }
 });
@@ -3307,7 +3332,7 @@ setTimeout(function(){
   const overlay = document.getElementById('loading-overlay');
   if(overlay && overlay.style.display !== 'none'){
     hideLoading();
-    const isAdmin = location.search.includes('admin');
+    const isAdmin = location.search.includes('manage20260701');
     goSc(isAdmin ? 'sc-adm-login' : 'sc-login');
     console.warn('25초 타임아웃 - 강제 화면 전환');
   }
