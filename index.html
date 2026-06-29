@@ -993,11 +993,40 @@ window.goToLogin = function(){
   }catch(e){}
 };
 
-const saveAdm=()=>{try{localStorage.setItem(ADM_KEY,'1');}catch(e){}};
-const loadAdm=()=>{try{return localStorage.getItem(ADM_KEY);}catch(e){return null;}};
+const saveAdm=()=>{
+  try{
+    const expire = Date.now() + 24*60*60*1000; // 24시간
+    localStorage.setItem(ADM_KEY, expire.toString());
+  }catch(e){}
+};
+const loadAdm=()=>{
+  try{
+    const val = localStorage.getItem(ADM_KEY);
+    if(!val) return null;
+    const expire = parseInt(val);
+    if(isNaN(expire)) return val; // 이전 버전 호환
+    if(Date.now() > expire){ localStorage.removeItem(ADM_KEY); return null; } // 만료
+    return '1';
+  }catch(e){return null;}
+};
 const clearAdm=()=>{try{localStorage.removeItem(ADM_KEY);}catch(e){}};
-const saveUser=id=>{try{localStorage.setItem(USER_KEY,id);}catch(e){}};
-const loadUser=()=>{try{return localStorage.getItem(USER_KEY);}catch(e){return null;}};
+const saveUser=id=>{
+  try{
+    const data = JSON.stringify({id, expire: Date.now() + 7*24*60*60*1000}); // 7일
+    localStorage.setItem(USER_KEY, data);
+  }catch(e){}
+};
+const loadUser=()=>{
+  try{
+    const raw = localStorage.getItem(USER_KEY);
+    if(!raw) return null;
+    try{
+      const data = JSON.parse(raw);
+      if(data.expire && Date.now() > data.expire){ localStorage.removeItem(USER_KEY); return null; }
+      return data.id;
+    }catch(e){ return raw; } // 이전 버전 호환 (id 그대로)
+  }catch(e){return null;}
+};
 const clearUser=()=>{try{localStorage.removeItem(USER_KEY);}catch(e){}};
 
 function withTimeout(promise, ms){
@@ -2339,7 +2368,9 @@ window.changeAdmPw = async function(){
   const cf = document.getElementById('pw-confirm').value;
   if(!cur){ showPwMsg('현재 비밀번호를 입력하세요.', false); return; }
   if(cur !== ADM_PW){ showPwMsg('현재 비밀번호가 틀렸습니다.', false); return; }
-  if(nw.length < 4){ showPwMsg('새 비밀번호는 4자 이상이어야 합니다.', false); return; }
+  if(nw.length < 8){ showPwMsg('새 비밀번호는 8자 이상이어야 합니다.', false); return; }
+  if(!/[a-zA-Z]/.test(nw)){ showPwMsg('영문자를 포함해야 합니다. (예: Reward2025)', false); return; }
+  if(!/[0-9]/.test(nw)){ showPwMsg('숫자를 포함해야 합니다. (예: Reward2025)', false); return; }
   if(nw !== cf){ showPwMsg('새 비밀번호가 일치하지 않습니다.', false); return; }
   showLoading(currentLang==='ko'?'저장 중...':'Saving...');
   try{
