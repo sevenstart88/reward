@@ -213,7 +213,7 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 </div>
 
 <!-- 인원정보 잠금 비밀번호 모달 -->
-<div id="info-lock-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9300;display:flex;align-items:center;justify-content:center;padding:20px">
+<div id="info-lock-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9300;align-items:center;justify-content:center;padding:20px">
   <div style="background:#fff;max-width:320px;width:100%;border-radius:20px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.2)">
     <div style="background:linear-gradient(135deg,#1e40af,#4f46e5);padding:20px;text-align:center">
       <div style="font-size:36px;margin-bottom:8px">🔒</div>
@@ -256,7 +256,7 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 </div>
 
 <!-- 인원정보 비밀번호 변경 모달 -->
-<div id="info-pw-change-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9400;display:flex;align-items:center;justify-content:center;padding:20px">
+<div id="info-pw-change-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9400;align-items:center;justify-content:center;padding:20px">
   <div style="background:#fff;max-width:320px;width:100%;border-radius:20px;overflow:hidden">
     <div style="background:linear-gradient(135deg,#1e40af,#4f46e5);padding:16px 18px;display:flex;align-items:center;justify-content:space-between">
       <div style="font-size:15px;font-weight:800;color:#fff">🔐 인원정보 비밀번호 변경</div>
@@ -3019,8 +3019,10 @@ function getLockName(key){
   return names[key] || key;
 }
 
-// 잠금 필요 여부 확인
+// 잠금 필요 여부 확인 (관리자 페이지에서만)
 function needLock(key){
+  const isAdminPage = location.search.includes('manage20260701');
+  if(!isAdminPage) return false;
   return INFO_PW && lockSettings[key] && !isInfoUnlocked();
 }
 
@@ -3050,8 +3052,10 @@ function setInfoUnlocked(){
   }catch(e){}
 }
 
-// 인원정보 접근 시 잠금 확인
+// 인원정보 접근 시 잠금 확인 (관리자 페이지에서만 작동)
 function requireInfoUnlock(callback){
+  const isAdminPage = location.search.includes('manage20260701');
+  if(!isAdminPage){ callback(); return; } // 사용자 페이지는 잠금 없음
   if(!INFO_PW){ callback(); return; } // 비밀번호 미설정 시 바로 실행
   if(isInfoUnlocked()){ callback(); return; } // 이미 인증됨
   // 잠금 모달 표시
@@ -3063,7 +3067,7 @@ function requireInfoUnlock(callback){
 
 function showInfoLockModal(){
   const modal = document.getElementById('info-lock-modal');
-  if(modal) modal.style.display = 'flex';
+  if(modal){ modal.style.display = 'flex'; modal.style.alignItems='center'; modal.style.justifyContent='center'; }
   updateLockDots();
   document.getElementById('info-lock-err').textContent = '';
 }
@@ -3146,7 +3150,8 @@ function checkInfoPw(){
 
 window.showInfoPwChange = function(){
   document.getElementById('info-lock-modal').style.display = 'none';
-  document.getElementById('info-pw-change-modal').style.display = 'flex';
+  const ipcm = document.getElementById('info-pw-change-modal');
+  if(ipcm){ ipcm.style.display='flex'; ipcm.style.alignItems='center'; ipcm.style.justifyContent='center'; }
   document.getElementById('info-pw-cur').value = '';
   document.getElementById('info-pw-new').value = '';
   document.getElementById('info-pw-confirm').value = '';
