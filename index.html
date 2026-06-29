@@ -192,6 +192,11 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 .lang-btn{padding:5px 14px;font-size:12px;font-weight:700;border-radius:20px;border:1.5px solid #dde1e7;background:#fff;cursor:pointer;font-family:inherit;color:#64748b;transition:all .2s}
 .lang-btn.on{background:#3b82f6;border-color:#3b82f6;color:#fff}
 .lang-gap{margin-top:38px}
+.lock-dot{width:14px;height:14px;border-radius:50%;border:2px solid #3b82f6;background:#fff;transition:all .15s}
+.lock-dot.filled{background:#3b82f6}
+.lock-dot.hidden{border-color:#e2e8f0}
+.lock-key{padding:16px;font-size:20px;font-weight:700;border:1.5px solid #e2e8f0;border-radius:12px;background:#fff;cursor:pointer;font-family:inherit;color:#1a1a2e;transition:all .1s}
+.lock-key:active{background:#eff6ff;border-color:#3b82f6;transform:scale(.95)}
 </style>
 </head>
 <body>
@@ -204,6 +209,66 @@ textarea{resize:none;min-height:80px;line-height:1.6}
       <div onclick="document.getElementById('notice-modal').style.display='none'" style="color:#fff;font-size:22px;cursor:pointer;font-weight:700;line-height:1">✕</div>
     </div>
     <div id="notice-modal-body" style="padding:16px 18px"></div>
+  </div>
+</div>
+
+<!-- 인원정보 잠금 비밀번호 모달 -->
+<div id="info-lock-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9300;display:flex;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;max-width:320px;width:100%;border-radius:20px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.2)">
+    <div style="background:linear-gradient(135deg,#1e40af,#4f46e5);padding:20px;text-align:center">
+      <div style="font-size:36px;margin-bottom:8px">🔒</div>
+      <div style="font-size:16px;font-weight:800;color:#fff">인원 정보 잠금</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.8);margin-top:4px">비밀번호를 입력하세요 (4~6자리)</div>
+    </div>
+    <div style="padding:20px">
+      <!-- 비밀번호 점 표시 -->
+      <div id="info-lock-dots" style="display:flex;justify-content:center;gap:12px;margin-bottom:20px">
+        <div class="lock-dot" id="dot-0"></div>
+        <div class="lock-dot" id="dot-1"></div>
+        <div class="lock-dot" id="dot-2"></div>
+        <div class="lock-dot" id="dot-3"></div>
+        <div class="lock-dot" id="dot-4"></div>
+        <div class="lock-dot" id="dot-5"></div>
+      </div>
+      <!-- 오류 메시지 -->
+      <div id="info-lock-err" style="text-align:center;font-size:13px;color:#ef4444;margin-bottom:12px;min-height:20px;font-weight:600"></div>
+      <!-- 숫자 키패드 -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+        <button class="lock-key" onclick="lockKeyPress('1')">1</button>
+        <button class="lock-key" onclick="lockKeyPress('2')">2</button>
+        <button class="lock-key" onclick="lockKeyPress('3')">3</button>
+        <button class="lock-key" onclick="lockKeyPress('4')">4</button>
+        <button class="lock-key" onclick="lockKeyPress('5')">5</button>
+        <button class="lock-key" onclick="lockKeyPress('6')">6</button>
+        <button class="lock-key" onclick="lockKeyPress('7')">7</button>
+        <button class="lock-key" onclick="lockKeyPress('8')">8</button>
+        <button class="lock-key" onclick="lockKeyPress('9')">9</button>
+        <button class="lock-key" onclick="lockClear()" style="background:#f1f5f9;color:#374151;font-size:13px">지우기</button>
+        <button class="lock-key" onclick="lockKeyPress('0')">0</button>
+        <button class="lock-key" onclick="lockCancel()" style="background:#fef2f2;color:#ef4444;font-size:13px">취소</button>
+      </div>
+      <!-- 비밀번호 변경 링크 -->
+      <div style="text-align:center;margin-top:14px">
+        <span onclick="showInfoPwChange()" style="font-size:12px;color:#3b82f6;cursor:pointer;text-decoration:underline">비밀번호 변경</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 인원정보 비밀번호 변경 모달 -->
+<div id="info-pw-change-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9400;display:flex;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;max-width:320px;width:100%;border-radius:20px;overflow:hidden">
+    <div style="background:linear-gradient(135deg,#1e40af,#4f46e5);padding:16px 18px;display:flex;align-items:center;justify-content:space-between">
+      <div style="font-size:15px;font-weight:800;color:#fff">🔐 인원정보 비밀번호 변경</div>
+      <div onclick="document.getElementById('info-pw-change-modal').style.display='none'" style="color:#fff;font-size:22px;cursor:pointer;font-weight:700">✕</div>
+    </div>
+    <div style="padding:18px">
+      <div class="fl"><span class="lbl">현재 비밀번호 (4~6자리)</span><input type="password" id="info-pw-cur" inputmode="numeric" maxlength="6" placeholder="현재 비밀번호"></div>
+      <div class="fl"><span class="lbl">새 비밀번호 (4~6자리)</span><input type="password" id="info-pw-new" inputmode="numeric" maxlength="6" placeholder="숫자 4~6자리"></div>
+      <div class="fl"><span class="lbl">새 비밀번호 확인</span><input type="password" id="info-pw-confirm" inputmode="numeric" maxlength="6" placeholder="다시 입력"></div>
+      <div id="info-pw-change-msg" style="font-size:13px;margin-bottom:8px;display:none;padding:8px 12px;border-radius:8px"></div>
+      <button onclick="saveInfoPw()" class="btn btnP">💾 변경하기</button>
+    </div>
   </div>
 </div>
 
@@ -494,6 +559,11 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 
 
 
+    <div class="stat-card" style="cursor:pointer;margin-bottom:10px;text-align:center;padding:13px;background:linear-gradient(135deg,#fff7ed,#ffedd5);border:1.5px solid #fed7aa" onclick="showInfoPwChange()">
+      <div style="font-size:16px;font-weight:800;color:#c2410c">🔐 인원정보 잠금 비밀번호</div>
+      <div style="font-size:12px;color:#ea580c;margin-top:3px">인원 상세정보 열람 시 비밀번호 필요</div>
+    </div>
+
     <div class="stat-card" style="cursor:pointer;margin-bottom:10px;text-align:center;padding:13px;background:linear-gradient(135deg,#faf5ff,#ede9fe);border:1.5px solid #c4b5fd" id="btn-event" onclick="showAdmSection('event')">
       <div style="font-size:16px;font-weight:800;color:#6d28d9">🎉 이벤트 관리</div>
       <div style="font-size:12px;color:#7c3aed;margin-top:3px">이벤트 작성 · 알바인원 페이지에 표시</div>
@@ -747,6 +817,72 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 
     <!-- 섹션: 비밀번호 변경 -->
     <div id="sec-pwchange" style="display:none">
+      <!-- 잠금 설정 관리 -->
+      <div class="search-box" style="margin-bottom:12px;background:linear-gradient(135deg,#fff7ed,#ffedd5);border:1.5px solid #fed7aa">
+        <div class="search-title" style="color:#c2410c">🔒 인원정보 잠금 설정</div>
+        <div style="font-size:12px;color:#64748b;margin-bottom:12px;line-height:1.7">
+          잠금을 <b>OFF</b> 하면 비밀번호 없이 인원정보를 볼 수 있습니다.<br>
+          불편할 때만 임시로 끄고, 다시 켜두세요!
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px">
+          <div style="display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:10px;padding:10px 14px;border:1px solid #e2e8f0">
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#1a1a2e">인원 상세정보 잠금</div>
+              <div style="font-size:11px;color:#64748b">클릭 시 비밀번호 요구</div>
+            </div>
+            <div id="lock-toggle-detail" onclick="toggleInfoLock('detail')" style="cursor:pointer;width:44px;height:24px;border-radius:12px;background:#16a34a;position:relative;transition:all .2s">
+              <div style="position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:all .2s"></div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:10px;padding:10px 14px;border:1px solid #e2e8f0">
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#1a1a2e">검색 결과 잠금</div>
+              <div style="font-size:11px;color:#64748b">검색 후 결과 표시 시 비밀번호 요구</div>
+            </div>
+            <div id="lock-toggle-search" onclick="toggleInfoLock('search')" style="cursor:pointer;width:44px;height:24px;border-radius:12px;background:#16a34a;position:relative;transition:all .2s">
+              <div style="position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:all .2s"></div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:10px;padding:10px 14px;border:1px solid #e2e8f0">
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#1a1a2e">오늘 가입 목록 잠금</div>
+              <div style="font-size:11px;color:#64748b">오늘 가입 인원 확인 시 비밀번호 요구</div>
+            </div>
+            <div id="lock-toggle-today" onclick="toggleInfoLock('today')" style="cursor:pointer;width:44px;height:24px;border-radius:12px;background:#16a34a;position:relative;transition:all .2s">
+              <div style="position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:all .2s"></div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:10px;padding:10px 14px;border:1px solid #e2e8f0">
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#1a1a2e">정산 엑셀 추출 잠금</div>
+              <div style="font-size:11px;color:#64748b">계좌번호 포함 엑셀 다운로드 시 비밀번호 요구</div>
+            </div>
+            <div id="lock-toggle-excel" onclick="toggleInfoLock('excel')" style="cursor:pointer;width:44px;height:24px;border-radius:12px;background:#16a34a;position:relative;transition:all .2s">
+              <div style="position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:all .2s"></div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:10px;padding:10px 14px;border:1px solid #e2e8f0">
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#1a1a2e">정보 수정/삭제 잠금</div>
+              <div style="font-size:11px;color:#64748b">인원 수정·삭제 버튼 클릭 시 비밀번호 요구</div>
+            </div>
+            <div id="lock-toggle-edit" onclick="toggleInfoLock('edit')" style="cursor:pointer;width:44px;height:24px;border-radius:12px;background:#16a34a;position:relative;transition:all .2s">
+              <div style="position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:all .2s"></div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:10px;padding:10px 14px;border:1px solid #e2e8f0">
+            <div>
+              <div style="font-size:13px;font-weight:700;color:#1a1a2e">랭킹 닉네임 관리 잠금</div>
+              <div style="font-size:11px;color:#64748b">닉네임 관리 페이지 진입 시 비밀번호 요구</div>
+            </div>
+            <div id="lock-toggle-ranking" onclick="toggleInfoLock('ranking')" style="cursor:pointer;width:44px;height:24px;border-radius:12px;background:#16a34a;position:relative;transition:all .2s">
+              <div style="position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;background:#fff;transition:all .2s"></div>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:#94a3b8;text-align:center">설정은 자동 저장됩니다</div>
+      </div>
+
       <div class="search-box">
         <div class="search-title">🔐 관리자 비밀번호 변경</div>
         <div style="font-size:12px;color:#64748b;margin-bottom:14px;background:#f8fafc;border-radius:10px;padding:10px;line-height:1.7">
@@ -1356,6 +1492,8 @@ async function init(){
   const isAdmin = location.search.includes('manage20260701');
   // 관리자 비밀번호 Firebase에서 로드
   await loadAdmConfig();
+  await loadInfoPw(); // 인원정보 비밀번호 로드
+  loadLockSettings(); // 잠금 설정 로드
 
   // 즉시 화면 전환 (로딩 없이)
   if(isAdmin){
@@ -1883,9 +2021,12 @@ window.resetNameSearch = function(){
 };
 
 function showResult(list, summary){
-  const sumEl=document.getElementById('srch-summary');
-  sumEl.textContent=summary; sumEl.style.display='block';
-  renderList(list);
+  const doShow = ()=>{
+    const sumEl=document.getElementById('srch-summary');
+    sumEl.textContent=summary; sumEl.style.display='block';
+    renderList(list);
+  };
+  if(needLock('search')){ requireInfoUnlock(doShow); } else { doShow(); }
 }
 function hideResult(){
   const sumEl=document.getElementById('srch-summary');
@@ -2105,8 +2246,16 @@ function renderOsList(){
 };
 
 window.toggleMemDetail = function(id){
-  expandedMemId = expandedMemId===id ? null : id;
-  renderOsList();
+  if(expandedMemId === id){
+    expandedMemId = null;
+    renderOsList();
+  } else {
+    if(needLock('detail')){
+      requireInfoUnlock(()=>{ expandedMemId = id; renderOsList(); });
+    } else {
+      expandedMemId = id; renderOsList();
+    }
+  }
 };
 
 window.changeOsInline = async function(id, newOs){
@@ -2613,6 +2762,10 @@ function calcSettleRows(from, to){
 }
 
 window.downloadSettleExcel = function(bankType){
+  if(needLock('excel')){
+    requireInfoUnlock(()=>downloadSettleExcel(bankType));
+    return;
+  }
   const { from, to } = getSettleWeekRange(settleOffset);
   const deposit = getDepositDate(settleOffset);
   const rows = calcSettleRows(from, to);
@@ -2805,6 +2958,232 @@ window.openEventModal = function(){
 const SETTLE_PAGE_SIZE = 20;
 let settlePage = 1;
 
+// ══════════════════════════════════════
+// 인원정보 비밀번호 잠금
+// ══════════════════════════════════════
+const INFO_PW_DOC = 'infopwconfig';
+const INFO_LOCK_SESSION_KEY = 'rw_info_unlocked';
+let INFO_PW = ''; // Firebase에서 로드
+let infoLockInput = '';
+let infoLockCallback = null; // 잠금 해제 후 실행할 함수
+let infoLockFailCount = 0;
+let infoLockUntil = 0;
+
+// ══════════════════════════════════════
+// 잠금 설정 관리
+// ══════════════════════════════════════
+const LOCK_SETTINGS_KEY = 'rw_lock_settings';
+
+// 기본값: 전부 잠금 ON
+let lockSettings = {
+  detail:  true, // 인원 상세정보
+  search:  true, // 검색 결과
+  today:   true, // 오늘 가입
+  excel:   true, // 정산 엑셀
+  edit:    true, // 수정/삭제
+  ranking: true, // 랭킹 닉네임
+};
+
+function loadLockSettings(){
+  try{
+    const saved = localStorage.getItem(LOCK_SETTINGS_KEY);
+    if(saved) lockSettings = {...lockSettings, ...JSON.parse(saved)};
+  }catch(e){}
+  updateLockToggles();
+}
+
+function saveLockSettings(){
+  try{ localStorage.setItem(LOCK_SETTINGS_KEY, JSON.stringify(lockSettings)); }catch(e){}
+  updateLockToggles();
+}
+
+function updateLockToggles(){
+  Object.keys(lockSettings).forEach(key=>{
+    const el = document.getElementById('lock-toggle-'+key);
+    if(!el) return;
+    const on = lockSettings[key];
+    el.style.background = on ? '#16a34a' : '#94a3b8';
+    const dot = el.querySelector('div');
+    if(dot) dot.style.right = on ? '2px' : '22px';
+  });
+}
+
+window.toggleInfoLock = function(key){
+  lockSettings[key] = !lockSettings[key];
+  saveLockSettings();
+  showToast(lockSettings[key] ? `🔒 ${getLockName(key)} 잠금 ON` : `🔓 ${getLockName(key)} 잠금 OFF`);
+};
+
+function getLockName(key){
+  const names = {detail:'상세정보', search:'검색결과', today:'오늘가입', excel:'정산엑셀', edit:'수정/삭제', ranking:'랭킹닉네임'};
+  return names[key] || key;
+}
+
+// 잠금 필요 여부 확인
+function needLock(key){
+  return INFO_PW && lockSettings[key] && !isInfoUnlocked();
+}
+
+// Firebase에서 인원정보 비밀번호 로드
+async function loadInfoPw(){
+  try{
+    const snap = await getDocs(collection(db, NOTICE_COLLECTION));
+    snap.forEach(d=>{ if(d.id===INFO_PW_DOC && d.data().password) INFO_PW = d.data().password; });
+  }catch(e){ console.warn('인원정보 비밀번호 로드 실패'); }
+}
+
+// 세션 잠금 상태 확인 (30분 유지)
+function isInfoUnlocked(){
+  try{
+    const val = localStorage.getItem(INFO_LOCK_SESSION_KEY);
+    if(!val) return false;
+    const expire = parseInt(val);
+    if(Date.now() > expire){ localStorage.removeItem(INFO_LOCK_SESSION_KEY); return false; }
+    return true;
+  }catch(e){ return false; }
+}
+
+function setInfoUnlocked(){
+  try{
+    // 30분 유지
+    localStorage.setItem(INFO_LOCK_SESSION_KEY, (Date.now() + 30*60*1000).toString());
+  }catch(e){}
+}
+
+// 인원정보 접근 시 잠금 확인
+function requireInfoUnlock(callback){
+  if(!INFO_PW){ callback(); return; } // 비밀번호 미설정 시 바로 실행
+  if(isInfoUnlocked()){ callback(); return; } // 이미 인증됨
+  // 잠금 모달 표시
+  infoLockCallback = callback;
+  infoLockInput = '';
+  infoLockFailCount = 0;
+  showInfoLockModal();
+}
+
+function showInfoLockModal(){
+  const modal = document.getElementById('info-lock-modal');
+  if(modal) modal.style.display = 'flex';
+  updateLockDots();
+  document.getElementById('info-lock-err').textContent = '';
+}
+
+function updateLockDots(){
+  for(let i=0; i<6; i++){
+    const dot = document.getElementById('dot-'+i);
+    if(!dot) continue;
+    if(i < infoLockInput.length){
+      dot.className = 'lock-dot filled';
+    } else if(!INFO_PW || i < INFO_PW.length){
+      dot.className = 'lock-dot';
+    } else {
+      dot.className = 'lock-dot hidden';
+    }
+  }
+}
+
+window.lockKeyPress = function(num){
+  // 잠금 체크
+  if(Date.now() < infoLockUntil){
+    const remain = Math.ceil((infoLockUntil - Date.now()) / 1000);
+    document.getElementById('info-lock-err').textContent = `⛔ ${remain}초 후 다시 시도하세요`;
+    return;
+  }
+  const maxLen = INFO_PW ? INFO_PW.length : 6;
+  if(infoLockInput.length >= maxLen) return;
+  infoLockInput += num;
+  updateLockDots();
+  // 자동 확인
+  if(infoLockInput.length === maxLen){
+    setTimeout(checkInfoPw, 150);
+  }
+};
+
+window.lockClear = function(){
+  if(infoLockInput.length > 0){
+    infoLockInput = infoLockInput.slice(0, -1);
+    updateLockDots();
+    document.getElementById('info-lock-err').textContent = '';
+  }
+};
+
+window.lockCancel = function(){
+  const modal = document.getElementById('info-lock-modal');
+  if(modal) modal.style.display = 'none';
+  infoLockCallback = null;
+  infoLockInput = '';
+};
+
+function checkInfoPw(){
+  if(infoLockInput === INFO_PW){
+    // 인증 성공
+    infoLockFailCount = 0;
+    setInfoUnlocked();
+    const modal = document.getElementById('info-lock-modal');
+    if(modal) modal.style.display = 'none';
+    if(infoLockCallback){ infoLockCallback(); infoLockCallback = null; }
+    infoLockInput = '';
+  } else {
+    // 인증 실패
+    infoLockFailCount++;
+    infoLockInput = '';
+    updateLockDots();
+    if(infoLockFailCount >= 5){
+      infoLockUntil = Date.now() + 60000; // 1분 잠금
+      document.getElementById('info-lock-err').textContent = '⛔ 5회 실패 — 1분 잠금';
+    } else {
+      document.getElementById('info-lock-err').textContent = `❌ 비밀번호가 틀렸습니다 (${infoLockFailCount}회)`;
+    }
+    // 화면 흔들기 효과
+    const modal = document.querySelector('#info-lock-modal > div');
+    if(modal){
+      modal.style.transform = 'translateX(-8px)';
+      setTimeout(()=>modal.style.transform = 'translateX(8px)', 80);
+      setTimeout(()=>modal.style.transform = 'translateX(0)', 160);
+    }
+  }
+}
+
+window.showInfoPwChange = function(){
+  document.getElementById('info-lock-modal').style.display = 'none';
+  document.getElementById('info-pw-change-modal').style.display = 'flex';
+  document.getElementById('info-pw-cur').value = '';
+  document.getElementById('info-pw-new').value = '';
+  document.getElementById('info-pw-confirm').value = '';
+  document.getElementById('info-pw-change-msg').style.display = 'none';
+};
+
+function showInfoPwMsg(txt, ok){
+  const el = document.getElementById('info-pw-change-msg');
+  if(!el) return;
+  el.textContent = txt;
+  el.style.background = ok ? '#f0fdf4' : '#fef2f2';
+  el.style.color = ok ? '#16a34a' : '#dc2626';
+  el.style.display = 'block';
+}
+
+window.saveInfoPw = async function(){
+  const cur = document.getElementById('info-pw-cur').value;
+  const nw  = document.getElementById('info-pw-new').value;
+  const cf  = document.getElementById('info-pw-confirm').value;
+  // 처음 설정 시 현재 비밀번호 불필요
+  if(INFO_PW && cur !== INFO_PW){ showInfoPwMsg('현재 비밀번호가 틀렸습니다.', false); return; }
+  if(nw.length < 4 || nw.length > 6){ showInfoPwMsg('4~6자리 숫자로 입력하세요.', false); return; }
+  if(!/^\d+$/.test(nw)){ showInfoPwMsg('숫자만 입력하세요.', false); return; }
+  if(nw !== cf){ showInfoPwMsg('새 비밀번호가 일치하지 않습니다.', false); return; }
+  showLoading('저장 중...');
+  try{
+    await setDoc(doc(db, NOTICE_COLLECTION, INFO_PW_DOC), {password: nw});
+    INFO_PW = nw;
+    hideLoading();
+    showInfoPwMsg('✅ 비밀번호가 설정되었습니다!', true);
+    setTimeout(()=>{
+      document.getElementById('info-pw-change-modal').style.display = 'none';
+    }, 1500);
+    showToast('✅ 인원정보 비밀번호 설정 완료');
+  }catch(e){ hideLoading(); showInfoPwMsg('저장 오류: '+e.message, false); }
+};
+
 window.rkSearch = function(){
   const q=(document.getElementById('rk-srch')||{}).value||'';
   const sorted=MB.slice().sort((a,b)=>(b.points||0)-(a.points||0));
@@ -2820,6 +3199,7 @@ window.rkReset = function(){
 let editTargetId = null;
 
 window.openEditModal = function(id){
+  if(needLock('edit')){ requireInfoUnlock(()=>openEditModal(id)); return; }
   const m = MB.find(x=>x.id===id); if(!m) return;
   editTargetId = id;
   document.getElementById('edit-modal-title').textContent = '✏️ ' + m.name + '님 정보 수정';
@@ -2891,9 +3271,12 @@ window.showAdmSection = function(name){
     if(osListEl){ osListEl.style.display='none'; osListEl.innerHTML=''; }
     updateOsCounts();
   }
-  if(name==='ranking') rkReset();
+  if(name==='ranking'){
+    if(needLock('ranking')){ requireInfoUnlock(()=>rkReset()); }
+    else { rkReset(); }
+  }
   if(name==='notice') initNoticeEditor();
-  if(name==='pwchange') initPwChange();
+  if(name==='pwchange'){ initPwChange(); updateLockToggles(); }
   if(name==='settle') initSettle();
   if(name==='event') initEventEditor();
   if(name==='excel'){
@@ -2986,6 +3369,17 @@ function renderTodaySection(){
   const sumEl=document.getElementById('today-summary');
   if(sumEl) sumEl.textContent=`📅 ${today} 가입: ${list.length}명`;
   const listEl=document.getElementById('today-list');
+  if(!listEl) return;
+  // 인원 수만 보여주고 상세는 잠금
+  if(needLock('today') && list.length > 0){
+    listEl.innerHTML = `<div onclick="requireInfoUnlock(()=>renderTodaySection())" style="background:#fff;border-radius:14px;padding:20px;text-align:center;cursor:pointer;border:2px dashed #3b82f6;margin-bottom:8px">
+      <div style="font-size:32px;margin-bottom:8px">🔒</div>
+      <div style="font-size:14px;font-weight:700;color:#1e40af">오늘 가입 ${list.length}명</div>
+      <div style="font-size:12px;color:#64748b;margin-top:4px">클릭해서 비밀번호 입력 후 확인</div>
+    </div>`;
+    return;
+  }
+  // 아래 기존 코드 계속
   if(!listEl) return;
   if(!list.length){
     listEl.innerHTML='<div class="ep">오늘 가입한 알바인원이 없습니다.</div>';
@@ -3230,6 +3624,7 @@ window.confirmExcel = async function(){
 };
 
 window.delMem = async function(id){
+  if(needLock('edit')){ requireInfoUnlock(()=>delMem(id)); return; }
   if(!confirm('삭제하시겠습니까?')) return;
   showLoading(currentLang==='ko'?'삭제 중...':'Deleting...');
   try{ await deleteDoc(doc(db,'members',id)); MB=MB.filter(m=>m.id!==id); hideLoading(); updateStats(); doCurrentSearch(); }
