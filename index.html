@@ -218,7 +218,7 @@ textarea{resize:none;min-height:80px;line-height:1.6}
     <div style="background:linear-gradient(135deg,#1e40af,#4f46e5);padding:20px;text-align:center">
       <div style="font-size:36px;margin-bottom:8px">🔒</div>
       <div id="lock-section-label" style="font-size:15px;font-weight:800;color:#fff;margin-bottom:4px">🔒 인원 정보</div>
-      <div style="font-size:12px;color:rgba(255,255,255,.8)">비밀번호를 입력하세요 (4~6자리)</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.8)">카테고리 비밀번호를 입력하세요 (4~6자리)</div>
     </div>
     <div style="padding:20px">
       <!-- 비밀번호 점 표시 -->
@@ -259,12 +259,12 @@ textarea{resize:none;min-height:80px;line-height:1.6}
 <div id="info-pw-change-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9400;align-items:center;justify-content:center;padding:20px">
   <div style="background:#fff;max-width:320px;width:100%;border-radius:20px;overflow:hidden">
     <div style="background:linear-gradient(135deg,#1e40af,#4f46e5);padding:16px 18px;display:flex;align-items:center;justify-content:space-between">
-      <div style="font-size:15px;font-weight:800;color:#fff">🔐 인원정보 비밀번호 변경</div>
+      <div style="font-size:15px;font-weight:800;color:#fff">🔐 카테고리 비밀번호 변경</div>
       <div onclick="document.getElementById('info-pw-change-modal').style.display='none'" style="color:#fff;font-size:22px;cursor:pointer;font-weight:700">✕</div>
     </div>
     <div style="padding:18px">
-      <div class="fl"><span class="lbl">현재 비밀번호 (4~6자리)</span><input type="password" id="info-pw-cur" inputmode="numeric" maxlength="6" placeholder="현재 비밀번호"></div>
-      <div class="fl"><span class="lbl">새 비밀번호 (4~6자리)</span><input type="password" id="info-pw-new" inputmode="numeric" maxlength="6" placeholder="숫자 4~6자리"></div>
+      <div class="fl"><span class="lbl">현재 카테고리 비밀번호 (4~6자리)</span><input type="password" id="info-pw-cur" inputmode="numeric" maxlength="6" placeholder="현재 비밀번호"></div>
+      <div class="fl"><span class="lbl">새 카테고리 비밀번호 (4~6자리)</span><input type="password" id="info-pw-new" inputmode="numeric" maxlength="6" placeholder="숫자 4~6자리"></div>
       <div class="fl"><span class="lbl">새 비밀번호 확인</span><input type="password" id="info-pw-confirm" inputmode="numeric" maxlength="6" placeholder="다시 입력"></div>
       <div id="info-pw-change-msg" style="font-size:13px;margin-bottom:8px;display:none;padding:8px 12px;border-radius:8px"></div>
       <button onclick="saveInfoPw()" class="btn btnP">💾 변경하기</button>
