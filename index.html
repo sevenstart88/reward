@@ -217,8 +217,8 @@ textarea{resize:none;min-height:80px;line-height:1.6}
   <div style="background:#fff;max-width:320px;width:100%;border-radius:20px;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.2)">
     <div style="background:linear-gradient(135deg,#1e40af,#4f46e5);padding:20px;text-align:center">
       <div style="font-size:36px;margin-bottom:8px">🔒</div>
-      <div style="font-size:16px;font-weight:800;color:#fff">인원 정보 잠금</div>
-      <div style="font-size:12px;color:rgba(255,255,255,.8);margin-top:4px">비밀번호를 입력하세요 (4~6자리)</div>
+      <div id="lock-section-label" style="font-size:15px;font-weight:800;color:#fff;margin-bottom:4px">🔒 인원 정보</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.8)">비밀번호를 입력하세요 (4~6자리)</div>
     </div>
     <div style="padding:20px">
       <!-- 비밀번호 점 표시 -->
@@ -2026,7 +2026,7 @@ function showResult(list, summary){
     sumEl.textContent=summary; sumEl.style.display='block';
     renderList(list);
   };
-  if(needLock('search')){ requireInfoUnlock(doShow); } else { doShow(); }
+  if(needLock('search')){ requireInfoUnlock(doShow, 'search'); } else { doShow(); }
 }
 function hideResult(){
   const sumEl=document.getElementById('srch-summary');
@@ -2251,7 +2251,7 @@ window.toggleMemDetail = function(id){
     renderOsList();
   } else {
     if(needLock('detail')){
-      requireInfoUnlock(()=>{ expandedMemId = id; renderOsList(); });
+      requireInfoUnlock(()=>{ expandedMemId = id; renderOsList(); }, 'detail');
     } else {
       expandedMemId = id; renderOsList();
     }
@@ -2763,7 +2763,7 @@ function calcSettleRows(from, to){
 
 window.downloadSettleExcel = function(bankType){
   if(needLock('excel')){
-    requireInfoUnlock(()=>downloadSettleExcel(bankType));
+    requireInfoUnlock(()=>downloadSettleExcel(bankType), 'settle');
     return;
   }
   const { from, to } = getSettleWeekRange(settleOffset);
@@ -3019,11 +3019,11 @@ function getLockName(key){
   return names[key] || key;
 }
 
-// 잠금 필요 여부 확인 (관리자 페이지에서만)
+// 잠금 필요 여부 확인 (관리자 페이지에서만, 섹션별)
 function needLock(key){
   const isAdminPage = location.search.includes('manage20260701');
   if(!isAdminPage) return false;
-  return INFO_PW && lockSettings[key] && !isInfoUnlocked();
+  return INFO_PW && lockSettings[key] && !isInfoUnlocked(key);
 }
 
 // Firebase에서 인원정보 비밀번호 로드
@@ -3034,40 +3034,49 @@ async function loadInfoPw(){
   }catch(e){ console.warn('인원정보 비밀번호 로드 실패'); }
 }
 
-// 세션 잠금 상태 확인 (30분 유지)
-function isInfoUnlocked(){
-  try{
-    const val = localStorage.getItem(INFO_LOCK_SESSION_KEY);
-    if(!val) return false;
-    const expire = parseInt(val);
-    if(Date.now() > expire){ localStorage.removeItem(INFO_LOCK_SESSION_KEY); return false; }
-    return true;
-  }catch(e){ return false; }
+// 섹션별 개별 잠금 해제 상태 (현재 세션 메모리에만 보관)
+const unlockedSections = {}; // {섹션이름: true}
+let currentLockSection = ''; // 현재 잠금 요청 중인 섹션
+
+function isInfoUnlocked(section){
+  return unlockedSections[section] === true;
 }
 
-function setInfoUnlocked(){
-  try{
-    // 30분 유지
-    localStorage.setItem(INFO_LOCK_SESSION_KEY, (Date.now() + 30*60*1000).toString());
-  }catch(e){}
+function setInfoUnlocked(section){
+  unlockedSections[section] = true;
 }
 
-// 인원정보 접근 시 잠금 확인 (관리자 페이지에서만 작동)
-function requireInfoUnlock(callback){
+// 인원정보 접근 시 잠금 확인 (관리자 페이지 + 섹션별 개별)
+function requireInfoUnlock(callback, section){
   const isAdminPage = location.search.includes('manage20260701');
   if(!isAdminPage){ callback(); return; } // 사용자 페이지는 잠금 없음
   if(!INFO_PW){ callback(); return; } // 비밀번호 미설정 시 바로 실행
-  if(isInfoUnlocked()){ callback(); return; } // 이미 인증됨
+  const sec = section || 'default';
+  if(isInfoUnlocked(sec)){ callback(); return; } // 이 섹션 이미 인증됨
   // 잠금 모달 표시
+  currentLockSection = sec;
   infoLockCallback = callback;
   infoLockInput = '';
   infoLockFailCount = 0;
-  showInfoLockModal();
+  showInfoLockModal(sec);
 }
 
-function showInfoLockModal(){
+const SECTION_NAMES = {
+  tot:'총 알바인원', today:'오늘 가입', notice:'공지사항 관리',
+  ranking:'랭킹 닉네임', excel:'주간 리워드 설정', settle:'정산 엑셀 추출',
+  event:'이벤트 관리', detail:'인원 상세정보', search:'검색 결과',
+  edit:'정보 수정/삭제', default:'인원 정보'
+};
+
+function showInfoLockModal(sec){
   const modal = document.getElementById('info-lock-modal');
   if(modal){ modal.style.display = 'flex'; modal.style.alignItems='center'; modal.style.justifyContent='center'; }
+  // 섹션 이름 표시
+  const subTxt = modal ? modal.querySelector('.lock-section-name') : null;
+  const sName = SECTION_NAMES[sec] || '인원 정보';
+  // 헤더 서브텍스트 업데이트
+  const lockSub = document.getElementById('lock-section-label');
+  if(lockSub) lockSub.textContent = `🔒 ${sName}`;
   updateLockDots();
   document.getElementById('info-lock-err').textContent = '';
 }
@@ -3122,7 +3131,7 @@ function checkInfoPw(){
   if(infoLockInput === INFO_PW){
     // 인증 성공
     infoLockFailCount = 0;
-    setInfoUnlocked();
+    setInfoUnlocked(currentLockSection);
     const modal = document.getElementById('info-lock-modal');
     if(modal) modal.style.display = 'none';
     if(infoLockCallback){ infoLockCallback(); infoLockCallback = null; }
@@ -3204,7 +3213,7 @@ window.rkReset = function(){
 let editTargetId = null;
 
 window.openEditModal = function(id){
-  if(needLock('edit')){ requireInfoUnlock(()=>openEditModal(id)); return; }
+  if(needLock('edit')){ requireInfoUnlock(()=>openEditModal(id), 'edit'); return; }
   const m = MB.find(x=>x.id===id); if(!m) return;
   editTargetId = id;
   document.getElementById('edit-modal-title').textContent = '✏️ ' + m.name + '님 정보 수정';
@@ -3302,11 +3311,11 @@ window.showAdmSection = function(name){
     _doShowAdmSection(name);
     return;
   }
-  // 나머지 모든 섹션은 비밀번호 필요
-  if(isInfoUnlocked()){
+  // 나머지 모든 섹션은 섹션별 개별 비밀번호 필요
+  if(isInfoUnlocked(name)){
     _doShowAdmSection(name);
   } else {
-    requireInfoUnlock(()=>_doShowAdmSection(name));
+    requireInfoUnlock(()=>_doShowAdmSection(name), name);
   }
 };
 
@@ -3391,7 +3400,7 @@ function renderTodaySection(){
   if(!listEl) return;
   // 인원 수만 보여주고 상세는 잠금
   if(needLock('today') && list.length > 0){
-    listEl.innerHTML = `<div onclick="requireInfoUnlock(()=>renderTodaySection())" style="background:#fff;border-radius:14px;padding:20px;text-align:center;cursor:pointer;border:2px dashed #3b82f6;margin-bottom:8px">
+    listEl.innerHTML = `<div onclick="requireInfoUnlock(()=>renderTodaySection(),'today')" style="background:#fff;border-radius:14px;padding:20px;text-align:center;cursor:pointer;border:2px dashed #3b82f6;margin-bottom:8px">
       <div style="font-size:32px;margin-bottom:8px">🔒</div>
       <div style="font-size:14px;font-weight:700;color:#1e40af">오늘 가입 ${list.length}명</div>
       <div style="font-size:12px;color:#64748b;margin-top:4px">클릭해서 비밀번호 입력 후 확인</div>
@@ -3643,7 +3652,7 @@ window.confirmExcel = async function(){
 };
 
 window.delMem = async function(id){
-  if(needLock('edit')){ requireInfoUnlock(()=>delMem(id)); return; }
+  if(needLock('edit')){ requireInfoUnlock(()=>delMem(id), 'edit'); return; }
   if(!confirm('삭제하시겠습니까?')) return;
   showLoading(currentLang==='ko'?'삭제 중...':'Deleting...');
   try{ await deleteDoc(doc(db,'members',id)); MB=MB.filter(m=>m.id!==id); hideLoading(); updateStats(); doCurrentSearch(); }
